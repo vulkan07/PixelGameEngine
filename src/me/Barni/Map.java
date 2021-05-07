@@ -6,6 +6,7 @@ import java.io.*;
 
 public class Map {
     Game game;
+    public Physics physics;
     public TextureAtlas atlas;
 
     public int width, height, tileSize;
@@ -24,6 +25,7 @@ public class Map {
 
         game.logger.info("Initialized new map, size: " + w + ", " + h);
 
+        physics = new Physics(game, this);
 
         //TEST
         for (int i = 0; i < tiles.length; i++)
@@ -134,6 +136,7 @@ public class Map {
             if (e != null)
                 e.tick();
         }
+        physics.update();
     }
 
     public void addEntity(Entity e) {

@@ -7,7 +7,7 @@ public class Player extends Entity {
 
     boolean colliding;
     private Vec2D moving;
-    private Hitbox touchHitbox, colliderHitbox;
+
 
     public Player(Game g, String name, Vec2D pos) {
         super(g, name, pos);
@@ -38,7 +38,8 @@ public class Player extends Entity {
             moving.x += speed;
         }
 
-        physics();
+        velocity.add(moving);
+        //physics();
     }
 
     private void physics() {

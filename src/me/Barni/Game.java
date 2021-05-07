@@ -74,6 +74,8 @@ public class Game extends Canvas implements Runnable {
         map.loadMap("py.map");
         pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, -2), true, 60, 3, 60);
 
+        map.physics.init();
+
         //ClearBuffer
         clearBuffer = new int[WIDTH / PX_SIZE * HEIGHT / PX_SIZE];
         for (int i = 0; i < clearBuffer.length; i++)
