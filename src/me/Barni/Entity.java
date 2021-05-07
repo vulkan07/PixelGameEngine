@@ -3,14 +3,15 @@ package me.Barni;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public abstract class Entity {
+public class Entity {
 
     Game game;
     public String name;
     public Vec2D position, size, velocity, gravity = new Vec2D(0, 0.7f);
     public float speed, resistance;
-    public boolean visible, active, solid, locked, collidesWithMap;
+    public boolean visible, active, solid, locked, collidesWithMap, hasTexture;
     protected Hitbox touchHitbox, colliderHitbox;
+    public Texture texture;
 
     public Entity(Game g, String name) {
         commonConstructor(g, name);
@@ -21,9 +22,16 @@ public abstract class Entity {
         position = pos;
     }
 
+    public void loadTexture(String imgPath, String animPath) {
+        texture.loadTexture(game, imgPath, (int) size.x, (int) size.y, animPath);
+        hasTexture = true;
+    }
+
     private void commonConstructor(Game g, String name) {
         game = g;
         this.name = name;
+
+        texture = new Texture();
 
         visible = true;
         active = true;
@@ -53,6 +61,7 @@ public abstract class Entity {
     }
 
     public void tick() {
+        texture.update();
         if (!active) return;
     }
 
@@ -60,6 +69,8 @@ public abstract class Entity {
         if (!visible) return;
 
         Graphics g = img.getGraphics();
+        if (hasTexture)
+            g.drawImage(texture.getTexture(), (int) position.x, (int) position.y, null);
         g.setColor(Color.RED);
         g.drawRect((int) position.x, (int) position.y, (int) size.x, (int) size.y);
     }

@@ -70,7 +70,12 @@ public class Game extends Canvas implements Runnable {
 
         //=TEST=\\
         player = new Player(this, "player", new Vec2D(512, 500));
+        player.loadTexture("test.png", "test.anim");
+        Entity e = new Entity(this, "test", new Vec2D(712,600));
+        e.resistance = .1f;
+
         map.addEntity(player);
+        map.addEntity(e);
         map.loadMap("py.map");
         pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, -2), true, 60, 3, 60);
 
@@ -80,6 +85,7 @@ public class Game extends Canvas implements Runnable {
         clearBuffer = new int[WIDTH / PX_SIZE * HEIGHT / PX_SIZE];
         for (int i = 0; i < clearBuffer.length; i++)
             clearBuffer[i] = white;
+
 
         //Actual start
         running = true;
@@ -125,12 +131,12 @@ public class Game extends Canvas implements Runnable {
                 timer = 0;
             }
         }
-        System.out.println("re-run");
     }
 
     public void tick() {
         mouseHandler.update();
         map.tick();
+        map.getEntity("test").velocity.x -= 0.11f;
 
         //TEST\\
         pem.initialPos = mouseHandler.getPosition().div(PX_SIZE);

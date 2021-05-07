@@ -32,6 +32,16 @@ public class Physics {
             ent.velocity.decrease(ent.resistance);
             ent.position.add(ent.velocity);
 
+            //Resolve collision: Entity VS Entity
+            //TODO optimize this
+            for (Entity other : map.entities)
+            {
+                if (other == null) continue;
+                if (ent.touchHitbox.isColliding(other.touchHitbox))
+                    ent.colliderHitbox.resolveCollision(other.colliderHitbox, ent.velocity, ent.position);
+            }
+
+            //Resolve collision: Entity VS map
             for (Hitbox h : ent.touchHitbox.touchingMapTiles(map))
                 if (h != null ) ent.colliderHitbox.resolveCollision(h, ent.velocity, ent.position);
 

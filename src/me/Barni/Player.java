@@ -11,8 +11,8 @@ public class Player extends Entity {
 
     public Player(Game g, String name, Vec2D pos) {
         super(g, name, pos);
-        size.y = 60;
-        size.x = 30;
+        size.y = 64;
+        size.x = 32;
         touchHitbox = new Hitbox((int) (pos.x), (int) (pos.y), (int) size.x / 2 * -1, (int) size.y / 2 * -1, (int) size.x * 2, (int) size.y * 2);
         colliderHitbox = new Hitbox((int) pos.x, (int) pos.y, (int) size.x, (int) size.y);
         resistance = 0.3f;
@@ -20,6 +20,7 @@ public class Player extends Entity {
 
     @Override
     public void tick() {
+        super.tick();
         moving = new Vec2D(0, 0);
         if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT))
             speed = .4f;
@@ -60,10 +61,14 @@ public class Player extends Entity {
         //UPDATE HITBOXES
         touchHitbox.update(position);
         colliderHitbox.update(position);
+
     }
 
     @Override
     public void render(BufferedImage img) {
+
+        super.render(img);
+
         Graphics g = img.getGraphics();
 
         g.setColor(Color.BLUE);

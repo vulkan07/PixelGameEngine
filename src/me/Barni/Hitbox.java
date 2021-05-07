@@ -1,7 +1,5 @@
 package me.Barni;
 
-import java.io.IOException;
-
 public class Hitbox {
 
     public int x, y, w, h, realW, realH, offsX, offsY;
@@ -41,12 +39,12 @@ public class Hitbox {
 
         //IN X ZONE
         if (!(other.realW <= x || realW <= other.x)) {
+
             //FROM BOTTOM
             if (y <= other.realH && y > other.y) {
                 if (velocity.y < 0) {
                     velocity.y = 0;
                     pos.y = other.realH;
-                    //System.out.println("↑");
                     return true;
                 }
             }
@@ -56,7 +54,6 @@ public class Hitbox {
                 if (velocity.y > 0) {
                     velocity.y = 0;
                     pos.y = other.y - other.h + (other.h - h);
-                    //System.out.println("↓ ");
                     return true;
                 }
             }
@@ -67,11 +64,10 @@ public class Hitbox {
 
             //FROM LEFT
             //TODO FIX THIS PIECE OF SH*, it blocks you while colliding with x+ velocity at top/bottom; +5 is a temporary sol.
-            if (realW + 5 >= other.x && realW + 5 < other.realW) {
+            if (realW >= other.x && realW < other.realW) {
                 if (velocity.x > 0) {
                     velocity.x = 0;
                     pos.x = other.x - other.w + (other.w - w);
-                    //System.out.println("→ ");
                     return true;
                 }
             }
@@ -81,36 +77,12 @@ public class Hitbox {
                 if (velocity.x < 0) {
                     velocity.x = 0;
                     pos.x = other.realW;
-                    //System.out.println("←");
                     return true;
                 }
             }
         }
         return false;
     }
-    /*        if ((x <= other.realW) && !(other.realH < y || realH < other.y))
-            if (velocity.x < 0) {
-                pos.x = other.realW;
-                velocity.x = 0;
-            }
-
-        //FROM LEFT
-        if ((realW >= other.x) && !(realH < y || realH < other.y))
-            if (velocity.x > 0) {
-                pos.x = other.x;
-                velocity.x = 0;
-            }
-
-        //FROM TOP
-        if ((realH == other.y) && !(other.realW < x || realW < other.x))
-            if (velocity.y > 0)
-                velocity.y = 0;
-
-        //FROM BOTTOM
-        if ((y == other.realH) && !(other.realW < x || realW < other.x))
-            if (velocity.y < 0)
-                velocity.y = 0;
-*/
 
     public boolean isColliding(Hitbox other) {
         return AABB(other) || other.AABB(this);
