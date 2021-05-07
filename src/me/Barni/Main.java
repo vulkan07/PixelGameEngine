@@ -16,15 +16,15 @@ public class Main {
 //====================================================================================\\
 //============================= T O D O     L I S T ==================================\\
 //====================================================================================\\
-        //TODO [ ] PLAYER: Two hitboxes: touchHitbox, collideHitbox
+        //DONE [X] PLAYER: Two hitboxes: touchHitbox, collideHitbox
 
-        //TODO [ ] *Texture: If animated, texture array+indexer, that's changing by ticks, controlled by tick scheduler array; Read all from files
+        //TODO [ ] *Texture: If animated, texture array+indexer, that's changing by ticks, controlled by tick-data scheduler array; All read from files
         //                   If single texture: texture array[0], others are bypassed/null
 
         //TODO [ ] *Physics: Make physics work independent from entities, maybe have a map to connect ent groups
 
         //TODO [ ] *Camera: Abstract render from Game
-        //                  Do scrolling in directions, define algorithm
+        //                  Do scrolling in directions
 
 
         //TODO [ ] GAME: reduce processor usage

@@ -5,29 +5,31 @@ import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
+    boolean colliding;
     private Vec2D moving;
-    private Hitbox hitbox, h2;
+    private Hitbox touchHitbox, colliderHitbox;
 
     public Player(Game g, String name, Vec2D pos) {
         super(g, name, pos);
-        size.y = 64;
-        hitbox = new Hitbox((int) (pos.x - size.x / 2), (int) (pos.y - size.y / 2), (int) size.x * 2, (int) size.y * 2);
-        h2 = new Hitbox(64, 64, 32, 32);
-        //speed = 6;
+        size.y = 60;
+        size.x = 30;
+        touchHitbox = new Hitbox((int) (pos.x), (int) (pos.y), (int) size.x / 2 * -1, (int) size.y / 2 * -1, (int) size.x * 2, (int) size.y * 2);
+        colliderHitbox = new Hitbox((int) pos.x, (int) pos.y, (int) size.x, (int) size.y);
+        resistance = 0.3f;
     }
 
     @Override
     public void tick() {
         moving = new Vec2D(0, 0);
         if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT))
-            speed = 2;
+            speed = .4f;
         else
-            speed = 4;
+            speed = .8f;
         if (game.keyboardHandler.getKeyState(KeyboardHandler.UP)) {
-            moving.y -= speed;
+            moving.y -= speed * 2;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
-            moving.y += speed;
+            moving.y += speed * 2;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;
@@ -36,28 +38,48 @@ public class Player extends Entity {
             moving.x += speed;
         }
 
-        hitbox.resolveCollision(h2, moving);
+        physics();
+    }
 
-        hitbox.move(moving);
-        this.position.add(this.moving);
+    private void physics() {
+        //UPDATE PHYSICS STUFF
+        this.velocity.add(moving);
+        this.velocity.add(gravity);
+
+        this.velocity.limit(10);
+        velocity.decrease(resistance);
+
+        this.position.add(velocity);
+
+        colliding = false;
+        if (!game.keyboardHandler.getKeyState(KeyboardHandler.SPACE))
+            for (Hitbox h : touchHitbox.touchingMapTiles(game.map))
+                if (h != null) colliding |= colliderHitbox.resolveCollision(h, velocity, position);
+
+        //UPDATE HITBOXES
+        touchHitbox.update(position);
+        colliderHitbox.update(position);
     }
 
     @Override
     public void render(BufferedImage img) {
-        super.render(img);
         Graphics g = img.getGraphics();
 
         g.setColor(Color.BLUE);
-        if (h2.isColliding(hitbox)) g.setColor(Color.GREEN);
+        g.drawRect(touchHitbox.x, touchHitbox.y, touchHitbox.w, touchHitbox.h);
 
-        g.drawRect(hitbox.x, hitbox.y, hitbox.w, hitbox.h);
-        g.drawRect(h2.x, h2.y, h2.w, h2.h);
+        if (colliding)
+            g.setColor(Color.RED);
+        g.drawRect(colliderHitbox.x, colliderHitbox.y, colliderHitbox.w, colliderHitbox.h);
 
-        Hitbox[] hitboxes = hitbox.touchingMapTiles(game.map);
+        Hitbox[] hitboxes = touchHitbox.touchingMapTiles(game.map);
         for (Hitbox hg : hitboxes) {
             if (hg == null) continue;
             g.drawRect(hg.x, hg.y, hg.w, hg.h);
         }
+
+        g.setColor(Color.ORANGE);
+        g.fillRect((int) position.x, (int) position.y, 5, 5);
     }
 
 }

@@ -7,14 +7,15 @@ public abstract class Entity {
 
     Game game;
     String name;
-    Vec2D position, size, velocity;
-    int speed;
+    Vec2D position, size, velocity, gravity = new Vec2D(0,0.7f);
+    float speed, resistance;
     boolean visible, active, solid, locked;
 
     public Entity(Game g, String name) {
         this.game = g;
         this.name = name;
-        position = Vec2D.ZERO;
+        position = new Vec2D(0,0);
+        velocity = new Vec2D(0,0);
         size = new Vec2D(32,32);
 
         visible = true;
@@ -26,6 +27,7 @@ public abstract class Entity {
         this.game = g;
         this.name = name;
         position = pos;
+        velocity = new Vec2D(0,0);
         size = new Vec2D(32,32);
 
         visible = true;

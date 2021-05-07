@@ -116,7 +116,7 @@ public class Map {
             int y = i / width; //Y
             int x = i % width; //x
             img.getGraphics().drawImage(txt, x * tileSize, y * tileSize, null);
-            img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
+            //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
 
         }
 

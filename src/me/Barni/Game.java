@@ -27,7 +27,6 @@ public class Game extends Canvas implements Runnable {
     ParticleEmitter pem;                //PEM ONLY FOR TEST purposes
 
     public void start(String title, int w, int h, int px_size, boolean fullscreen, boolean resizeable, byte logLevel) {
-        System.out.println("init");
 
         //IMAGE DATA
         this.WIDTH = w;
@@ -36,7 +35,7 @@ public class Game extends Canvas implements Runnable {
         image = new BufferedImage(WIDTH / PX_SIZE, HEIGHT / PX_SIZE, BufferedImage.TYPE_INT_ARGB);
         buffer = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
 
-    //WINDOW\\
+        //WINDOW\\
         window = new JFrame(title);
         //Fullscreen
         if (fullscreen) {
@@ -70,10 +69,10 @@ public class Game extends Canvas implements Runnable {
         map.loadTextures();
 
         //=TEST=\\
-        player = new Player(this, "player", new Vec2D(256, 256));
+        player = new Player(this, "player", new Vec2D(512, 500));
         map.addEntity(player);
         map.loadMap("py.map");
-        pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, 2), true, 60, 3, 60);
+        pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, -2), true, 60, 3, 60);
 
         //ClearBuffer
         clearBuffer = new int[WIDTH / PX_SIZE * HEIGHT / PX_SIZE];
@@ -88,7 +87,6 @@ public class Game extends Canvas implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("run");
 
         //IMPORTANT! Frames and ticks are bounded together
         int fps = 60;
@@ -100,7 +98,6 @@ public class Game extends Canvas implements Runnable {
         last = System.nanoTime();
         logger.info("Preferred FPS: " + fps);
         logger.info("Game loop ready to start\n"); // \n to separate loop logs
-
 
         while (running) {
 
@@ -126,6 +123,7 @@ public class Game extends Canvas implements Runnable {
                 timer = 0;
             }
         }
+        System.out.println("re-run");
     }
 
     public void tick() {
@@ -158,8 +156,7 @@ public class Game extends Canvas implements Runnable {
     }
 
 
-
-   // public int colorRangeLimit(int num) {
+    // public int colorRangeLimit(int num) {
     //  return num > 255 ? 255 : (num < 0 ? 0 : num);
     // }
 

@@ -1,76 +1,146 @@
 package me.Barni;
 
+import java.io.IOException;
+
 public class Hitbox {
 
-    public int x, y, w, h;
+    public int x, y, w, h, realW, realH, offsX, offsY;
 
     public Hitbox(int x, int y, int w, int h) {
         this.x = x;
         this.y = y;
         this.w = w; //width
         this.h = h; //height
+        this.realW = x + w;
+        this.realH = y + h;
+    }
+
+    public Hitbox(int x, int y, int xOffs, int yOffs, int w, int h) {
+        this.x = x;
+        this.y = y;
+        this.offsX = xOffs;
+        this.offsY = yOffs;
+        this.w = w; //width
+        this.h = h; //height
+        this.realW = x + w;
+        this.realH = y + h;
     }
 
     private boolean AABB(Hitbox other) {
-        if (x >= other.x && x <= other.w + other.x || x + w >= other.x && x + w <= other.w + other.x)
-            if (y >= other.y && y <= other.h + other.y || y + h >= other.y && y + h <= other.h + other.y)
+        if (!(other.realH < y || y + h < other.y))
+            if (!(other.realW < x || x + w < other.x))
                 return true;
         return false;
     }
+    //if (x >= other.x && x <= other.w + other.x || x + w >= other.x && x + w <= other.w + other.x)
+    //    if (y >= other.y && y <= other.h + other.y || y + h >= other.y && y + h <= other.h + other.y)
+    //        return true;
 
-    public void resolveCollision(Hitbox other, Vec2D position) {
-        boolean top, down, left, right;
-        top   = false;
-        down  = false;
-        left  = false;
-        right = false;
 
-        if (x >= other.x && x <= other.w + other.x)
-        {
-            //Jobbról
-            right = true;
-        }
-        if (x + w >= other.x && x + w <= other.w + other.x)
-        {
-            //Balról
-            //position.x = position.x > 0 ? 0 : position.x;
-            left = true;
-        }
-        if (y >= other.y && y <= other.h + other.y)
-        {
-            //Alulról
-            //position.y = position.y < 0 ? 0 : position.y;
-            down = true;
-        }
-        if (y + h >= other.y && y + h <= other.h + other.y)
-        {
-            //Fentről
-            //position.y = position.y > 0 ? 0 : position.y;
-            top = true;
+    public boolean resolveCollision(Hitbox other, Vec2D velocity, Vec2D pos) {
+
+        //IN X ZONE
+        if (!(other.realW <= x || realW <= other.x)) {
+            //FROM BOTTOM
+            if (y <= other.realH && y > other.y) {
+                if (velocity.y < 0) {
+                    velocity.y = 0;
+                    pos.y = other.realH;
+                    //System.out.println("↑");
+                    return true;
+                }
+            }
+
+            //FROM TOP
+            if (realH >= other.y && realH < other.realH) {
+                if (velocity.y > 0) {
+                    velocity.y = 0;
+                    pos.y = other.y - other.h + (other.h - h);
+                    //System.out.println("↓ ");
+                    return true;
+                }
+            }
         }
 
+        //IN Y ZONE
+        if (!(other.realH <= y || realH <= other.y)) {
+
+            //FROM LEFT
+            //TODO FIX THIS PIECE OF SH*, it blocks you while colliding with x+ velocity at top/bottom; +5 is a temporary sol.
+            if (realW + 5 >= other.x && realW + 5 < other.realW) {
+                if (velocity.x > 0) {
+                    velocity.x = 0;
+                    pos.x = other.x - other.w + (other.w - w);
+                    //System.out.println("→ ");
+                    return true;
+                }
+            }
+
+            //FROM RIGHT
+            if (x <= other.realW && x > other.x) {
+                if (velocity.x < 0) {
+                    velocity.x = 0;
+                    pos.x = other.realW;
+                    //System.out.println("←");
+                    return true;
+                }
+            }
+        }
+        return false;
     }
+    /*        if ((x <= other.realW) && !(other.realH < y || realH < other.y))
+            if (velocity.x < 0) {
+                pos.x = other.realW;
+                velocity.x = 0;
+            }
+
+        //FROM LEFT
+        if ((realW >= other.x) && !(realH < y || realH < other.y))
+            if (velocity.x > 0) {
+                pos.x = other.x;
+                velocity.x = 0;
+            }
+
+        //FROM TOP
+        if ((realH == other.y) && !(other.realW < x || realW < other.x))
+            if (velocity.y > 0)
+                velocity.y = 0;
+
+        //FROM BOTTOM
+        if ((y == other.realH) && !(other.realW < x || realW < other.x))
+            if (velocity.y < 0)
+                velocity.y = 0;
+*/
 
     public boolean isColliding(Hitbox other) {
         return AABB(other) || other.AABB(this);
     }
 
-    public void move(Vec2D m) {
+    //OLD BECAUSE DOESN'T HANDLE OFFSET
+    private void move(Vec2D m) {
         x += (int) m.x;
         y += (int) m.y;
+        realW += (int) m.x;
+        realH += (int) m.y;
+    }
+
+    public void update(Vec2D newPos) {
+        this.x = (int) newPos.x + offsX;
+        this.y = (int) newPos.y + offsY;
+        this.realW = x + w;
+        this.realH = y + h;
     }
 
     public Hitbox[] touchingMapTiles(Map map) {
-        Hitbox[] out = new Hitbox[16];
+        Hitbox[] out = new Hitbox[24];
         Hitbox other = new Hitbox(0, 0, map.tileSize, map.tileSize);
 
         for (int i = 0; i < map.tiles.length; i++) {
-            if (map.tiles[i] == 0) continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if (map.tiles[i] == 0 || map.tiles[i] == 3)
+                continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST ON VOID TILES!!
             other.y = i / map.width * map.tileSize;
             other.x = i % map.width * map.tileSize;
-            //System.out.print("> " + other.x + ", "+ other.y);
             if (isColliding(other)) {
-                //System.out.print(" -> found");
                 for (int j = 0; j < out.length; j++) {
                     if (out[j] == null) {
                         out[j] = new Hitbox(other.x, other.y, map.tileSize, map.tileSize);
@@ -78,24 +148,7 @@ public class Hitbox {
                     }
                 }
             }
-            //System.out.println();
         }
         return out;
     }
 }
-
-
-/*
-        other.w = map.tileSize;
-        other.h = map.tileSize;
-        for (int i = 0; i < map.tiles.length; i++) {
-            other.y = (i / map.width) * map.tileSize; //Y
-            other.x = (i % map.width) * map.tileSize; //X
-            if (isColliding(other))
-                for (int j = 0; j < out.length; j++)
-                    if (out[j] == null) {
-                        out[j] = other;
-                        break;
-                    }
-        }
- */
