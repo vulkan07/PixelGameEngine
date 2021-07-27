@@ -39,30 +39,10 @@ public class Player extends Entity {
             moving.x += speed;
         }
 
-        velocity.add(moving);
-        //physics();
+        if (!locked && active)
+            velocity.add(moving);
     }
 
-    private void physics() {
-        //UPDATE PHYSICS STUFF
-        this.velocity.add(moving);
-        this.velocity.add(gravity);
-
-        this.velocity.limit(10);
-        velocity.decrease(resistance);
-
-        this.position.add(velocity);
-
-        colliding = false;
-        if (!game.keyboardHandler.getKeyState(KeyboardHandler.SPACE))
-            for (Hitbox h : touchHitbox.touchingMapTiles(game.map))
-                if (h != null) colliding |= colliderHitbox.resolveCollision(h, velocity, position);
-
-        //UPDATE HITBOXES
-        touchHitbox.update(position);
-        colliderHitbox.update(position);
-
-    }
 
     @Override
     public void render(BufferedImage img) {

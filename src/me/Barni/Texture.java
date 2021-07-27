@@ -23,17 +23,17 @@ public class Texture {
 
         //READ .anim
         if (dataPath == null)
-            game.logger.info("Not using .anim file");
+            game.logger.info("[TEXTURE] Not using .anim file");
         else {
             try {
                 BufferedReader br = new BufferedReader(new FileReader(new File(game.GAME_DIR + dataPath)));
                 delayStr = br.readLine();
             }
             catch (FileNotFoundException e) {
-                game.logger.info("Couldn't find .anim file for " + game.GAME_DIR + imgPath + ", image will be stationary");
+                game.logger.info("[TEXTURE] Couldn't find .anim file for " + game.GAME_DIR + imgPath + ", image will be stationary");
             }
             catch (IOException e) {
-                game.logger.err("Can't read " + game.GAME_DIR + dataPath);
+                game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + dataPath);
             }
         }
 
@@ -43,13 +43,13 @@ public class Texture {
         }
         catch (IOException e)
         {
-            game.logger.err("Can't read " + game.GAME_DIR + imgPath);
+            game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + imgPath);
         }
 
         //EMPTY .anim
         if (delayStr == null )
         {
-            game.logger.info(".anim file is empty");
+            game.logger.info("[TEXTURE] .anim file is empty");
             animated = false;
             frames = 1;
         }
@@ -58,7 +58,7 @@ public class Texture {
         else {
             //SPLIT UP & SET frames TO RIGHT AMOUNT
             String[] numsStr = delayStr.split(",");
-            game.logger.info(".anim frame count: " + numsStr.length);
+            game.logger.info("[TEXTURE] .anim frame count: " + numsStr.length);
             frames = numsStr.length;
             delay = new int[frames];
             animated = true;
@@ -67,11 +67,11 @@ public class Texture {
             for (int i = 0; i < numsStr.length; i++) {
                 try {
                     delay[i] = Integer.parseInt(numsStr[i]);
-                    System.out.println(i + " is " + delay[i]);
+                    //System.out.println(i + " is " + delay[i]);
                 }
                 catch (NumberFormatException nfe)
                 {
-                    game.logger.err("Invalid number format in .anim file");
+                    game.logger.err("[TEXTURE] Invalid number format in .anim file");
                     animated = false;
                     frames = 1;
                 }

@@ -6,11 +6,11 @@ import java.awt.event.MouseListener;
 
 public class MouseHandler implements MouseListener {
 
-    public final int LMB = 1;
-    public final int RMB = 3;
-    public final int WHEEL = 2;
-    public final int MB4 = 5;
-    public final int MB5 = 4;
+    public final byte LMB =   1;//(byte) 1;
+    public final byte RMB =   4;//(byte) 3;
+    public final byte WHEEL = 2;//(byte)  2;
+    public final byte MB4 =   8;//(byte) 5;
+    public final byte MB5 =   16;//(byte) 4;
 
     private byte pressed = 0;
     private Vec2D pos;
@@ -19,6 +19,7 @@ public class MouseHandler implements MouseListener {
 
     public MouseHandler(JFrame window, Game game)
     {
+
         this.game = game;
         this.window = window;
         pos = new Vec2D(0,0);
@@ -34,7 +35,8 @@ public class MouseHandler implements MouseListener {
 
     public boolean isPressed(int button)
     {
-        return (pressed & 1 << button - 1) != 0;
+        return (pressed & button ) != 0;
+        //return (pressed & 1 << button - 1) != 0;
     }
 
     public Vec2D getPosition() {return pos;}
@@ -50,7 +52,7 @@ public class MouseHandler implements MouseListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        pressed = (byte)(pressed & 0x11111110 << e.getButton()-1);
+        pressed = (byte)(pressed & 0xFFFFF0 << e.getButton()-1);
         //System.out.println(isPressed(RMB));
     }
 

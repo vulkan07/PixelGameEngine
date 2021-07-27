@@ -15,7 +15,7 @@ public class Logger {
         if (level<0 || level>3)
         {
             logLevel = 4;
-            err("Invalid log level: " + level + ", defaulting to ALL");
+            err("[LOGGER] Invalid level: " + level + ", defaulting to ALL");
         }
 
         String typeStr = null;
@@ -34,7 +34,7 @@ public class Logger {
                 typeStr = "ALL";
                 break;
         }
-        info("Log mode set to " + typeStr);
+        info("[LOGGER] mode set to " + typeStr);
     }
 
     public void warn(String msg) {

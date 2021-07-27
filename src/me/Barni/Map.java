@@ -10,8 +10,9 @@ public class Map {
     public TextureAtlas atlas;
 
     public int width, height, tileSize;
-    public int[] tiles;
-    public Entity[] entities = new Entity[32];
+    public byte[] tiles;
+    public Entity[] entities = new Entity[16];
+    public Decorative[] decoratives = new Decorative[32];
 
     BufferedImage txt;
 
@@ -19,11 +20,11 @@ public class Map {
         width = h;
         height = w;
         tileSize = tSize;
-        tiles = new int[width * height];
+        tiles = new byte[width * height];
         game = g;
         atlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
 
-        game.logger.info("Initialized new map, size: " + w + ", " + h);
+        game.logger.info("[MAP] Initialized new map, size: " + w + ", " + h);
 
         physics = new Physics(game, this);
 
@@ -49,19 +50,18 @@ public class Map {
                 ySize = Integer.parseInt(nums[1]);
                 width = xSize;
                 height = ySize;
-                tiles = new int[width * height];
+                tiles = new byte[width * height];
             } else {
-                game.logger.err("Missing size data in map " + fullPath);
+                game.logger.err("[MAP] Missing size data in map " + fullPath);
                 return;
             }
 
-            if (xSize*ySize < 4)
-            {
-                game.logger.err("Map is too small: " + fullPath);
+            if (xSize * ySize < 4) {
+                game.logger.err("[MAP] Map is too small: " + fullPath);
                 return;
             }
-            if (xSize*ySize > 2040) {
-                game.logger.warn("Map is possibly too big for screen: " + fullPath);
+            if (xSize * ySize > 2040) {
+                game.logger.warn("[MAP] Map is possibly too big for screen: " + fullPath);
             }
 
             //==GRID==\\
@@ -71,28 +71,28 @@ public class Map {
                 try {
                     lineElems = istream.readLine().split(",");
                 } catch (NullPointerException | IOException e) {
-                    game.logger.err("Invalid map grid format: too much line in " + fullPath);
+                    game.logger.err("[MAP] Invalid map grid format: too much line in " + fullPath);
                     return;
                 }
                 if (lineElems.length != xSize) {
-                    game.logger.err("Invalid map grid format in " + fullPath + ", at line " + (y + 2));
+                    game.logger.err("[MAP] Invalid map grid format in " + fullPath + ", at line " + (y + 2));
                     return;
                 }
                 for (int x = 0; x < xSize; x++) {
-                    tiles[y * xSize + x] = Integer.parseInt(lineElems[x]);
+                    tiles[y * xSize + x] = (byte) Integer.parseInt(lineElems[x]);
                 }
             }
 
 
         } catch (FileNotFoundException e) {
-            game.logger.err("Can't find map: " + fullPath);
+            game.logger.err("[MAP] Can't find: " + fullPath);
         } catch (IOException e) {
-            game.logger.err("Can't read map: " + fullPath);
+            game.logger.err("[MAP] Can't read: " + fullPath);
         } catch (NumberFormatException e) {
-            game.logger.err("Invalid number format in map: " + fullPath);
+            game.logger.err("[MAP] Invalid number format in: " + fullPath);
         }
-        game.logger.info("Successfully loaded map: " + fullPath);
-        game.logger.info("New map size: " + width + "," + height);
+        game.logger.info("[MAP] Successfully loaded: " + fullPath);
+        game.logger.info("[MAP] New size: " + width + "," + height);
     }
 
     public void loadTextures() {
@@ -104,7 +104,7 @@ public class Map {
             try {
                 buffer = ImageIO.read(new File(game.GAME_DIR + Material.materialPath[i]));
             } catch (IOException e) {
-                game.logger.err("Cannot load texture: " + game.GAME_DIR + Material.materialPath[i]);
+                game.logger.err("[MAP] Cannot load texture: " + game.GAME_DIR + Material.materialPath[i]);
             }
             atlas.addTexture(buffer);
         }
@@ -129,6 +129,14 @@ public class Map {
             if (e != null)
                 e.render(img);
         }
+
+    }
+
+    public void renderDecoratives(BufferedImage img) {
+        for (Decorative d : decoratives) {
+            if (d != null)
+                d.render(img);
+        }
     }
 
     public void tick() {
@@ -137,6 +145,11 @@ public class Map {
                 e.tick();
         }
         physics.update();
+
+        for (Decorative d : decoratives) {
+            if (d != null)
+                d.tick();
+        }
     }
 
     public void addEntity(Entity e) {
@@ -151,7 +164,8 @@ public class Map {
 
     public Entity getEntity(String name) {
         for (Entity e : entities)
-            if (e.name == name) return e;
+            if (e == null) continue;
+            else if (e.name == name) return e;
         return null;
     }
 

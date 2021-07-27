@@ -14,6 +14,12 @@ public class Vec2D {
         y = 0;
     }
 
+    /**Same as (int)x**/
+    public int xi() { return (int)x;}
+
+    /**Same as (int)y**/
+    public int yi() { return (int)y;}
+
     public Vec2D(float x, float y) {
         this.x = x;
         this.y = y;
@@ -120,5 +126,14 @@ public class Vec2D {
 
     float dist(@NotNull Vec2D a, @NotNull Vec2D b) {
         return (float) Math.sqrt(Math.pow((a.x - b.x), 2) + Math.pow((a.y - b.y), 2));
+    }
+
+    float dist(@NotNull Vec2D a) {
+        return (float) Math.sqrt(Math.pow((a.x - x), 2) + Math.pow((a.y - y), 2));
+    }
+
+    float dot(Vec2D other)
+    {
+        return x*other.x + y*other.y;
     }
 }

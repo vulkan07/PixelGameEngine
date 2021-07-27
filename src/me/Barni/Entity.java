@@ -7,12 +7,15 @@ public class Entity {
 
     Game game;
     public String name;
-    public Vec2D position, size, velocity, gravity = new Vec2D(0, 0.7f);
+
+    public Vec2D position, size, velocity, gravity;
     public float speed, resistance;
     public boolean visible, active, solid, locked, collidesWithMap, hasTexture;
+
     protected Hitbox touchHitbox, colliderHitbox;
     public Texture texture;
 
+    //====CONSTRUCTOR====\\
     public Entity(Game g, String name) {
         commonConstructor(g, name);
     }
@@ -21,12 +24,20 @@ public class Entity {
         commonConstructor(g, name);
         position = pos;
     }
+    public Entity(Game g, String name, Vec2D pos, Vec2D size) {
+        commonConstructor(g, name);
+        position = pos;
+        this.size = size;
+    }
+    //===================\\
+
 
     public void loadTexture(String imgPath, String animPath) {
         texture.loadTexture(game, imgPath, (int) size.x, (int) size.y, animPath);
         hasTexture = true;
     }
 
+    /**This does all that a constructor needs to do anyway**/
     private void commonConstructor(Game g, String name) {
         game = g;
         this.name = name;
@@ -41,6 +52,7 @@ public class Entity {
         // -1 is invalid -> uses default physics values
         speed = -1;
         resistance = -1;
+        gravity = null;
 
         position = new Vec2D(0, 0);
         velocity = new Vec2D(0, 0);
@@ -60,8 +72,9 @@ public class Entity {
                 (int) size.y);
     }
 
+
     public void tick() {
-        texture.update();
+        texture.update(); //Updates texture anyway (not need to be active)
         if (!active) return;
     }
 

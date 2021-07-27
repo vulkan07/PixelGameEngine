@@ -72,6 +72,7 @@ public class ParticleEmitter {
             if (particle[2] <= 0) continue;
             Graphics g = img.getGraphics();
             g.setColor(Color.RED);
+            //g.setColor(new Color(255, r.nextInt(255), r.nextInt(255)));
             g.fillRect(particle[0], particle[1], 2,2);
         }
     }

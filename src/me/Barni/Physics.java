@@ -45,6 +45,7 @@ public class Physics {
             for (Hitbox h : ent.touchHitbox.touchingMapTiles(map))
                 if (h != null ) ent.colliderHitbox.resolveCollision(h, ent.velocity, ent.position);
 
+
             ent.touchHitbox.update(ent.position);
             ent.colliderHitbox.update(ent.position);
         }

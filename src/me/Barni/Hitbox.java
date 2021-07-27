@@ -63,7 +63,6 @@ public class Hitbox {
         if (!(other.realH <= y || realH <= other.y)) {
 
             //FROM LEFT
-            //TODO FIX THIS PIECE OF SH*, it blocks you while colliding with x+ velocity at top/bottom; +5 is a temporary sol.
             if (realW >= other.x && realW < other.realW) {
                 if (velocity.x > 0) {
                     velocity.x = 0;
@@ -109,9 +108,9 @@ public class Hitbox {
 
         for (int i = 0; i < map.tiles.length; i++) {
             if (map.tiles[i] == 0 || map.tiles[i] == 3)
-                continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST ON VOID TILES!!
-            other.y = i / map.width * map.tileSize;
+                continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST ON VOID (and grass) TILES!!
             other.x = i % map.width * map.tileSize;
+            other.y = i / map.width * map.tileSize;
             if (isColliding(other)) {
                 for (int j = 0; j < out.length; j++) {
                     if (out[j] == null) {

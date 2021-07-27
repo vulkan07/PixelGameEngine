@@ -1,5 +1,6 @@
 package me.Barni;
 
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -14,20 +15,23 @@ public class Game extends Canvas implements Runnable {
     public JFrame window;               //Window
     private BufferedImage image;        //Image
     private int[] buffer, clearBuffer;  //ImageBuffer
-    int white = new Color(199, 236, 255).getRGB();   //Color value for canvas clear
+    int white = (0xFF << 24 | 181 << 16 | 218 << 8 | 232 << 0); //new Color(181, 218, 232).getRGB();   //Color value for canvas clear
 
     MouseHandler mouseHandler;          //Mouse
     KeyboardHandler keyboardHandler;    //Keyboard
     Logger logger;                      //Logger
     Map map;                            //Map
 
-    public static final String GAME_DIR = "C:\\Dev\\";
+    public final String GAME_DIR;
 
     Player player;                      //FOR TEST
     ParticleEmitter pem;                //PEM ONLY FOR TEST purposes
 
-    public void start(String title, int w, int h, int px_size, boolean fullscreen, boolean resizeable, byte logLevel) {
+    public Game(String wDir) {
+        GAME_DIR = wDir;
+    }
 
+    public void start(String title, int w, int h, int px_size, boolean fullscreen, boolean resizeable, byte logLevel) {
         //IMAGE DATA
         this.WIDTH = w;
         this.HEIGHT = h;
@@ -71,21 +75,20 @@ public class Game extends Canvas implements Runnable {
         //=TEST=\\
         player = new Player(this, "player", new Vec2D(512, 500));
         player.loadTexture("test.png", "test.anim");
-        Entity e = new Entity(this, "test", new Vec2D(712,600));
-        e.resistance = .1f;
+        //Entity e = new Entity(this, "test", new Vec2D(712, 600));
+        //e.resistance = .1f;
 
         map.addEntity(player);
-        map.addEntity(e);
+        //map.addEntity(e);
         map.loadMap("py.map");
-        pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, -2), true, 60, 3, 60);
+        pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, 1), true, 60, 3, 60);
 
         map.physics.init();
 
         //ClearBuffer
-        clearBuffer = new int[WIDTH / PX_SIZE * HEIGHT / PX_SIZE];
+        clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
         for (int i = 0; i < clearBuffer.length; i++)
             clearBuffer[i] = white;
-
 
         //Actual start
         running = true;
@@ -104,8 +107,8 @@ public class Game extends Canvas implements Runnable {
         int frames = 0;
 
         last = System.nanoTime();
-        logger.info("Preferred FPS: " + fps);
-        logger.info("Game loop ready to start\n"); // \n to separate loop logs
+        logger.info("[GAME] Preferred FPS: " + fps);
+        logger.info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
 
         while (running) {
 
@@ -136,13 +139,14 @@ public class Game extends Canvas implements Runnable {
     public void tick() {
         mouseHandler.update();
         map.tick();
-        map.getEntity("test").velocity.x -= 0.11f;
+        //map.getEntity("test").velocity.x -= 0.11f;
 
         //TEST\\
         pem.initialPos = mouseHandler.getPosition().div(PX_SIZE);
-        pem.emitting = mouseHandler.isPressed(mouseHandler.LMB);
+        pem.emitting = mouseHandler.isPressed(mouseHandler.RMB);
         pem.update();
     }
+
 
     public void render() {
         //=CLEAR CANVAS=\\
@@ -151,6 +155,7 @@ public class Game extends Canvas implements Runnable {
         //Map
         map.renderTiles(image);
         map.renderEntities(image);
+        map.renderDecoratives(image);
 
 
         //TEST\\
@@ -159,13 +164,75 @@ public class Game extends Canvas implements Runnable {
         //= Draw image to buffer -> show =\\
         Graphics g = getBufferStrategy().getDrawGraphics();
         g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+
+        /*///
+        b1.x = mouseHandler.getPosition().x;
+        b1.y = mouseHandler.getPosition().y;
+
+        float a = (b1.y - a1.y);
+        float b = (a1.x - b1.x);
+        float c = (a * a1.x + b * a1.y);
+
+        float aa = (b2.y - a2.y);
+        float bb = (a2.x - b2.x);
+        float cc = (aa * a2.x + bb * a2.y);
+
+        float det = a * bb - aa * b;
+        if (det == 0)
+            g.setColor(Color.BLUE);
+
+        float x = (bb * c - b * cc) / det;
+        float y = (a * cc - aa * c) / det;
+
+        Vec2D cPoint = new Vec2D(x, y);
+
+        Vec2D AB = vecWithUniqueOrigin(a2, b2);
+        Vec2D AC = vecWithUniqueOrigin(a2, cPoint);
+        float kAC = AC.dot(AB);
+        float kAB = AB.dot(AB);
+
+        if (!(0 < kAC && kAC < kAB) || a1.dist(cPoint) > a1.dist(b1)) {
+                x = b1.x;
+                y = b1.y;
+        }
+
+        g.drawLine((int) a2.x, (int) a2.y, (int) b2.x, (int) b2.y);
+        g.drawLine((int) a1.x, (int) a1.y, (int) x, (int) y);
+        *////
+
+
+        //int alpha = Math.max(50,colorRangeLimit(255-(int)new Vec2D(kx,ky).dist(mouseHandler.getPosition())));
+        int xmap = (int)remap(kx, -16, 1920, 0, 255);
+        g.setColor(new Color(xmap, xmap, xmap, 255));
+        g.fillOval((int) kx, (int) ky, 32, 32);
+        if (mouseHandler.isPressed(mouseHandler.LMB | mouseHandler.RMB)) {
+            tx = mouseHandler.getPosition().x - 16;
+            ty = mouseHandler.getPosition().y - 16;
+        }
+        kx = lerp(kx, tx, 0.1f);
+        ky = lerp(ky, ty, 0.1f);
+
         g.dispose();
         getBufferStrategy().show();
     }
 
+    float kx, ky, tx, ty;
 
-    // public int colorRangeLimit(int num) {
-    //  return num > 255 ? 255 : (num < 0 ? 0 : num);
-    // }
+    float lerp(float v0, float v1, float t) {
+        return (1 - t) * v0 + t * v1;
+    }
 
+    float remap(float value, float low1, float high1, float low2, float high2) {
+
+        return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+
+    }
+
+    public int colorRangeLimit(int value) {
+        return value > 255 ? 255 : (value < 0 ? 0 : value);
+    }
+
+    public Vec2D vecWithUniqueOrigin(Vec2D o, Vec2D v) {
+        return new Vec2D(v.x - o.x, v.y - o.y);
+    }
 }
