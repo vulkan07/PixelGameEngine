@@ -15,7 +15,7 @@ public class Player extends Entity {
         size.x = 32;
         touchHitbox = new Hitbox((int) (pos.x), (int) (pos.y), (int) size.x / 2 * -1, (int) size.y / 2 * -1, (int) size.x * 2, (int) size.y * 2);
         colliderHitbox = new Hitbox((int) pos.x, (int) pos.y, (int) size.x, (int) size.y);
-        resistance = 0.3f;
+        resistance = 0.2f;
     }
 
     @Override
@@ -23,14 +23,22 @@ public class Player extends Entity {
         super.tick();
         moving = new Vec2D(0, 0);
         if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT))
-            speed = .4f;
-        else
             speed = .8f;
+        else
+            speed = .5f;
+
+        if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL)) {
+            speed = .3f;
+            colliderHitbox.h = 32;
+        }
+        else
+            colliderHitbox.h = size.yi();
+
         if (game.keyboardHandler.getKeyState(KeyboardHandler.UP)) {
-            moving.y -= speed * 2;
+            moving.y -= speed * 3;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
-            moving.y += speed * 2;
+            moving.y = 0;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;

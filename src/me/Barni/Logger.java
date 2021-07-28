@@ -2,6 +2,7 @@ package me.Barni;
 
 public class Logger {
     private byte logLevel;
+    public static final byte LOG_SUPER = 4;
     public static final byte LOG_ALL = 3;
     public static final byte LOG_WARN_ERR = 2;
     public static final byte LOG_ERR = 1;
@@ -12,15 +13,13 @@ public class Logger {
         logLevel = level;
 
 
-        if (level<0 || level>3)
-        {
+        if (level < 0 || level > 4) {
             logLevel = 4;
             err("[LOGGER] Invalid level: " + level + ", defaulting to ALL");
         }
 
         String typeStr = null;
-        switch (level)
-        {
+        switch (level) {
             case 0:
                 typeStr = "NONE";
                 break;
@@ -33,6 +32,9 @@ public class Logger {
             case 3:
                 typeStr = "ALL";
                 break;
+            case 4:
+                typeStr = "ALL + SUBINFO";
+                break;
         }
         info("[LOGGER] mode set to " + typeStr);
     }
@@ -44,12 +46,17 @@ public class Logger {
 
     public void err(String msg) {
         if (logLevel >= 1)
-            System.out.println("[X] " + msg);
+            System.out.println(" [X] " + msg);
     }
 
     public void info(String msg) {
-        if (logLevel == 3)
+        if (logLevel >= 3)
             System.out.println("[.] " + msg);
+    }
+
+    public void subInfo(String msg) {
+        if (logLevel == 4)
+            System.out.println(" .  " + msg);
     }
 
 }

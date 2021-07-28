@@ -30,7 +30,7 @@ public class Texture {
                 delayStr = br.readLine();
             }
             catch (FileNotFoundException e) {
-                game.logger.info("[TEXTURE] Couldn't find .anim file for " + game.GAME_DIR + imgPath + ", image will be stationary");
+                game.logger.subInfo("[TEXTURE] Couldn't find .anim file for " + game.GAME_DIR + imgPath + ", image will be stationary");
             }
             catch (IOException e) {
                 game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + dataPath);
@@ -49,7 +49,7 @@ public class Texture {
         //EMPTY .anim
         if (delayStr == null )
         {
-            game.logger.info("[TEXTURE] .anim file is empty");
+            game.logger.subInfo("[TEXTURE] .anim file is empty");
             animated = false;
             frames = 1;
         }
@@ -58,7 +58,7 @@ public class Texture {
         else {
             //SPLIT UP & SET frames TO RIGHT AMOUNT
             String[] numsStr = delayStr.split(",");
-            game.logger.info("[TEXTURE] .anim frame count: " + numsStr.length);
+            game.logger.subInfo("[TEXTURE] .anim frame count: " + numsStr.length);
             frames = numsStr.length;
             delay = new int[frames];
             animated = true;

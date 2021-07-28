@@ -15,7 +15,9 @@ public class KeyboardHandler implements KeyListener {
     public static final int Q = 81;
     public static final int R = 82;
     public static final int SHIFT = 16;
+    public static final int CTRL = 17;
     public static final int ESC = 27;
+    public static final int F2 = 113;
 
     public boolean logPresses;
     private boolean[] pressed = new boolean[525];
@@ -39,6 +41,7 @@ public class KeyboardHandler implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == F2) game.mapEditing = !game.mapEditing;
         if (logPresses) game.logger.info("Pressed " + e.getKeyCode());
         pressed[e.getKeyCode()] = true;
     }

@@ -20,7 +20,7 @@ public class Main {
         else
             game = new Game("C:\\Dev\\");
 
-        game.start("Platformer Über Brutal RageGame hogy kilépsz", 1920, 1080, 1, true, false, Logger.LOG_ALL);
+        game.start("Über Brutal Platformer 2077", 1920, 1080, 1, true, false, Logger.LOG_SUPER);
     }
 }
 

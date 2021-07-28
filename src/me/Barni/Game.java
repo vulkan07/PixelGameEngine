@@ -12,10 +12,12 @@ public class Game extends Canvas implements Runnable {
     public int PX_SIZE;                 //For pixel art: 2 or 4, for normal: 1
     private boolean running = false;    //Running
 
+    Thread thread;                      //Game thread
+
     public JFrame window;               //Window
     private BufferedImage image;        //Image
     private int[] buffer, clearBuffer;  //ImageBuffer
-    int white = (0xFF << 24 | 181 << 16 | 218 << 8 | 232 << 0); //new Color(181, 218, 232).getRGB();   //Color value for canvas clear
+    int white = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
 
     MouseHandler mouseHandler;          //Mouse
     KeyboardHandler keyboardHandler;    //Keyboard
@@ -24,6 +26,10 @@ public class Game extends Canvas implements Runnable {
 
     public final String GAME_DIR;
 
+    public boolean mapEditing;
+    Vec2D selectedTile = new Vec2D(0, 0);
+    boolean selectedTileVisible = true;
+
     Player player;                      //FOR TEST
     ParticleEmitter pem;                //PEM ONLY FOR TEST purposes
 
@@ -31,7 +37,13 @@ public class Game extends Canvas implements Runnable {
         GAME_DIR = wDir;
     }
 
-    public void start(String title, int w, int h, int px_size, boolean fullscreen, boolean resizeable, byte logLevel) {
+    public synchronized void start(String title, int w, int h, int px_size, boolean fullscreen, boolean resizeable, byte logLevel) {
+
+        if (running) {
+            logger.err("Tried to start game, while it's running!");
+            return;
+        }
+
         //IMAGE DATA
         this.WIDTH = w;
         this.HEIGHT = h;
@@ -53,7 +65,9 @@ public class Game extends Canvas implements Runnable {
         window.add(this);
         window.setResizable(resizeable);
         window.setVisible(true);
-        window.requestFocus();
+        this.requestFocus();
+        //window.setIconImage(); do this
+
 
         //BufferStrategy
         createBufferStrategy(2);
@@ -80,7 +94,7 @@ public class Game extends Canvas implements Runnable {
 
         map.addEntity(player);
         //map.addEntity(e);
-        map.loadMap("py.map");
+        map.loadMap("first.map");
         pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, 1), true, 60, 3, 60);
 
         map.physics.init();
@@ -92,7 +106,8 @@ public class Game extends Canvas implements Runnable {
 
         //Actual start
         running = true;
-        new Thread(this).start();
+        thread = new Thread(this);
+        thread.start();
     }
 
 
@@ -124,9 +139,13 @@ public class Game extends Canvas implements Runnable {
                 //=RENDER=\\
                 render();
 
-                frames++;
+                try {
+                    Thread.sleep(0);
+                } catch (InterruptedException e) {}
+
                 delta--;
             }
+
 
             if (timer >= 1000000000) {
                 System.out.println("FPS: " + frames);
@@ -136,10 +155,36 @@ public class Game extends Canvas implements Runnable {
         }
     }
 
+
+    int tPos1, tPos2, tTimer = 0;
+
     public void tick() {
         mouseHandler.update();
         map.tick();
         //map.getEntity("test").velocity.x -= 0.11f;
+
+        tTimer--;
+        selectedTile = mouseHandler.getPosition().copy();
+        selectedTile.div(32);
+        if (mapEditing) {
+            if (mouseHandler.isPressed(mouseHandler.LMB | mouseHandler.RMB)) {
+
+                tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
+                if (tPos1 != tPos2 || tTimer <= 0) {
+                    tTimer = 15;
+                    tPos2 = tPos1;
+                    int prevTile = map.tiles[tPos1];
+                    if (mouseHandler.isPressed(mouseHandler.LMB))
+
+                        prevTile++;
+                    else
+                        prevTile--;
+
+                    prevTile = prevTile < 0 ? 0 : (prevTile > Material.MAT_COUNT-1 ? Material.MAT_COUNT-1 : prevTile);
+                    map.tiles[tPos1] = (byte) prevTile;
+                }
+            }
+        }
 
         //TEST\\
         pem.initialPos = mouseHandler.getPosition().div(PX_SIZE);
@@ -154,8 +199,8 @@ public class Game extends Canvas implements Runnable {
 
         //Map
         map.renderTiles(image);
-        map.renderEntities(image);
         map.renderDecoratives(image);
+        map.renderEntities(image);
 
 
         //TEST\\
@@ -198,11 +243,10 @@ public class Game extends Canvas implements Runnable {
 
         g.drawLine((int) a2.x, (int) a2.y, (int) b2.x, (int) b2.y);
         g.drawLine((int) a1.x, (int) a1.y, (int) x, (int) y);
-        *////
+        */
 
-
-        //int alpha = Math.max(50,colorRangeLimit(255-(int)new Vec2D(kx,ky).dist(mouseHandler.getPosition())));
-        int xmap = (int)remap(kx, -16, 1920, 0, 255);
+        /*
+        int xmap = (int) remap(kx, -16, 1920, 0, 255);
         g.setColor(new Color(xmap, xmap, xmap, 255));
         g.fillOval((int) kx, (int) ky, 32, 32);
         if (mouseHandler.isPressed(mouseHandler.LMB | mouseHandler.RMB)) {
@@ -211,22 +255,21 @@ public class Game extends Canvas implements Runnable {
         }
         kx = lerp(kx, tx, 0.1f);
         ky = lerp(ky, ty, 0.1f);
+        */
+
+        //Selected tile
+        if (selectedTileVisible) {
+            g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
+            g.fillRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 32, 32);
+            g.drawRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 31, 31);
+        }
 
         g.dispose();
         getBufferStrategy().show();
     }
 
-    float kx, ky, tx, ty;
 
-    float lerp(float v0, float v1, float t) {
-        return (1 - t) * v0 + t * v1;
-    }
 
-    float remap(float value, float low1, float high1, float low2, float high2) {
-
-        return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
-
-    }
 
     public int colorRangeLimit(int value) {
         return value > 255 ? 255 : (value < 0 ? 0 : value);

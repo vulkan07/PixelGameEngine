@@ -4,7 +4,7 @@ import com.sun.istack.internal.NotNull;
 
 public class Vec2D {
 
-    public static final Vec2D ZERO = new Vec2D(0,0);
+    public static final Vec2D ZERO = new Vec2D(0, 0);
 
     public float x, y;
 
@@ -14,15 +14,27 @@ public class Vec2D {
         y = 0;
     }
 
-    /**Same as (int)x**/
-    public int xi() { return (int)x;}
+    /**
+     * Same as (int)x
+     **/
+    public int xi() {
+        return (int) x;
+    }
 
-    /**Same as (int)y**/
-    public int yi() { return (int)y;}
+    /**
+     * Same as (int)y
+     **/
+    public int yi() {
+        return (int) y;
+    }
 
     public Vec2D(float x, float y) {
         this.x = x;
         this.y = y;
+    }
+
+    Vec2D copy() {
+        return new Vec2D(x, y);
     }
 
     //Arithmetics
@@ -124,16 +136,29 @@ public class Vec2D {
         return this;
     }
 
-    float dist(@NotNull Vec2D a, @NotNull Vec2D b) {
+    float dist(Vec2D a, Vec2D b) {
         return (float) Math.sqrt(Math.pow((a.x - b.x), 2) + Math.pow((a.y - b.y), 2));
     }
 
-    float dist(@NotNull Vec2D a) {
+    float dist(Vec2D a) {
         return (float) Math.sqrt(Math.pow((a.x - x), 2) + Math.pow((a.y - y), 2));
     }
 
-    float dot(Vec2D other)
-    {
-        return x*other.x + y*other.y;
+    float dot(Vec2D other) {
+        return x * other.x + y * other.y;
+    }
+
+    float lerp(float v0, float v1, float t) {
+        return (1 - t) * v0 + t * v1;
+    }
+
+    Vec2D lerp(Vec2D v0, Vec2D v1, float t) {
+        return new Vec2D(
+                (1 - t) * v0.x + t * v1.x,
+                (1 - t) * v0.y + t * v1.y);
+    }
+
+    float remap(float value, float low1, float high1, float low2, float high2) {
+        return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
     }
 }
