@@ -17,6 +17,8 @@ public class Map {
     public Decorative[] decoratives = new Decorative[32];
     private int decCount = 0;
 
+
+    Camera cam;
     BufferedImage txt;
 
     public Map(Game g, int w, int h, int tSize) {
@@ -31,16 +33,16 @@ public class Map {
 
         physics = new Physics(game, this);
 
+        cam = new Camera(game, this);
+
         //TEST
         for (int i = 0; i < tiles.length; i++)
             tiles[i] = 0;
     }
 
 
-    public void addDecorative(Decorative dec)
-    {
-        if(decCount >= decoratives.length)
-        {
+    public void addDecorative(Decorative dec) {
+        if (decCount >= decoratives.length) {
             game.logger.err("Decoratives array is full!");
             return;
         }
@@ -70,7 +72,10 @@ public class Map {
             txt = atlas.getTexture(tiles[i] - 1);
             int y = i / width; //Y
             int x = i % width; //x
-            img.getGraphics().drawImage(txt, x * tileSize, y * tileSize, null);
+            img.getGraphics().drawImage(txt,
+                    x * tileSize - cam.scroll.xi(),
+                    y * tileSize - cam.scroll.yi(),
+                    null);
             //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
 
         }
@@ -80,7 +85,7 @@ public class Map {
     public void renderEntities(BufferedImage img) {
         for (Entity e : entities) {
             if (e != null)
-                e.render(img);
+                e.render(img, cam);
         }
 
     }
@@ -88,11 +93,16 @@ public class Map {
     public void renderDecoratives(BufferedImage img) {
         for (Decorative d : decoratives) {
             if (d != null)
-                d.render(img);
+                d.render(img, cam);
         }
     }
 
     public void tick() {
+
+        if (game.player.position.dist(cam.view) > 50)
+            cam.lookAt(game.player.position);
+        cam.update();
+
         for (Entity e : entities) {
             if (e != null)
                 e.tick();

@@ -53,15 +53,17 @@ public class Player extends Entity {
 
 
     @Override
-    public void render(BufferedImage img) {
+    public void render(BufferedImage img, Camera cam) {
 
-        super.render(img);
+        super.render(img, cam);
 
         Graphics g = img.getGraphics();
 
+        //Draw hitbox
         g.setColor(Color.BLUE);
-        g.drawRect(touchHitbox.x, touchHitbox.y, touchHitbox.w, touchHitbox.h);
+        g.drawRect(touchHitbox.x - cam.scroll.xi(), touchHitbox.y - cam.scroll.yi(), touchHitbox.w, touchHitbox.h);
 
+        /*
         if (colliding)
             g.setColor(Color.RED);
         g.drawRect(colliderHitbox.x, colliderHitbox.y, colliderHitbox.w, colliderHitbox.h);
@@ -74,6 +76,7 @@ public class Player extends Entity {
 
         g.setColor(Color.ORANGE);
         g.fillRect((int) position.x, (int) position.y, 5, 5);
+        */
     }
 
 }

@@ -24,6 +24,7 @@ public class Entity {
         commonConstructor(g, name);
         position = pos;
     }
+
     public Entity(Game g, String name, Vec2D pos, Vec2D size) {
         commonConstructor(g, name);
         position = pos;
@@ -37,7 +38,9 @@ public class Entity {
         hasTexture = true;
     }
 
-    /**This does all that a constructor needs to do anyway**/
+    /**
+     * This does all that a constructor needs to do anyway
+     **/
     private void commonConstructor(Game g, String name) {
         game = g;
         this.name = name;
@@ -78,14 +81,23 @@ public class Entity {
         if (!active) return;
     }
 
-    public void render(BufferedImage img) {
+    public void render(BufferedImage img, Camera cam) {
         if (!visible) return;
 
         Graphics g = img.getGraphics();
         if (hasTexture)
-            g.drawImage(texture.getTexture(), (int) position.x, (int) position.y, null);
+            g.drawImage(texture.getTexture(),
+                    position.xi() - cam.scroll.xi(),
+                    position.yi() - cam.scroll.yi(),
+                    size.xi(),
+                    size.yi(),
+                    null);
         g.setColor(Color.RED);
-        g.drawRect((int) position.x, (int) position.y, (int) size.x, (int) size.y);
+        g.drawRect(
+                position.xi() - cam.scroll.xi(),
+                position.yi() - cam.scroll.yi(),
+                size.xi()-1,
+                size.yi()-1);
     }
 
 }

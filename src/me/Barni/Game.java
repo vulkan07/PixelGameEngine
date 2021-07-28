@@ -93,11 +93,10 @@ public class Game extends Canvas implements Runnable {
         map = ml.loadMap(GAME_DIR + "second.map");
 
         //If map doesnt load, a hardcoded map loads
-        if (map == null)
-        {
+        if (map == null) {
             map = new Map(this, 3, 5, 32);
-            byte[] defaultmap = {0,0,0,0,0, 0,0,0,0,0, 2,2,2,2,2,};
-            player.position = new Vec2D(48,0);
+            byte[] defaultmap = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2,};
+            player.position = new Vec2D(48, 0);
             map.tiles = defaultmap;
         }
 
@@ -214,9 +213,22 @@ public class Game extends Canvas implements Runnable {
         //TEST\\
         pem.render(image);
 
+
+
         //= Draw image to buffer -> show =\\
         Graphics g = getBufferStrategy().getDrawGraphics();
-        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+
+        //Selected tile
+        if (selectedTileVisible) {
+            g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
+            g.fillRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 32, 32);
+            g.drawRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 31, 31);
+        }
+
+        Graphics2D g2d = (Graphics2D) g;
+        //g2d.translate(-WIDTH / map.cam.zoom, -HEIGHT / map.cam.zoom);
+        //g2d.scale(map.cam.zoom, map.cam.zoom);
+        g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
         /*///
         b1.x = mouseHandler.getPosition().x;
@@ -265,12 +277,7 @@ public class Game extends Canvas implements Runnable {
         ky = lerp(ky, ty, 0.1f);
         */
 
-        //Selected tile
-        if (selectedTileVisible) {
-            g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
-            g.fillRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 32, 32);
-            g.drawRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 31, 31);
-        }
+
 
         g.dispose();
         getBufferStrategy().show();

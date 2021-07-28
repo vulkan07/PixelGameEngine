@@ -21,7 +21,7 @@ public class Decorative {
         texture.update();
     }
 
-    public void render(BufferedImage img) {
-        img.getGraphics().drawImage(texture.getTexture(), x, y, w, h, null);
+    public void render(BufferedImage img, Camera cam) {
+        img.getGraphics().drawImage(texture.getTexture(), x - cam.scroll.xi(), y - cam.scroll.yi(), w, h, null);
     }
 }

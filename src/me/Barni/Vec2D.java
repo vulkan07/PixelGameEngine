@@ -95,6 +95,12 @@ public class Vec2D {
         return this;
     }
 
+    Vec2D lowLimit(float min) {
+        if (x < min) x = min;
+        if (y < min) y = min;
+        return this;
+    }
+
     Vec2D limit(float max) {
         if (Math.abs(x) > max)
             if (x > 0)
@@ -152,10 +158,10 @@ public class Vec2D {
         return (1 - t) * v0 + t * v1;
     }
 
-    Vec2D lerp(Vec2D v0, Vec2D v1, float t) {
+    Vec2D lerp(Vec2D v1, float t) {
         return new Vec2D(
-                (1 - t) * v0.x + t * v1.x,
-                (1 - t) * v0.y + t * v1.y);
+                (1 - t) * x + t * v1.x,
+                (1 - t) * y + t * v1.y);
     }
 
     float remap(float value, float low1, float high1, float low2, float high2) {
