@@ -49,7 +49,7 @@ public class Texture {
         //EMPTY .anim
         if (delayStr == null )
         {
-            game.logger.subInfo("[TEXTURE] .anim file is empty");
+            //game.logger.subInfo("[TEXTURE] .anim file is empty"); //Removed from log, because it's working!
             animated = false;
             frames = 1;
         }

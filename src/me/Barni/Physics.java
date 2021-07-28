@@ -37,6 +37,7 @@ public class Physics {
             for (Entity other : map.entities)
             {
                 if (other == null) continue;
+                if (other == ent) continue;
                 if (ent.touchHitbox.isColliding(other.touchHitbox))
                     ent.colliderHitbox.resolveCollision(other.colliderHitbox, ent.velocity, ent.position);
             }

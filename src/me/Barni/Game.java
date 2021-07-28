@@ -82,27 +82,34 @@ public class Game extends Canvas implements Runnable {
         keyboardHandler = new KeyboardHandler(this, false);
         this.addKeyListener(keyboardHandler);
 
-        //Map
-        map = new Map(this, 60, 34, 32);
-        map.loadTextures();
 
         //=TEST=\\
         player = new Player(this, "player", new Vec2D(512, 500));
         player.loadTexture("test.png", "test.anim");
-        //Entity e = new Entity(this, "test", new Vec2D(712, 600));
-        //e.resistance = .1f;
-
-        map.addEntity(player);
-        //map.addEntity(e);
-        map.loadMap("first.map");
         pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, 1), true, 60, 3, 60);
 
+        //Map
+        MapLoader ml = new MapLoader(this);
+        map = ml.loadMap(GAME_DIR + "second.map");
+
+        //If map doesnt load, a hardcoded map loads
+        if (map == null)
+        {
+            map = new Map(this, 3, 5, 32);
+            byte[] defaultmap = {0,0,0,0,0, 0,0,0,0,0, 2,2,2,2,2,};
+            player.position = new Vec2D(48,0);
+            map.tiles = defaultmap;
+        }
+
+        map.loadTextures();
+        map.addEntity(player);
         map.physics.init();
 
         //ClearBuffer
         clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
         for (int i = 0; i < clearBuffer.length; i++)
             clearBuffer[i] = white;
+
 
         //Actual start
         running = true;
@@ -138,10 +145,11 @@ public class Game extends Canvas implements Runnable {
                 tick();
                 //=RENDER=\\
                 render();
-
+                frames++;
                 try {
                     Thread.sleep(0);
-                } catch (InterruptedException e) {}
+                } catch (InterruptedException e) {
+                }
 
                 delta--;
             }
@@ -180,7 +188,7 @@ public class Game extends Canvas implements Runnable {
                     else
                         prevTile--;
 
-                    prevTile = prevTile < 0 ? 0 : (prevTile > Material.MAT_COUNT-1 ? Material.MAT_COUNT-1 : prevTile);
+                    prevTile = prevTile < 0 ? 0 : (prevTile > Material.MAT_COUNT - 1 ? Material.MAT_COUNT - 1 : prevTile);
                     map.tiles[tPos1] = (byte) prevTile;
                 }
             }
@@ -267,8 +275,6 @@ public class Game extends Canvas implements Runnable {
         g.dispose();
         getBufferStrategy().show();
     }
-
-
 
 
     public int colorRangeLimit(int value) {
