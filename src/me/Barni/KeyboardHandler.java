@@ -28,8 +28,7 @@ public class KeyboardHandler implements KeyListener {
         this.logPresses = logPress;
     }
 
-    public boolean getKeyState(int key)
-    {
+    public boolean getKeyState(int key) {
         return pressed[key];
     }
 
@@ -42,6 +41,10 @@ public class KeyboardHandler implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == F2) game.mapEditing = !game.mapEditing;
+        if (e.getKeyCode() == 109)
+            game.mapPaintID--;
+        if (e.getKeyCode() == 107)
+            game.mapPaintID++;
         if (logPresses) game.logger.info("Pressed " + e.getKeyCode());
         pressed[e.getKeyCode()] = true;
     }

@@ -92,12 +92,14 @@ public class Entity {
                     size.xi(),
                     size.yi(),
                     null);
+        /*
         g.setColor(Color.RED);
         g.drawRect(
                 position.xi() - cam.scroll.xi(),
                 position.yi() - cam.scroll.yi(),
                 size.xi()-1,
                 size.yi()-1);
+         */
     }
 
 }

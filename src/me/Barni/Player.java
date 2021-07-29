@@ -22,7 +22,7 @@ public class Player extends Entity {
     public void tick() {
         super.tick();
         moving = new Vec2D(0, 0);
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT))
+        /*if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT))
             speed = .85f;
         else
             speed = .5f;
@@ -30,15 +30,15 @@ public class Player extends Entity {
         if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL)) {
             speed = .35f;
             colliderHitbox.h = 32;
-        }
-        else
-            colliderHitbox.h = size.yi();
+        } else
+            colliderHitbox.h = size.yi();*/
 
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.UP)) {
-            moving.y -= speed * 3;
+        if (game.keyboardHandler.getKeyState(KeyboardHandler.UP) ||
+                game.keyboardHandler.getKeyState(KeyboardHandler.SPACE) ) {
+            moving.y -= speed * 2;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
-            moving.y = 0;
+            moving.y += speed;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;
@@ -56,14 +56,14 @@ public class Player extends Entity {
     public void render(BufferedImage img, Camera cam) {
 
         super.render(img, cam);
-
+/*
         Graphics g = img.getGraphics();
 
         //Draw hitbox
         g.setColor(Color.BLUE);
         g.drawRect(touchHitbox.x - cam.scroll.xi(), touchHitbox.y - cam.scroll.yi(), touchHitbox.w, touchHitbox.h);
 
-        /*
+
         if (colliding)
             g.setColor(Color.RED);
         g.drawRect(colliderHitbox.x, colliderHitbox.y, colliderHitbox.w, colliderHitbox.h);

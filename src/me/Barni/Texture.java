@@ -26,7 +26,7 @@ public class Texture {
             game.logger.info("[TEXTURE] Not using .anim file");
         else {
             try {
-                BufferedReader br = new BufferedReader(new FileReader(new File(game.GAME_DIR + dataPath)));
+                BufferedReader br = new BufferedReader(new FileReader(new File(game.GAME_DIR + "textures\\" + dataPath)));
                 delayStr = br.readLine();
             }
             catch (FileNotFoundException e) {
@@ -39,7 +39,7 @@ public class Texture {
 
         //READ IMAGE
         try {
-            fullImg = ImageIO.read(new File(game.GAME_DIR + imgPath));
+            fullImg = ImageIO.read(new File(game.GAME_DIR + "textures\\" + imgPath));
         }
         catch (IOException e)
         {

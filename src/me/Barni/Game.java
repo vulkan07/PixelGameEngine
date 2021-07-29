@@ -27,6 +27,7 @@ public class Game extends Canvas implements Runnable {
     public final String GAME_DIR;
 
     public boolean mapEditing;
+    public int mapPaintID;
     Vec2D selectedTile = new Vec2D(0, 0);
     boolean selectedTileVisible = true;
 
@@ -85,12 +86,12 @@ public class Game extends Canvas implements Runnable {
 
         //=TEST=\\
         player = new Player(this, "player", new Vec2D(512, 500));
-        player.loadTexture("test.png", "test.anim");
+        player.loadTexture("player.png", "player.anim");
         pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, 1), true, 60, 3, 60);
 
         //Map
         MapLoader ml = new MapLoader(this);
-        map = ml.loadMap(GAME_DIR + "second.map");
+        map = ml.loadMap(GAME_DIR + "01.map");
 
         //If map doesnt load, a hardcoded map loads
         if (map == null) {
@@ -170,28 +171,42 @@ public class Game extends Canvas implements Runnable {
         map.tick();
         //map.getEntity("test").velocity.x -= 0.11f;
 
+        //Tile editor
         tTimer--;
         selectedTile = mouseHandler.getPosition().copy();
+        selectedTile.add(map.cam.scroll);
         selectedTile.div(32);
-        if (mapEditing) {
-            if (mouseHandler.isPressed(mouseHandler.LMB | mouseHandler.RMB)) {
 
-                tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
+
+        mapPaintID = mapPaintID < 1 ? 1 : (mapPaintID > Material.MAT_COUNT - 1 ? Material.MAT_COUNT - 1 : mapPaintID);
+
+        if (mapEditing) {
+            tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
+            if (mouseHandler.isPressed(mouseHandler.LMB)) {
                 if (tPos1 != tPos2 || tTimer <= 0) {
                     tTimer = 15;
                     tPos2 = tPos1;
-                    int prevTile = map.tiles[tPos1];
-                    if (mouseHandler.isPressed(mouseHandler.LMB))
-
-                        prevTile++;
-                    else
-                        prevTile--;
-
-                    prevTile = prevTile < 0 ? 0 : (prevTile > Material.MAT_COUNT - 1 ? Material.MAT_COUNT - 1 : prevTile);
-                    map.tiles[tPos1] = (byte) prevTile;
+                    try {
+                        map.tiles[tPos1] = (byte) mapPaintID;
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                    }
                 }
-            }
+            } else if (mouseHandler.isPressed(mouseHandler.RMB))
+                try {
+                    map.tiles[tPos1] = 0;
+                } catch (ArrayIndexOutOfBoundsException e) {
+                }
         }
+
+        /*
+        if (tPos1 < 0 || tPos1 > map.tiles.length)
+            selectedTileVisible = false;
+        else
+            selectedTileVisible = true;
+         */
+
+        if (keyboardHandler.getKeyState(KeyboardHandler.R))
+            map.dumpCurrentMapIntoFile("currentMap.txt");
 
         //TEST\\
         pem.initialPos = mouseHandler.getPosition().div(PX_SIZE);
@@ -214,21 +229,29 @@ public class Game extends Canvas implements Runnable {
         pem.render(image);
 
 
-
         //= Draw image to buffer -> show =\\
         Graphics g = getBufferStrategy().getDrawGraphics();
+
+
+        Graphics2D g2d = (Graphics2D) g;
+        if (map.cam.zoom != 1)
+            g2d.translate(-WIDTH / map.cam.zoom, -HEIGHT / map.cam.zoom);
+        g2d.scale(map.cam.zoom, map.cam.zoom);
+        g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
         //Selected tile
         if (selectedTileVisible) {
             g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
-            g.fillRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 32, 32);
-            g.drawRect((int) selectedTile.x * 32, (int) selectedTile.y * 32, 31, 31);
+            g.fillRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 32, 32);
+            g.drawRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 31, 31);
         }
 
-        Graphics2D g2d = (Graphics2D) g;
-        //g2d.translate(-WIDTH / map.cam.zoom, -HEIGHT / map.cam.zoom);
-        //g2d.scale(map.cam.zoom, map.cam.zoom);
-        g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+        //Selected tile type
+        if (mapEditing)
+            try {
+                g.drawImage(map.atlas.getTexture(mapPaintID-1), 8, 8, null);
+            } catch (ArrayIndexOutOfBoundsException e) {
+            }
 
         /*///
         b1.x = mouseHandler.getPosition().x;
@@ -276,8 +299,6 @@ public class Game extends Canvas implements Runnable {
         kx = lerp(kx, tx, 0.1f);
         ky = lerp(ky, ty, 0.1f);
         */
-
-
 
         g.dispose();
         getBufferStrategy().show();
