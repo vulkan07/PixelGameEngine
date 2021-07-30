@@ -1,6 +1,7 @@
 package me.Barni;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
@@ -11,8 +12,9 @@ public class Map {
 
     public int width, height, tileSize;
     public byte[] tiles;
+    public boolean[] solidTiles;
     public Entity[] entities = new Entity[16];
-    public Decorative[] decoratives = new Decorative[32];
+    public Decorative[] decoratives = new Decorative[16];
     private int decCount = 0;
 
 
@@ -24,6 +26,7 @@ public class Map {
         height = w;
         tileSize = tSize;
         tiles = new byte[width * height];
+        solidTiles = new boolean[width * height];
         game = g;
         atlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
 
@@ -34,9 +37,10 @@ public class Map {
         cam = new Camera(game, this);
 
         //TEST
-        for (int i = 0; i < tiles.length; i++)
-            tiles[i] = 0;
+        for (int i = 0; i < solidTiles.length; i++)
+            solidTiles[i] = true;
     }
+
 
     public void dumpCurrentMapIntoFile(String path) {
         game.logger.info("[MAP] Writing out current map");
@@ -53,7 +57,13 @@ public class Map {
             if (i % width == 0 && i != 0) {
                 data += '\n';
             }
+
             data += tiles[i] + ",";
+
+            if (!solidTiles[i])
+                data += "b";
+            else
+                data += " ";
         }
 
         try {
@@ -82,33 +92,45 @@ public class Map {
 
         for (int i = 1; i < Material.materialPath.length; i++) {
 
-            try {
+            /*try {
                 buffer = ImageIO.read(new File(game.GAME_DIR + "textures\\" + Material.materialPath[i]));
             } catch (IOException e) {
                 game.logger.err("[MAP] Cannot load texture: " + game.GAME_DIR + "textures\\" + Material.materialPath[i]);
             }
-            atlas.addTexture(buffer);
+            atlas.addTexture(buffer);*/
+            Texture t = new Texture();
+            t.loadTexture(game, Material.materialPath[i] + ".png", tileSize, tileSize, Material.materialPath[i] + ".anim");
+            atlas.addTexture(t);
         }
     }
 
     public void renderTiles(BufferedImage img) {
 
+        Graphics g = img.getGraphics();
+        g.setColor(new Color(0, 0, 0, 100));
 
         for (int i = 0; i < tiles.length; i++) {
             if (tiles[i] == 0) continue;
             txt = atlas.getTexture(tiles[i] - 1);
             int y = i / width; //Y
             int x = i % width; //x
-            img.getGraphics().drawImage(txt,
+            g.drawImage(txt,
                     x * tileSize - cam.scroll.xi(),
                     y * tileSize - cam.scroll.yi(),
                     null);
+            if (!solidTiles[i])
+                g.fillRect(
+                        x * tileSize - cam.scroll.xi(),
+                        y * tileSize - cam.scroll.yi(),
+                        tileSize,
+                        tileSize
+                );
             //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
 
         }
 
         if (game.mapEditing)
-            img.getGraphics().drawRect(
+            g.drawRect(
                     -cam.scroll.xi(),
                     -cam.scroll.yi(),
                     width * tileSize,
@@ -124,14 +146,17 @@ public class Map {
 
     }
 
-    public void renderDecoratives(BufferedImage img) {
+    public void renderDecoratives(BufferedImage img, int zPlane) {
         for (Decorative d : decoratives) {
             if (d != null)
-                d.render(img, cam);
+                if (d.z == zPlane)
+                    d.render(img, cam);
         }
     }
 
     public void tick() {
+
+        atlas.update();
 
         if (game.player.position.dist(cam.view) > 50)
             cam.lookAt(game.player.position);

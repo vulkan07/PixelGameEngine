@@ -22,11 +22,9 @@ public class Player extends Entity {
     public void tick() {
         super.tick();
         moving = new Vec2D(0, 0);
-        /*if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT))
-            speed = .85f;
-        else
-            speed = .5f;
-
+        if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL))
+            velocity.limit(3);
+        /*
         if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL)) {
             speed = .35f;
             colliderHitbox.h = 32;

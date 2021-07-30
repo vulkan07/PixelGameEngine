@@ -52,6 +52,8 @@ public class Physics {
                     ent.position.x = boundX - ent.colliderHitbox.w;
                 if (ent.position.y > boundY)
                     ent.velocity.y -= 500;
+
+
                 if (h != null ) ent.colliderHitbox.resolveCollision(h, ent.velocity, ent.position);
             }
 

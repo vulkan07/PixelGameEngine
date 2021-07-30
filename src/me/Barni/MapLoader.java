@@ -173,7 +173,7 @@ public class MapLoader {
     }
 
     private void loadDecorative(String[] params, int lineIndex) {
-        if (params.length < 5 || params.length > 5) {
+        if (params.length < 7 || params.length > 7) {
             game.logger.err("Invalid object notation! Object list item line: " + lineIndex);
             return;
         }
@@ -188,8 +188,10 @@ public class MapLoader {
                 Integer.parseInt(params[0]),
                 Integer.parseInt(params[1]),
                 Integer.parseInt(params[2]),
-                Integer.parseInt(params[3]),
-                params[4]);
+                Float.parseFloat(params[3]),
+                Integer.parseInt(params[4]),
+                Integer.parseInt(params[5]),
+                params[6]);
         map.addDecorative(newDec);
     }
 
@@ -211,6 +213,12 @@ public class MapLoader {
 
             //For every column
             for (int x = 0; x < xSize; x++) {
+                if (tilesRaw[x].contains("b"))
+                {
+                    tilesRaw[x] = tilesRaw[x].replace("b","");
+                    map.solidTiles[y * xSize + x] = false;
+                } else
+                    tilesRaw[x] = tilesRaw[x].replace(" ","");
                 map.tiles[y * xSize + x] = (byte) Integer.parseInt(tilesRaw[x]);
             }
         }

@@ -7,10 +7,16 @@ import java.io.*;
 public class Texture {
 
     Game game;
+
+
     private boolean animated;
     public BufferedImage[] textures;
     int width, height, counter, frame, frames;
     public int[] delay;
+
+    public boolean isAnimated() {
+        return animated;
+    }
 
     public void loadTexture(Game g, String imgPath, int w, int h, String dataPath) {
         game = g;

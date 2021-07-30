@@ -26,10 +26,12 @@ public class Game extends Canvas implements Runnable {
 
     public final String GAME_DIR;
 
-    public boolean mapEditing;
+    public boolean mapEditing, solidityEditing;
     public int mapPaintID;
     Vec2D selectedTile = new Vec2D(0, 0);
     boolean selectedTileVisible = true;
+    Font defaultFont = new Font("Verdana", Font.PLAIN, 24);
+
 
     Player player;                      //FOR TEST
     ParticleEmitter pem;                //PEM ONLY FOR TEST purposes
@@ -164,7 +166,7 @@ public class Game extends Canvas implements Runnable {
     }
 
 
-    int tPos1, tPos2, tTimer = 0;
+    int tPos1, tPos2;
 
     public void tick() {
         mouseHandler.update();
@@ -172,7 +174,6 @@ public class Game extends Canvas implements Runnable {
         //map.getEntity("test").velocity.x -= 0.11f;
 
         //Tile editor
-        tTimer--;
         selectedTile = mouseHandler.getPosition().copy();
         selectedTile.add(map.cam.scroll);
         selectedTile.div(32);
@@ -183,27 +184,34 @@ public class Game extends Canvas implements Runnable {
         if (mapEditing) {
             tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
             if (mouseHandler.isPressed(mouseHandler.LMB)) {
-                if (tPos1 != tPos2 || tTimer <= 0) {
-                    tTimer = 15;
-                    tPos2 = tPos1;
+                if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
                     try {
-                        map.tiles[tPos1] = (byte) mapPaintID;
+                        map.solidTiles[tPos1] = true;
                     } catch (ArrayIndexOutOfBoundsException e) {
+                    }
+                } else {
+
+                    if (tPos1 != tPos2) {
+                        tPos2 = tPos1;
+                        try {
+                            map.tiles[tPos1] = (byte) mapPaintID;
+                        } catch (ArrayIndexOutOfBoundsException e) {
+                        }
                     }
                 }
             } else if (mouseHandler.isPressed(mouseHandler.RMB))
-                try {
-                    map.tiles[tPos1] = 0;
-                } catch (ArrayIndexOutOfBoundsException e) {
+                if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
+                    try {
+                        map.solidTiles[tPos1] = false;
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                    }
+                } else {
+                    try {
+                        map.tiles[tPos1] = 0;
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                    }
                 }
         }
-
-        /*
-        if (tPos1 < 0 || tPos1 > map.tiles.length)
-            selectedTileVisible = false;
-        else
-            selectedTileVisible = true;
-         */
 
         if (keyboardHandler.getKeyState(KeyboardHandler.R))
             map.dumpCurrentMapIntoFile("currentMap.txt");
@@ -220,10 +228,13 @@ public class Game extends Canvas implements Runnable {
         System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
 
         //Map
+        map.renderDecoratives(image, -1); //Behind map layer
         map.renderTiles(image);
-        map.renderDecoratives(image);
+
+        map.renderDecoratives(image, 0); //Before map
         map.renderEntities(image);
 
+        map.renderDecoratives(image, 1); //Before entities
 
         //TEST\\
         pem.render(image);
@@ -247,12 +258,20 @@ public class Game extends Canvas implements Runnable {
         }
 
         //Selected tile type
-        if (mapEditing)
-            try {
-                g.drawImage(map.atlas.getTexture(mapPaintID-1), 8, 8, null);
-            } catch (ArrayIndexOutOfBoundsException e) {
-            }
+        if (mapEditing) {
+            g.setColor(Color.WHITE);
+            g.setFont(defaultFont);
+            g.drawString("Editing", 8, 24);
+            if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
 
+                g.drawString("Solidity", 8, 64);
+            } else {
+                try {
+                    g.drawImage(map.atlas.getTexture(mapPaintID - 1), 8, 32, 64,64, null);
+                } catch (ArrayIndexOutOfBoundsException e) {
+                }
+            }
+        }
         /*///
         b1.x = mouseHandler.getPosition().x;
         b1.y = mouseHandler.getPosition().y;

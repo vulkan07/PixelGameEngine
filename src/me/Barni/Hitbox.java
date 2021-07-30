@@ -2,7 +2,7 @@ package me.Barni;
 
 public class Hitbox {
 
-    public int x, y, w, h, realW, realH, offsX, offsY;
+    public int x, y, w, h, realW, realH, offsX, offsY, solidType;
 
     public Hitbox(int x, int y, int w, int h) {
         this.x = x;
@@ -11,6 +11,7 @@ public class Hitbox {
         this.h = h; //height
         this.realW = x + w;
         this.realH = y + h;
+        this.solidType = 1;
     }
 
     public Hitbox(int x, int y, int xOffs, int yOffs, int w, int h) {
@@ -22,6 +23,7 @@ public class Hitbox {
         this.h = h; //height
         this.realW = x + w;
         this.realH = y + h;
+        this.solidType = 1;
     }
 
     private boolean AABB(Hitbox other) {
@@ -36,6 +38,15 @@ public class Hitbox {
 
 
     public boolean resolveCollision(Hitbox other, Vec2D velocity, Vec2D pos) {
+
+        if (other.solidType == 0)
+            return true;
+
+        if (other.solidType == 2)
+        {
+            velocity.limit(2);
+            return true;
+        }
 
         //IN X ZONE
         if (!(other.realW <= x || realW <= other.x)) {
@@ -107,14 +118,19 @@ public class Hitbox {
         Hitbox other = new Hitbox(0, 0, map.tileSize, map.tileSize);
 
         for (int i = 0; i < map.tiles.length; i++) {
-            if (map.tiles[i] == 0 || map.tiles[i] == 3)
-                continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST ON VOID (and grass) TILES!!
+            if (!map.solidTiles[i])
+                continue;
+            //if (Material.solid[map.tiles[i]] == 0)
+            //    continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST NOT SOLID TILES!!
+            //HANDLED IN resolveCollision()
+
             other.x = i % map.width * map.tileSize;
             other.y = i / map.width * map.tileSize;
             if (isColliding(other)) {
                 for (int j = 0; j < out.length; j++) {
                     if (out[j] == null) {
                         out[j] = new Hitbox(other.x, other.y, map.tileSize, map.tileSize);
+                        out[j].solidType = Material.solid[map.tiles[i]];
                         break;
                     }
                 }
