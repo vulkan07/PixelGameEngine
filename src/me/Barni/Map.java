@@ -11,15 +11,37 @@ public class Map {
     public TextureAtlas atlas;
 
     public int width, height, tileSize;
-    public byte[] tiles;
+    private byte[] tiles;
     public boolean[] solidTiles;
     public Entity[] entities = new Entity[16];
     public Decorative[] decoratives = new Decorative[16];
     private int decCount = 0;
+    public Vec2D playerStartPos, playerStartVel;
 
 
     Camera cam;
     BufferedImage txt;
+
+    public byte getTile(int i)
+    {
+        return tiles[i];
+    }
+    public void setTile(int i, int id)
+    {
+        tiles[i] = (byte) id;
+    }
+    public void setTile(int x, int y, int id)
+    {
+        tiles[y * width + x] = (byte) id;
+    }
+    public int getTilesLength()
+    {
+        return tiles.length;
+    }
+    public void setTileArray(byte[] newTiles)
+    {
+        tiles = newTiles;
+    }
 
     public Map(Game g, int w, int h, int tSize) {
         width = h;
@@ -107,7 +129,7 @@ public class Map {
     public void renderTiles(BufferedImage img) {
 
         Graphics g = img.getGraphics();
-        g.setColor(new Color(0, 0, 0, 100));
+        g.setColor(new Color(0, 0, 20, 100));
 
         for (int i = 0; i < tiles.length; i++) {
             if (tiles[i] == 0) continue;
@@ -118,7 +140,7 @@ public class Map {
                     x * tileSize - cam.scroll.xi(),
                     y * tileSize - cam.scroll.yi(),
                     null);
-            if (!solidTiles[i])
+            if (!solidTiles[i] && Material.solid[tiles[i]] == 1)
                 g.fillRect(
                         x * tileSize - cam.scroll.xi(),
                         y * tileSize - cam.scroll.yi(),
@@ -158,7 +180,7 @@ public class Map {
 
         atlas.update();
 
-        if (game.player.position.dist(cam.view) > 50)
+        if (game.player.position.dist(cam.view) > 50 && game.player.alive)
             cam.lookAt(game.player.position);
         cam.update();
 
@@ -175,13 +197,25 @@ public class Map {
     }
 
     public void addEntity(Entity e) {
+        if (e instanceof Player)
+            initPlayer((Player)e);
         for (int i = 0; i < entities.length; i++) {
             if (entities[i] == null) {
                 entities[i] = e;
+                physics.init();
                 return;
             }
         }
         game.logger.err("[MAP] Entity array is full!!");
+    }
+
+    private void initPlayer(Player p)
+    {
+        p.spawnLocation = playerStartPos.copy();
+        p.position = playerStartPos.copy();
+        p.velocity = playerStartVel;
+        playerStartPos = null;
+        playerStartVel = null;
     }
 
     public Entity getEntity(String name) {
@@ -192,6 +226,7 @@ public class Map {
     }
 
     public void removeEntity(String name) {
+        physics.init();
         for (int i = 0; i < entities.length; i++)
             if (entities[i].name == name) entities[i] = null;
     }

@@ -3,6 +3,7 @@ package me.Barni;
 public class Camera {
 
     Vec2D scroll, view;
+    Hitbox visibleArea;
     private Vec2D target;
     Game game;
     Map map;
@@ -15,6 +16,7 @@ public class Camera {
         this.view = new Vec2D(0, 0);
         this.game = game;
         this.map = map;
+        visibleArea = new Hitbox(0,0, game.WIDTH, game.HEIGHT);
     }
 
     public void update() {
@@ -22,6 +24,7 @@ public class Camera {
         //scroll.lowLimit(0); //Crop view for top and left
         view.x = scroll.x + game.WIDTH / 2;
         view.y = scroll.y + game.HEIGHT / 2;
+        visibleArea.update(scroll);
     }
 
     public void move(Vec2D move) {

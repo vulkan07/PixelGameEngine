@@ -37,14 +37,18 @@ public class Hitbox {
     //        return true;
 
 
-    public boolean resolveCollision(Hitbox other, Vec2D velocity, Vec2D pos) {
+    public boolean resolveCollision(Entity ent, Hitbox other, Vec2D velocity, Vec2D pos) {
 
         if (other.solidType == 0)
             return true;
 
-        if (other.solidType == 2)
-        {
+        if (other.solidType == 2) {
             velocity.limit(2);
+            return true;
+        }
+
+        if (other.solidType == 3) {
+            ent.die(120);
             return true;
         }
 
@@ -98,6 +102,14 @@ public class Hitbox {
         return AABB(other) || other.AABB(this);
     }
 
+    public boolean isCollidingWithAny(Hitbox[] others) {
+        for (Hitbox h : others)
+            if (h != null)
+                if (AABB(h))
+                    return true;
+        return false;
+    }
+
     //OLD BECAUSE DOESN'T HANDLE OFFSET
     private void move(Vec2D m) {
         x += (int) m.x;
@@ -117,7 +129,7 @@ public class Hitbox {
         Hitbox[] out = new Hitbox[24];
         Hitbox other = new Hitbox(0, 0, map.tileSize, map.tileSize);
 
-        for (int i = 0; i < map.tiles.length; i++) {
+        for (int i = 0; i < map.getTilesLength(); i++) {
             if (!map.solidTiles[i])
                 continue;
             //if (Material.solid[map.tiles[i]] == 0)
@@ -130,7 +142,7 @@ public class Hitbox {
                 for (int j = 0; j < out.length; j++) {
                     if (out[j] == null) {
                         out[j] = new Hitbox(other.x, other.y, map.tileSize, map.tileSize);
-                        out[j].solidType = Material.solid[map.tiles[i]];
+                        out[j].solidType = Material.solid[map.getTile(i)];
                         break;
                     }
                 }

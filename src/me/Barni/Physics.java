@@ -11,8 +11,8 @@ public class Physics {
     public Physics(Game g, Map m) {
         game = g;
         map = m;
-        boundX = m.width*m.tileSize;
-        boundY = m.height*m.tileSize;
+        boundX = m.width * m.tileSize;
+        boundY = m.height * m.tileSize;
     }
 
     public void init() {
@@ -36,25 +36,29 @@ public class Physics {
             ent.position.add(ent.velocity);
 
             //Resolve collision: Entity VS Entity
+            /*
             //TODO optimize this
-            for (Entity other : map.entities)
-            {
+            for (Entity other : map.entities) {
                 if (other == null) continue;
                 if (other == ent) continue;
                 if (ent.touchHitbox.isColliding(other.touchHitbox))
                     ent.colliderHitbox.resolveCollision(other.colliderHitbox, ent.velocity, ent.position);
             }
+            */
 
             //Resolve collision: Entity VS map
-            for (Hitbox h : ent.touchHitbox.touchingMapTiles(map)) {
+            Hitbox[] hList = ent.touchHitbox.touchingMapTiles(map);
+            for (int i = 0; i < hList.length - 1; i++) {
+
                 ent.position.lowLimit(0);
                 if (ent.position.x + ent.colliderHitbox.w > boundX)
                     ent.position.x = boundX - ent.colliderHitbox.w;
                 if (ent.position.y > boundY)
                     ent.velocity.y -= 500;
 
-
-                if (h != null ) ent.colliderHitbox.resolveCollision(h, ent.velocity, ent.position);
+                if (ent.touchHitbox.isCollidingWithAny(hList))
+                    if (hList[i] != null)
+                        ent.colliderHitbox.resolveCollision(ent, hList[i], ent.velocity, ent.position);
             }
 
 

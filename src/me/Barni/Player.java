@@ -5,8 +5,12 @@ import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
-    boolean colliding, crouching, jumping;
+    boolean crouching, jumping, alive;
     private Vec2D moving;
+    ParticleEmitter pem;
+
+    private int respawnTimer, respawnTime;
+    public Vec2D spawnLocation;
 
 
     public Player(Game g, String name, Vec2D pos) {
@@ -16,11 +20,46 @@ public class Player extends Entity {
         touchHitbox = new Hitbox((int) (pos.x), (int) (pos.y), (int) size.x / 2 * -1, (int) size.y / 2 * -1, (int) size.x * 2, (int) size.y * 2);
         colliderHitbox = new Hitbox((int) pos.x, (int) pos.y, (int) size.x, (int) size.y);
         resistance = 0.3f;
+        alive = true;
+        spawnLocation = new Vec2D();
+
+        pem = new ParticleEmitter(game, "playerDieParticle",new Vec2D(200, 200), new Vec2D(0,0), true, 20, 6, 120);
+        game.map.addEntity(pem);
+    }
+
+    public void die(int respawnTimeTicks) {
+        pem.position.x = position.x + size.x / 2;
+        pem.position.y = position.y + size.y / 2;
+        pem.emitting = true;
+
+        alive = false;
+        visible = false;
+
+        position = spawnLocation.copy();
+        respawnTimer = respawnTimeTicks;
+        respawnTime = respawnTimeTicks;
+    }
+
+    public void respawn() {
+        visible = true;
+        alive = true;
     }
 
     @Override
     public void tick() {
         super.tick();
+
+
+        if (!alive) {
+            respawnTimer--;
+            if (respawnTimer < respawnTime-4)
+                pem.emitting = false;
+
+            if (respawnTimer <= 0)
+                respawn();
+            return;
+        }
+
         moving = new Vec2D(0, 0);
         if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL))
             velocity.limit(3);
@@ -32,7 +71,7 @@ public class Player extends Entity {
             colliderHitbox.h = size.yi();*/
 
         if (game.keyboardHandler.getKeyState(KeyboardHandler.UP) ||
-                game.keyboardHandler.getKeyState(KeyboardHandler.SPACE) ) {
+                game.keyboardHandler.getKeyState(KeyboardHandler.SPACE)) {
             moving.y -= speed * 2;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {

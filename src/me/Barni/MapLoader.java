@@ -110,20 +110,22 @@ public class MapLoader {
 
                     case "startpos":
                         String[] startPos = line.split("=")[1].split(",");
-                        game.player.position.x = Integer.parseInt(startPos[0]);
-                        game.player.position.y = Integer.parseInt(startPos[1]);
+                        map.playerStartPos = new Vec2D();
+                        map.playerStartPos.x = Integer.parseInt(startPos[0]);
+                        map.playerStartPos.y = Integer.parseInt(startPos[1]);
                         break;
 
                     case "startvel":
                         String[] startVel = line.split("=")[1].split(",");
-                        game.player.velocity.x = Integer.parseInt(startVel[0]);
-                        game.player.velocity.y = Integer.parseInt(startVel[1]);
+                        map.playerStartVel = new Vec2D();
+                        map.playerStartVel.x = Integer.parseInt(startVel[0]);
+                        map.playerStartVel.y = Integer.parseInt(startVel[1]);
                         break;
 
 
                     case "objectlist":
                         int count = Integer.parseInt(line.split("=")[1]);
-                        loadObjects(lines, lineIndex+1,count);
+                        loadObjects(lines, lineIndex + 1, count);
                         lineIndex += count; //Skip reading of obj list
                         break;
 
@@ -143,27 +145,23 @@ public class MapLoader {
     }
 
     private void loadObjects(String[] lines, int offset, int count) {
-        if (map == null)
-        {
+        if (map == null) {
             fail("Object list should be after map!", offset);
             return;
         }
         //loop trough lines
-        for (int lineIndex = offset; lineIndex < count+offset; lineIndex++)
-        {
+        for (int lineIndex = offset; lineIndex < count + offset; lineIndex++) {
             String line = lines[lineIndex];
 
             //DECORATIVE
-            if (line.toLowerCase().contains("dec "))
-            {
+            if (line.toLowerCase().contains("dec ")) {
                 String[] params = line.toLowerCase().replace("dec ", "").split(",");
                 loadDecorative(params, lineIndex);
                 continue;
             }
 
             //ENTITY
-            if (line.toLowerCase().contains("ent "))
-            {
+            if (line.toLowerCase().contains("ent ")) {
                 System.out.println("ent");
                 continue;
             }
@@ -213,13 +211,12 @@ public class MapLoader {
 
             //For every column
             for (int x = 0; x < xSize; x++) {
-                if (tilesRaw[x].contains("b"))
-                {
-                    tilesRaw[x] = tilesRaw[x].replace("b","");
+                if (tilesRaw[x].contains("b")) {
+                    tilesRaw[x] = tilesRaw[x].replace("b", "");
                     map.solidTiles[y * xSize + x] = false;
                 } else
-                    tilesRaw[x] = tilesRaw[x].replace(" ","");
-                map.tiles[y * xSize + x] = (byte) Integer.parseInt(tilesRaw[x]);
+                    tilesRaw[x] = tilesRaw[x].replace(" ", "");
+                map.setTile(y * xSize + x, Integer.parseInt(tilesRaw[x]));
             }
         }
     }

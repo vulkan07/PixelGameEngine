@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.Random;
 
 public class Game extends Canvas implements Runnable {
     //public String title;                //Title
@@ -86,11 +87,6 @@ public class Game extends Canvas implements Runnable {
         this.addKeyListener(keyboardHandler);
 
 
-        //=TEST=\\
-        player = new Player(this, "player", new Vec2D(512, 500));
-        player.loadTexture("player.png", "player.anim");
-        pem = new ParticleEmitter(new Vec2D(200, 200), new Vec2D(0, 1), true, 60, 3, 60);
-
         //Map
         MapLoader ml = new MapLoader(this);
         map = ml.loadMap(GAME_DIR + "01.map");
@@ -100,12 +96,15 @@ public class Game extends Canvas implements Runnable {
             map = new Map(this, 3, 5, 32);
             byte[] defaultmap = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2,};
             player.position = new Vec2D(48, 0);
-            map.tiles = defaultmap;
+            map.setTileArray(defaultmap);
         }
 
         map.loadTextures();
-        map.addEntity(player);
         map.physics.init();
+
+        player = new Player(this, "player", new Vec2D(512, 500));
+        player.loadTexture("player.png", "player.anim");
+        map.addEntity(player);
 
         //ClearBuffer
         clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
@@ -148,15 +147,14 @@ public class Game extends Canvas implements Runnable {
                 //=RENDER=\\
                 render();
                 frames++;
-                try {
-                    Thread.sleep(0);
-                } catch (InterruptedException e) {
-                }
+
 
                 delta--;
             }
-
-
+            /*try {
+                Thread.sleep((long)(delta));
+            } catch (InterruptedException e) {
+            }*/
             if (timer >= 1000000000) {
                 System.out.println("FPS: " + frames);
                 frames = 0;
@@ -194,7 +192,7 @@ public class Game extends Canvas implements Runnable {
                     if (tPos1 != tPos2) {
                         tPos2 = tPos1;
                         try {
-                            map.tiles[tPos1] = (byte) mapPaintID;
+                            map.setTile(tPos1, mapPaintID);
                         } catch (ArrayIndexOutOfBoundsException e) {
                         }
                     }
@@ -207,7 +205,7 @@ public class Game extends Canvas implements Runnable {
                     }
                 } else {
                     try {
-                        map.tiles[tPos1] = 0;
+                        map.setTile(tPos1, 0);
                     } catch (ArrayIndexOutOfBoundsException e) {
                     }
                 }
@@ -217,9 +215,9 @@ public class Game extends Canvas implements Runnable {
             map.dumpCurrentMapIntoFile("currentMap.txt");
 
         //TEST\\
-        pem.initialPos = mouseHandler.getPosition().div(PX_SIZE);
-        pem.emitting = mouseHandler.isPressed(mouseHandler.RMB);
-        pem.update();
+        //pem.position = mouseHandler.getPosition().div(PX_SIZE);
+        //pem.position = player.position;
+        //pem.active = mouseHandler.isPressed(mouseHandler.RMB);
     }
 
 
@@ -235,9 +233,6 @@ public class Game extends Canvas implements Runnable {
         map.renderEntities(image);
 
         map.renderDecoratives(image, 1); //Before entities
-
-        //TEST\\
-        pem.render(image);
 
 
         //= Draw image to buffer -> show =\\

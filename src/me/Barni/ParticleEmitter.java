@@ -7,17 +7,18 @@ import java.util.Random;
 //TODO inherit from entity
 //TODO use variable 'active'
 
-public class ParticleEmitter {
-    public boolean emitting;
+public class ParticleEmitter extends Entity {
     private Random r;
     private int[][] particles;
     private int max_particles, halfNoise;
+    public boolean emitting;
     public int noise, lifespan;
     private Vec2D moveForce = new Vec2D(0, 2f);
-    Vec2D initialPos;
 
-    public ParticleEmitter(Vec2D pos, Vec2D force, boolean start_active, int max_particles, int noise, int lifeTimeTicks) {
-        this.emitting = start_active;
+    public ParticleEmitter(Game game, String name, Vec2D pos, Vec2D force, boolean start_active, int max_particles, int noise, int lifeTimeTicks) {
+        super(game, name, pos);
+        this.active = start_active;
+        this.emitting = false;
         this.halfNoise = noise / 2;
         this.noise = noise;
 
@@ -30,14 +31,15 @@ public class ParticleEmitter {
 
         this.lifespan = lifeTimeTicks;
         this.r = new Random();
-        this.initialPos = pos;
+        this.position = pos;
         this.max_particles = max_particles;
         this.particles = new int[max_particles][3];
         for (int[] particle : particles)
             particle[2] = 0;
     }
 
-    public void update() {
+    public void tick() {
+        if (!active) return;
 
         //ADD if possible
         if (emitting) {
@@ -45,8 +47,8 @@ public class ParticleEmitter {
 
                 if (particles[i][2] > 0) continue;
 
-                particles[i][0] = (int) initialPos.x; //set X
-                particles[i][1] = (int) initialPos.y; //set Y
+                particles[i][0] = position.xi(); //set X
+                particles[i][1] = position.yi(); //set Y
                 particles[i][2] = lifespan;           //set LIFESPAN(TICKS)
                 break;
             }
@@ -67,13 +69,15 @@ public class ParticleEmitter {
         }
     }
 
-    public void render(BufferedImage img) {
+    public void render(BufferedImage img, Camera cam) {
+        if (!visible || !active) return;
+
         for (int[] particle : particles) {
             if (particle[2] <= 0) continue;
             Graphics g = img.getGraphics();
             g.setColor(Color.RED);
             //g.setColor(new Color(255, r.nextInt(255), r.nextInt(255)));
-            g.fillRect(particle[0], particle[1], 2,2);
+            g.fillRect(particle[0] - cam.scroll.xi(), particle[1]  - cam.scroll.yi(), 2,2);
         }
     }
 

@@ -75,6 +75,11 @@ public class Entity {
                 (int) size.y);
     }
 
+    public void die(int respawnTimeTicks) {
+    }
+
+    public void respawn() {
+    }
 
     public void tick() {
         texture.update(); //Updates texture anyway (not need to be active)
