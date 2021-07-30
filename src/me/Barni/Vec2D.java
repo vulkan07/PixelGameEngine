@@ -2,6 +2,8 @@ package me.Barni;
 
 import com.sun.istack.internal.NotNull;
 
+import java.util.Random;
+
 public class Vec2D {
 
     public static final Vec2D ZERO = new Vec2D(0, 0);
@@ -101,6 +103,7 @@ public class Vec2D {
         return this;
     }
 
+
     Vec2D limit(float max) {
         if (Math.abs(x) > max)
             if (x > 0)
@@ -164,7 +167,7 @@ public class Vec2D {
                 (1 - t) * y + t * v1.y);
     }
 
-    float remap(float value, float low1, float high1, float low2, float high2) {
+    static float remap(float value, float low1, float high1, float low2, float high2) {
         return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
     }
 }

@@ -5,7 +5,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.util.Random;
 
 public class Game extends Canvas implements Runnable {
     //public String title;                //Title
@@ -27,7 +26,9 @@ public class Game extends Canvas implements Runnable {
 
     public final String GAME_DIR;
 
-    public boolean mapEditing, solidityEditing;
+    public boolean mapEditing, screenFadingIn, screenFadingOut;
+    public int blankAlpha = 255;
+
     public int mapPaintID;
     Vec2D selectedTile = new Vec2D(0, 0);
     boolean selectedTileVisible = true;
@@ -47,6 +48,9 @@ public class Game extends Canvas implements Runnable {
             logger.err("Tried to start game, while it's running!");
             return;
         }
+
+
+        this.setBackground(Color.BLACK);
 
         //IMAGE DATA
         this.WIDTH = w;
@@ -74,7 +78,7 @@ public class Game extends Canvas implements Runnable {
 
 
         //BufferStrategy
-        createBufferStrategy(2);
+        createBufferStrategy(3);
 
 
         //Utility
@@ -111,11 +115,13 @@ public class Game extends Canvas implements Runnable {
         for (int i = 0; i < clearBuffer.length; i++)
             clearBuffer[i] = white;
 
+        screenFadingIn = true;
 
         //Actual start
         running = true;
         thread = new Thread(this);
         thread.start();
+
     }
 
 
@@ -167,6 +173,11 @@ public class Game extends Canvas implements Runnable {
     int tPos1, tPos2;
 
     public void tick() {
+        if (keyboardHandler.getKeyState(KeyboardHandler.Q))
+            screenFadingOut = true;
+        if (keyboardHandler.getKeyState(KeyboardHandler.E))
+            screenFadingIn = true;
+
         mouseHandler.update();
         map.tick();
         //map.getEntity("test").velocity.x -= 0.11f;
@@ -214,6 +225,7 @@ public class Game extends Canvas implements Runnable {
         if (keyboardHandler.getKeyState(KeyboardHandler.R))
             map.dumpCurrentMapIntoFile("currentMap.txt");
 
+
         //TEST\\
         //pem.position = mouseHandler.getPosition().div(PX_SIZE);
         //pem.position = player.position;
@@ -225,48 +237,48 @@ public class Game extends Canvas implements Runnable {
         //=CLEAR CANVAS=\\
         System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
 
-        //Map
-        map.renderDecoratives(image, -1); //Behind map layer
-        map.renderTiles(image);
-
-        map.renderDecoratives(image, 0); //Before map
-        map.renderEntities(image);
-
-        map.renderDecoratives(image, 1); //Before entities
-
-
-        //= Draw image to buffer -> show =\\
         Graphics g = getBufferStrategy().getDrawGraphics();
-
-
         Graphics2D g2d = (Graphics2D) g;
-        if (map.cam.zoom != 1)
-            g2d.translate(-WIDTH / map.cam.zoom, -HEIGHT / map.cam.zoom);
-        g2d.scale(map.cam.zoom, map.cam.zoom);
-        g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+        if (blankAlpha != 255 ) {
 
-        //Selected tile
-        if (selectedTileVisible) {
-            g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
-            g.fillRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 32, 32);
-            g.drawRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 31, 31);
-        }
+            //Map
+            map.renderDecoratives(image, -1); //Behind map layer
+            map.renderTiles(image);
 
-        //Selected tile type
-        if (mapEditing) {
-            g.setColor(Color.WHITE);
-            g.setFont(defaultFont);
-            g.drawString("Editing", 8, 24);
-            if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
+            map.renderDecoratives(image, 0); //Before map
+            map.renderEntities(image);
 
-                g.drawString("Solidity", 8, 64);
-            } else {
-                try {
-                    g.drawImage(map.atlas.getTexture(mapPaintID - 1), 8, 32, 64,64, null);
-                } catch (ArrayIndexOutOfBoundsException e) {
+            map.renderDecoratives(image, 1); //Before entities
+
+
+
+            if (map.cam.zoom != 1)
+                g2d.translate(-WIDTH / map.cam.zoom, -HEIGHT / map.cam.zoom);
+            g2d.scale(map.cam.zoom, map.cam.zoom);
+            g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+
+            //Selected tile
+            if (selectedTileVisible) {
+                g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
+                g.fillRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 32, 32);
+                g.drawRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 31, 31);
+            }
+
+            //Selected tile type
+            if (mapEditing) {
+                g.setColor(Color.WHITE);
+                g.setFont(defaultFont);
+                g.drawString("Editing", 8, 24);
+                if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
+
+                    g.drawString("Solidity", 8, 64);
+                } else {
+                    try {
+                        g.drawImage(map.atlas.getTexture(mapPaintID - 1), 8, 32, 64, 64, null);
+                    } catch (ArrayIndexOutOfBoundsException e) {
+                    }
                 }
             }
-        }
         /*///
         b1.x = mouseHandler.getPosition().x;
         b1.y = mouseHandler.getPosition().y;
@@ -313,6 +325,31 @@ public class Game extends Canvas implements Runnable {
         kx = lerp(kx, tx, 0.1f);
         ky = lerp(ky, ty, 0.1f);
         */
+        }
+
+        //None -> back
+        if (screenFadingOut) {
+            blankAlpha += 5;
+
+            if (blankAlpha > 255) {
+                blankAlpha = 255;
+                screenFadingOut = false;
+            }
+        }
+        //Black -> none
+        if (screenFadingIn) {
+            blankAlpha -= 5;
+
+            if (blankAlpha < 0) {
+                blankAlpha = 0;
+                screenFadingIn = false;
+            }
+        }
+
+        if (screenFadingIn || screenFadingOut || blankAlpha == 1) {
+            g2d.setColor(new Color(0, 0, 0, blankAlpha));
+            g2d.fillRect(0, 0, WIDTH, HEIGHT);
+        }
 
         g.dispose();
         getBufferStrategy().show();

@@ -28,7 +28,7 @@ public class Physics {
         for (Entity ent : map.entities) {
             if (ent == null) continue;
 
-            if (!ent.active || ent.locked || !ent.solid || !ent.collidesWithMap) continue;
+            if (!ent.active || ent.locked || !ent.solid || !ent.alive || !ent.collidesWithMap) continue;
 
             ent.velocity.add(gravity);
             ent.velocity.limit(10);
@@ -54,9 +54,9 @@ public class Physics {
                 if (ent.position.x + ent.colliderHitbox.w > boundX)
                     ent.position.x = boundX - ent.colliderHitbox.w;
                 if (ent.position.y > boundY)
-                    ent.velocity.y -= 500;
+                    ent.die(120);
 
-                if (ent.touchHitbox.isCollidingWithAny(hList))
+                //if (ent.touchHitbox.isCollidingWithAny(hList))
                     if (hList[i] != null)
                         ent.colliderHitbox.resolveCollision(ent, hList[i], ent.velocity, ent.position);
             }

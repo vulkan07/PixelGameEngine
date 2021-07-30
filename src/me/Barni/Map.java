@@ -22,24 +22,23 @@ public class Map {
     Camera cam;
     BufferedImage txt;
 
-    public byte getTile(int i)
-    {
+    public byte getTile(int i) {
         return tiles[i];
     }
-    public void setTile(int i, int id)
-    {
+
+    public void setTile(int i, int id) {
         tiles[i] = (byte) id;
     }
-    public void setTile(int x, int y, int id)
-    {
+
+    public void setTile(int x, int y, int id) {
         tiles[y * width + x] = (byte) id;
     }
-    public int getTilesLength()
-    {
+
+    public int getTilesLength() {
         return tiles.length;
     }
-    public void setTileArray(byte[] newTiles)
-    {
+
+    public void setTileArray(byte[] newTiles) {
         tiles = newTiles;
     }
 
@@ -128,18 +127,30 @@ public class Map {
 
     public void renderTiles(BufferedImage img) {
 
-        Graphics g = img.getGraphics();
+        Graphics2D g = (Graphics2D)img.getGraphics();
         g.setColor(new Color(0, 0, 20, 100));
+
 
         for (int i = 0; i < tiles.length; i++) {
             if (tiles[i] == 0) continue;
             txt = atlas.getTexture(tiles[i] - 1);
             int y = i / width; //Y
             int x = i % width; //x
-            g.drawImage(txt,
-                    x * tileSize - cam.scroll.xi(),
-                    y * tileSize - cam.scroll.yi(),
-                    null);
+
+            if (tiles[i] == Material.WATER) {
+                    g.drawImage(txt,
+                            x * tileSize - cam.scroll.xi(),
+                            y * tileSize - cam.scroll.yi() + 6,
+                            tileSize,
+                            tileSize,
+                            null);
+            } else
+                g.drawImage(txt,
+                        x * tileSize - cam.scroll.xi(),
+                        y * tileSize - cam.scroll.yi(),
+                        null);
+
+
             if (!solidTiles[i] && Material.solid[tiles[i]] == 1)
                 g.fillRect(
                         x * tileSize - cam.scroll.xi(),
@@ -198,7 +209,7 @@ public class Map {
 
     public void addEntity(Entity e) {
         if (e instanceof Player)
-            initPlayer((Player)e);
+            initPlayer((Player) e);
         for (int i = 0; i < entities.length; i++) {
             if (entities[i] == null) {
                 entities[i] = e;
@@ -209,11 +220,10 @@ public class Map {
         game.logger.err("[MAP] Entity array is full!!");
     }
 
-    private void initPlayer(Player p)
-    {
+    private void initPlayer(Player p) {
         p.spawnLocation = playerStartPos.copy();
         p.position = playerStartPos.copy();
-        p.velocity = playerStartVel;
+        p.velocity = playerStartVel.copy();
         playerStartPos = null;
         playerStartVel = null;
     }

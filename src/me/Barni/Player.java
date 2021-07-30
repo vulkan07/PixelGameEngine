@@ -5,25 +5,36 @@ import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
-    boolean crouching, jumping, alive;
+    boolean crouching, jumping;
     private Vec2D moving;
     ParticleEmitter pem;
 
-    private int respawnTimer, respawnTime;
+    private int respawnTimer;
     public Vec2D spawnLocation;
 
 
     public Player(Game g, String name, Vec2D pos) {
         super(g, name, pos);
-        size.y = 64;
+        size.y = 63;
         size.x = 32;
         touchHitbox = new Hitbox((int) (pos.x), (int) (pos.y), (int) size.x / 2 * -1, (int) size.y / 2 * -1, (int) size.x * 2, (int) size.y * 2);
         colliderHitbox = new Hitbox((int) pos.x, (int) pos.y, (int) size.x, (int) size.y);
         resistance = 0.3f;
+        speed = 0.7f;
         alive = true;
         spawnLocation = new Vec2D();
 
-        pem = new ParticleEmitter(game, "playerDieParticle",new Vec2D(200, 200), new Vec2D(0,0), true, 20, 6, 120);
+        pem = new ParticleEmitter(
+                game,
+                "playerDieParticle",
+                new Vec2D(64, 64),
+                new Vec2D(-7,-7),
+                new Vec2D(7,7),
+                true,
+                128,
+                2,
+                16,
+                92);
         game.map.addEntity(pem);
     }
 
@@ -31,18 +42,22 @@ public class Player extends Entity {
         pem.position.x = position.x + size.x / 2;
         pem.position.y = position.y + size.y / 2;
         pem.emitting = true;
+        pem.createParticle(128);
+        pem.emitting = false;
 
         alive = false;
         visible = false;
 
+        velocity.mult(0);
         position = spawnLocation.copy();
         respawnTimer = respawnTimeTicks;
-        respawnTime = respawnTimeTicks;
+        //game.screenFadingOut = true;
     }
 
     public void respawn() {
         visible = true;
         alive = true;
+        //game.screenFadingIn = true;
     }
 
     @Override
@@ -51,10 +66,10 @@ public class Player extends Entity {
 
 
         if (!alive) {
-            respawnTimer--;
-            if (respawnTimer < respawnTime-4)
-                pem.emitting = false;
+            //if (respawnTimer < respawnTime - 2)
+            //    pem.emitting = false;
 
+            respawnTimer--;
             if (respawnTimer <= 0)
                 respawn();
             return;
@@ -88,12 +103,12 @@ public class Player extends Entity {
             velocity.add(moving);
     }
 
-
+    /*
     @Override
-    public void render(BufferedImage img, Camera cam) {
+    public void render(Graphics2D g, Camera cam) {
 
-        super.render(img, cam);
-/*
+        super.render(g, cam);
+
         Graphics g = img.getGraphics();
 
         //Draw hitbox
@@ -113,7 +128,7 @@ public class Player extends Entity {
 
         g.setColor(Color.ORANGE);
         g.fillRect((int) position.x, (int) position.y, 5, 5);
-        */
-    }
+
+    }*/
 
 }

@@ -10,7 +10,7 @@ public class Entity {
 
     public Vec2D position, size, velocity, gravity;
     public float speed, resistance;
-    public boolean visible, active, solid, locked, collidesWithMap, hasTexture;
+    public boolean visible, active, solid, locked, collidesWithMap, hasTexture, alive;
 
     protected Hitbox touchHitbox, colliderHitbox;
     public Texture texture;

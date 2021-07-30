@@ -4,80 +4,128 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
-//TODO inherit from entity
-//TODO use variable 'active'
-
 public class ParticleEmitter extends Entity {
-    private Random r;
-    private int[][] particles;
-    private int max_particles, halfNoise;
+    private final Random r;
+    private final Particle[] particles;
+    private int max_particles;
     public boolean emitting;
-    public int noise, lifespan;
-    private Vec2D moveForce = new Vec2D(0, 2f);
+    public int lifespanMin, lifespanMax;
+    public int noise;
+    public Vec2D gravity = new Vec2D(0, 0.1f);
+    private Vec2D moveForceMin;
+    private Vec2D moveForceMax;
 
-    public ParticleEmitter(Game game, String name, Vec2D pos, Vec2D force, boolean start_active, int max_particles, int noise, int lifeTimeTicks) {
+    public ParticleEmitter(
+            Game game,
+            String name,
+            Vec2D pos,
+            Vec2D forceMin,
+            Vec2D forceMax,
+            boolean start_active,
+            int max_particles,
+            int noise,
+            int lifeTimeMin,
+            int lifeTimeMax) {
         super(game, name, pos);
         this.active = start_active;
         this.emitting = false;
-        this.halfNoise = noise / 2;
         this.noise = noise;
 
-        if (noise % 2 != 0) {
-            noise--;
-        }
 
-        if (force != null)
-            this.moveForce = force;
+        this.moveForceMin = forceMin;
+        this.moveForceMax = forceMax;
 
-        this.lifespan = lifeTimeTicks;
+
+        this.lifespanMin = lifeTimeMin;
+        this.lifespanMax = lifeTimeMax;
         this.r = new Random();
         this.position = pos;
         this.max_particles = max_particles;
-        this.particles = new int[max_particles][3];
-        for (int[] particle : particles)
-            particle[2] = 0;
+        this.particles = new Particle[max_particles];
     }
+
+    public void createParticle(int count) {
+        if (emitting) {
+            for (int i = 0; i < max_particles; i++) {
+
+                if (particles[i] != null) continue;
+
+                particles[i] = new Particle(
+                        position.copy(),
+                        moveForceMin == moveForceMax ? moveForceMax.copy() : randomVector(moveForceMin, moveForceMax),
+                        gravity,
+                        random(lifespanMin, lifespanMax));
+                count--;
+                if (count == 0)
+                    break;
+            }
+        }
+    }
+
+    private int random(int min, int max) {
+        int out = r.nextInt(max);
+        if (out < min) return min;
+        return out;
+    }
+
+    private Vec2D randomVector(Vec2D min, Vec2D max) {
+        Vec2D out = new Vec2D();
+        int xHalf = max.xi() / 2;
+        int yHalf = max.yi() / 2;
+
+
+        out.x = r.nextInt((int) Math.abs(max.x));
+        out.y = r.nextInt((int) Math.abs(max.y));
+
+        if (out.x < min.x) out.x = min.x;
+        if (out.y < min.y) out.y = min.y;
+
+        out.x += r.nextFloat();
+        out.y += r.nextFloat();
+
+        out.x -= xHalf;
+        out.y -= yHalf;
+
+        return out;
+    }
+
 
     public void tick() {
         if (!active) return;
 
         //ADD if possible
-        if (emitting) {
-            for (int i = 0; i < max_particles; i++) {
+        createParticle(1);
 
-                if (particles[i][2] > 0) continue;
-
-                particles[i][0] = position.xi(); //set X
-                particles[i][1] = position.yi(); //set Y
-                particles[i][2] = lifespan;           //set LIFESPAN(TICKS)
-                break;
-            }
-        }
         //UPDATE
-        for (int[] particle : particles) {
+        for (int i = 0; i < max_particles; i++) {
+
+            //If empty place
+            if (particles[i] == null)
+                continue;
+
             //If dead
-            if (particle[2] == 0) {
-                particle[2] = 0;   // set lifespan to dead (-1)
+            if (particles[i].lifetime == 0) {
+                particles[i] = null;
+                continue;
             }
+
 
             //If not dead
-            if (particle[2] > 0) {
-                particle[0] += (int) moveForce.x + r.nextInt(noise) - halfNoise; //update X
-                particle[1] += (int) moveForce.y + r.nextInt(noise) - halfNoise; //update Y
-                particle[2]--;                                                   //Decrement life
-            }
+            if (noise != 0)
+                particles[i].pos.add(new Vec2D(r.nextInt(noise + 1) - noise / 2, r.nextInt(noise + 1) - noise / 2));
+            particles[i].tick();
         }
     }
 
     public void render(BufferedImage img, Camera cam) {
         if (!visible || !active) return;
 
-        for (int[] particle : particles) {
-            if (particle[2] <= 0) continue;
+        for (Particle pt : particles) {
+            if (pt == null) continue;
             Graphics g = img.getGraphics();
-            g.setColor(Color.RED);
-            //g.setColor(new Color(255, r.nextInt(255), r.nextInt(255)));
-            g.fillRect(particle[0] - cam.scroll.xi(), particle[1]  - cam.scroll.yi(), 2,2);
+            g.setColor(new Color(255,0,0,100));
+            int pSize = (int)Vec2D.remap(pt.lifetime/2, 0, lifespanMax, 1, 16);
+            g.fillOval(pt.pos.xi() - cam.scroll.xi(), pt.pos.yi() - cam.scroll.yi(), pSize, pSize);
         }
     }
 

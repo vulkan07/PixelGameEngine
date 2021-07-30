@@ -42,12 +42,13 @@ public class Hitbox {
         if (other.solidType == 0)
             return true;
 
-        if (other.solidType == 2) {
-            velocity.limit(2);
+        boolean touching = AABB(other);
+        if (other.solidType == 2 && touching) {
+            velocity.limit(1);
             return true;
         }
 
-        if (other.solidType == 3) {
+        if (other.solidType == 3 && touching) {
             ent.die(120);
             return true;
         }
