@@ -68,6 +68,7 @@ public class Hitbox {
             //FROM TOP
             if (realH >= other.y && realH < other.realH) {
                 if (velocity.y > 0) {
+                    ((Player)ent).canJump = true;
                     velocity.y = 0;
                     pos.y = other.y - other.h + (other.h - h);
                     return true;
@@ -131,8 +132,6 @@ public class Hitbox {
         Hitbox other = new Hitbox(0, 0, map.tileSize, map.tileSize);
 
         for (int i = 0; i < map.getTilesLength(); i++) {
-            if (!map.solidTiles[i])
-                continue;
             //if (Material.solid[map.tiles[i]] == 0)
             //    continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST NOT SOLID TILES!!
             //HANDLED IN resolveCollision()

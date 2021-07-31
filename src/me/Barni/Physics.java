@@ -3,7 +3,7 @@ package me.Barni;
 public class Physics {
 
     Game game;
-    public Vec2D gravity = new Vec2D(0, .4f);
+    public Vec2D gravity = new Vec2D(0, .5f);
     public float def_speed = .8f, def_resistance = .4f;
     public Map map;
     public int boundX, boundY;
@@ -31,7 +31,7 @@ public class Physics {
             if (!ent.active || ent.locked || !ent.solid || !ent.alive || !ent.collidesWithMap) continue;
 
             ent.velocity.add(gravity);
-            ent.velocity.limit(10);
+            ent.velocity.limit(15);
             ent.velocity.decrease(ent.resistance);
             ent.position.add(ent.velocity);
 

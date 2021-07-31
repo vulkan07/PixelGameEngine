@@ -12,7 +12,8 @@ public class Entity {
     public float speed, resistance;
     public boolean visible, active, solid, locked, collidesWithMap, hasTexture, alive;
 
-    protected Hitbox touchHitbox, colliderHitbox;
+    protected Hitbox touchHitbox;
+    protected Hitbox colliderHitbox;
     public Texture texture;
 
     //====CONSTRUCTOR====\\
@@ -73,6 +74,7 @@ public class Entity {
                 (int) position.y,
                 (int) size.x,
                 (int) size.y);
+        touchHitbox = null;
     }
 
     public void die(int respawnTimeTicks) {

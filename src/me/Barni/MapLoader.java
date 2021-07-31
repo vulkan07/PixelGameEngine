@@ -1,7 +1,6 @@
 package me.Barni;
 
 import java.io.*;
-import java.util.stream.Stream;
 
 public class MapLoader {
 
@@ -10,7 +9,7 @@ public class MapLoader {
     Map map;
     private String fullPath; //Used by other methods
 
-    public static final String validMapHeader = "#bmap-v1.1";
+    public static final String validMapHeader = "#bmap-v1.2";
     public static final int maxLines = 128;
 
     public MapLoader(Game game) {
@@ -50,16 +49,6 @@ public class MapLoader {
                 return null;
             }
 
-            //Test footer "#end"
-            /* TODO
-            if (!lines[maxLines-1].equalsIgnoreCase("#end"))
-            {
-                fail("Invalid map footer!", maxLines-1);
-                return null;
-            }
-            */
-
-
             boolean foundSize = false;
             int newW = 0, newH = 0;
             this.map = null;
@@ -96,8 +85,18 @@ public class MapLoader {
                             return null;
                         }
                         this.map = new Map(game, newH, newW, 32);
-                        loadGrid(lines, lineIndex + 1, newW, newH);
+                        loadGrid(lines, lineIndex + 1, newW, newH, false);
                         logger.info("[MAP+] Grid data loaded");
+                        lineIndex += newH;
+                        break;
+
+                    case "backmap":
+                        if (map == null) {
+                            fail("\".map\" has to be before \".backMap\"", lineIndex);
+                            return null;
+                        }
+                        loadGrid(lines, lineIndex + 1, newW, newH, true);
+                        logger.info("[MAP+] Back Grid data loaded");
                         lineIndex += newH;
                         break;
 
@@ -193,7 +192,7 @@ public class MapLoader {
         map.addDecorative(newDec);
     }
 
-    private void loadGrid(String[] lines, int offset, int xSize, int ySize) {
+    private void loadGrid(String[] lines, int offset, int xSize, int ySize, boolean backGround) {
         String[] tilesRaw;
         //For every row
         for (int y = 0; y < ySize; y++) {
@@ -211,12 +210,15 @@ public class MapLoader {
 
             //For every column
             for (int x = 0; x < xSize; x++) {
-                if (tilesRaw[x].contains("b")) {
+                /*if (tilesRaw[x].contains("b")) {
                     tilesRaw[x] = tilesRaw[x].replace("b", "");
-                    map.solidTiles[y * xSize + x] = false;
-                } else
-                    tilesRaw[x] = tilesRaw[x].replace(" ", "");
-                map.setTile(y * xSize + x, Integer.parseInt(tilesRaw[x]));
+                    map.ba[y * xSize + x] = false;
+                } else*/
+                tilesRaw[x] = tilesRaw[x].replace(" ", "");
+                if (backGround)
+                    map.setBackTile(y * xSize + x, Integer.parseInt(tilesRaw[x]));
+                else
+                    map.setTile(y * xSize + x, Integer.parseInt(tilesRaw[x]));
             }
         }
     }

@@ -12,7 +12,7 @@ public class Map {
 
     public int width, height, tileSize;
     private byte[] tiles;
-    public boolean[] solidTiles;
+    private byte[] backTiles;
     public Entity[] entities = new Entity[16];
     public Decorative[] decoratives = new Decorative[16];
     private int decCount = 0;
@@ -22,6 +22,14 @@ public class Map {
     Camera cam;
     BufferedImage txt;
 
+    public byte getBackTile(int i) {
+        return backTiles[i];
+    }
+
+    public void setBackTile(int i, int id) {
+        backTiles[i] = (byte) id;
+    }
+
     public byte getTile(int i) {
         return tiles[i];
     }
@@ -29,6 +37,7 @@ public class Map {
     public void setTile(int i, int id) {
         tiles[i] = (byte) id;
     }
+
 
     public void setTile(int x, int y, int id) {
         tiles[y * width + x] = (byte) id;
@@ -47,7 +56,7 @@ public class Map {
         height = w;
         tileSize = tSize;
         tiles = new byte[width * height];
-        solidTiles = new boolean[width * height];
+        backTiles = new byte[width * height];
         game = g;
         atlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
 
@@ -58,15 +67,15 @@ public class Map {
         cam = new Camera(game, this);
 
         //TEST
-        for (int i = 0; i < solidTiles.length; i++)
-            solidTiles[i] = true;
+        for (int i = 0; i < backTiles.length; i++)
+            backTiles[i] = 0;
     }
 
 
     public void dumpCurrentMapIntoFile(String path) {
         game.logger.info("[MAP] Writing out current map");
 
-        String data = "";
+        String data = ".map=\n";
         File file = new File(game.GAME_DIR + path);
         try {
             file.createNewFile();
@@ -74,17 +83,20 @@ public class Map {
             e.printStackTrace();
         }
 
+        //FG
         for (int i = 0; i < tiles.length; i++) {
             if (i % width == 0 && i != 0) {
                 data += '\n';
             }
-
             data += tiles[i] + ",";
-
-            if (!solidTiles[i])
-                data += "b";
-            else
-                data += " ";
+        }
+        data += "\n\n.backMap=\n";
+        //BG
+        for (int i = 0; i < backTiles.length; i++) {
+            if (i % width == 0 && i != 0) {
+                data += '\n';
+            }
+            data += backTiles[i] + ",";
         }
 
         try {
@@ -108,17 +120,8 @@ public class Map {
     }
 
     public void loadTextures() {
-        BufferedImage buffer = null;
-        //atlas.addTexture(null); //void
 
         for (int i = 1; i < Material.materialPath.length; i++) {
-
-            /*try {
-                buffer = ImageIO.read(new File(game.GAME_DIR + "textures\\" + Material.materialPath[i]));
-            } catch (IOException e) {
-                game.logger.err("[MAP] Cannot load texture: " + game.GAME_DIR + "textures\\" + Material.materialPath[i]);
-            }
-            atlas.addTexture(buffer);*/
             Texture t = new Texture();
             t.loadTexture(game, Material.materialPath[i] + ".png", tileSize, tileSize, Material.materialPath[i] + ".anim");
             atlas.addTexture(t);
@@ -127,23 +130,43 @@ public class Map {
 
     public void renderTiles(BufferedImage img) {
 
-        Graphics2D g = (Graphics2D)img.getGraphics();
+        Graphics g = img.getGraphics();
         g.setColor(new Color(0, 0, 20, 100));
 
 
         for (int i = 0; i < tiles.length; i++) {
-            if (tiles[i] == 0) continue;
-            txt = atlas.getTexture(tiles[i] - 1);
-            int y = i / width; //Y
-            int x = i % width; //x
 
-            if (tiles[i] == Material.WATER) {
+
+            int x = i % width; //x
+            int y = i / width; //Y
+            //BG
+            if (backTiles[i] != 0) {
+                txt = atlas.getTexture(backTiles[i] - 1);
+                if (backTiles[i] != 0) {
                     g.drawImage(txt,
                             x * tileSize - cam.scroll.xi(),
-                            y * tileSize - cam.scroll.yi() + 6,
+                            y * tileSize - cam.scroll.yi(),
                             tileSize,
                             tileSize,
                             null);
+                    if (!Material.translucent[backTiles[i]])
+                        g.fillRect(x * tileSize - cam.scroll.xi(),
+                                y * tileSize - cam.scroll.yi(),
+                                tileSize,
+                                tileSize);
+                }
+            }
+
+            //FG
+            if (tiles[i] == 0) continue;
+            txt = atlas.getTexture(tiles[i] - 1);
+            if (tiles[i] == Material.WATER) {
+                g.drawImage(txt,
+                        x * tileSize - cam.scroll.xi(),
+                        y * tileSize - cam.scroll.yi() + 6,
+                        tileSize,
+                        tileSize,
+                        null);
             } else
                 g.drawImage(txt,
                         x * tileSize - cam.scroll.xi(),
@@ -151,13 +174,6 @@ public class Map {
                         null);
 
 
-            if (!solidTiles[i] && Material.solid[tiles[i]] == 1)
-                g.fillRect(
-                        x * tileSize - cam.scroll.xi(),
-                        y * tileSize - cam.scroll.yi(),
-                        tileSize,
-                        tileSize
-                );
             //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
 
         }

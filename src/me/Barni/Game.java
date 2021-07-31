@@ -23,6 +23,7 @@ public class Game extends Canvas implements Runnable {
     KeyboardHandler keyboardHandler;    //Keyboard
     Logger logger;                      //Logger
     Map map;                            //Map
+    Player player;
 
     public final String GAME_DIR;
 
@@ -34,9 +35,6 @@ public class Game extends Canvas implements Runnable {
     boolean selectedTileVisible = true;
     Font defaultFont = new Font("Verdana", Font.PLAIN, 24);
 
-
-    Player player;                      //FOR TEST
-    ParticleEmitter pem;                //PEM ONLY FOR TEST purposes
 
     public Game(String wDir) {
         GAME_DIR = wDir;
@@ -99,14 +97,13 @@ public class Game extends Canvas implements Runnable {
         if (map == null) {
             map = new Map(this, 3, 5, 32);
             byte[] defaultmap = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2,};
-            player.position = new Vec2D(48, 0);
             map.setTileArray(defaultmap);
         }
 
         map.loadTextures();
         map.physics.init();
 
-        player = new Player(this, "player", new Vec2D(512, 500));
+        player = new Player(this, "player", new Vec2D(48, 0));
         player.loadTexture("player.png", "player.anim");
         map.addEntity(player);
 
@@ -167,10 +164,19 @@ public class Game extends Canvas implements Runnable {
                 timer = 0;
             }
         }
+        stop();
     }
 
 
     int tPos1, tPos2;
+
+    public void stop() {
+        logger.info("Game loop stopped");
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+        }
+    }
 
     public void tick() {
         if (keyboardHandler.getKeyState(KeyboardHandler.Q))
@@ -195,7 +201,7 @@ public class Game extends Canvas implements Runnable {
             if (mouseHandler.isPressed(mouseHandler.LMB)) {
                 if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
                     try {
-                        map.solidTiles[tPos1] = true;
+                        map.setBackTile(tPos1, mapPaintID);
                     } catch (ArrayIndexOutOfBoundsException e) {
                     }
                 } else {
@@ -211,7 +217,7 @@ public class Game extends Canvas implements Runnable {
             } else if (mouseHandler.isPressed(mouseHandler.RMB))
                 if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
                     try {
-                        map.solidTiles[tPos1] = false;
+                        map.setBackTile(tPos1, 0);
                     } catch (ArrayIndexOutOfBoundsException e) {
                     }
                 } else {
@@ -239,7 +245,7 @@ public class Game extends Canvas implements Runnable {
 
         Graphics g = getBufferStrategy().getDrawGraphics();
         Graphics2D g2d = (Graphics2D) g;
-        if (blankAlpha != 255 ) {
+        if (blankAlpha != 255) {
 
             //Map
             map.renderDecoratives(image, -1); //Behind map layer
@@ -249,7 +255,6 @@ public class Game extends Canvas implements Runnable {
             map.renderEntities(image);
 
             map.renderDecoratives(image, 1); //Before entities
-
 
 
             if (map.cam.zoom != 1)
@@ -269,15 +274,20 @@ public class Game extends Canvas implements Runnable {
                 g.setColor(Color.WHITE);
                 g.setFont(defaultFont);
                 g.drawString("Editing", 8, 24);
-                if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
+                try {
+                    g.drawImage(map.atlas.getTexture(mapPaintID - 1), 8, 32, 64, 64, null);
+                    if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
 
-                    g.drawString("Solidity", 8, 64);
-                } else {
-                    try {
-                        g.drawImage(map.atlas.getTexture(mapPaintID - 1), 8, 32, 64, 64, null);
-                    } catch (ArrayIndexOutOfBoundsException e) {
+                        g.drawString("Back", 12, 88);
+                        g.setColor(new Color(0, 0, 20, 100));
+                        g.fillRect(8,
+                                32,
+                                64,
+                                64);
                     }
+                } catch (ArrayIndexOutOfBoundsException e) {
                 }
+
             }
         /*///
         b1.x = mouseHandler.getPosition().x;

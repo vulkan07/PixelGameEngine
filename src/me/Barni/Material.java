@@ -31,6 +31,19 @@ public class Material {
                 3,
         };
 
+    public static final boolean[] translucent =
+            {
+                    false,
+                    false,
+                    false,
+                    true,
+                    true,
+                    false,
+                    false,
+                    true,
+                    true
+            };
+
     public static final String[] materialPath =
             {null,
             "dirt",
