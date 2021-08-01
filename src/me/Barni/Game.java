@@ -109,8 +109,11 @@ public class Game extends Canvas implements Runnable {
         map.addEntity(player);
 
         PressurePlate pp = new PressurePlate(this, null, new Vec2D(224, 736));
-        pp.loadTexture("pressure_plate.png", "");
+        pp.loadTexture("pressure_plate.png", "pressure_plate.anim");
         map.addEntity(pp);
+
+        LevelExit exit = new LevelExit(this, "exit", new Vec2D(1867, 374), GAME_DIR + "01.map");
+        map.addEntity(exit);
 
         //ClearBuffer
         clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
@@ -125,6 +128,18 @@ public class Game extends Canvas implements Runnable {
         thread.start();
     }
 
+    public void loadNewMap(String path) {
+
+        MapLoader ml = new MapLoader(this);
+        map = ml.loadMap(path);
+        map.loadTextures();
+        player = new Player(this, "player", new Vec2D(48, 0));
+        player.locked = false;
+        player.loadTexture("player.png", "player.anim");
+        map.addEntity(player);
+
+        screenFadingIn = true;
+    }
 
     @Override
     public void run() {

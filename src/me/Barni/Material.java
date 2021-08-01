@@ -39,7 +39,7 @@ public class Material {
                     false,
                     false,
                     true,
-                    true,
+                    true, //glass
                     false,
                     false,
                     true,

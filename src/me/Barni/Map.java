@@ -146,8 +146,8 @@ public class Map {
             if (
                     x * tileSize + tileSize < cam.scroll.x ||
                             x * tileSize > cam.scroll.x + game.WIDTH ||
-                                    y * tileSize + tileSize < cam.scroll.y ||
-                                            y * tileSize > cam.scroll.y + game.WIDTH
+                            y * tileSize + tileSize < cam.scroll.y ||
+                            y * tileSize > cam.scroll.y + game.WIDTH
             ) continue;
 
             //BG
@@ -241,7 +241,7 @@ public class Map {
         game.logger.err("[MAP] Entity array is full!!");
     }
 
-    private void initPlayer(Player p) {
+    public void initPlayer(Player p) {
         p.spawnLocation = playerStartPos.copy();
         p.position = playerStartPos.copy();
         p.velocity = playerStartVel.copy();
@@ -259,7 +259,8 @@ public class Map {
     public void removeEntity(String name) {
         physics.init();
         for (int i = 0; i < entities.length; i++)
-            if (entities[i].name == name) entities[i] = null;
+            if (entities[i] != null)
+                if (entities[i].name == name) entities[i] = null;
     }
 
 

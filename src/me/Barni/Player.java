@@ -1,13 +1,17 @@
 package me.Barni;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
 public class Player extends Entity {
 
     boolean canJump, wantToJump, jumped;
     private Vec2D moving;
     ParticleEmitter pem;
 
-
-    private int respawnTimer;
+    private Texture face = new Texture();
+    public int faceIndex = 0;
+    private int respawnTimer, blinkTimer = 100, idleTimer;
     public Vec2D spawnLocation;
 
 
@@ -20,6 +24,8 @@ public class Player extends Entity {
         resistance = 0.3f;
         alive = true;
         spawnLocation = new Vec2D();
+
+        face.loadTexture(g, "player_face.png", size.xi(), size.yi(), "player_face.anim");
 
         pem = new ParticleEmitter(
                 game,
@@ -36,6 +42,7 @@ public class Player extends Entity {
     }
 
     public void die(int respawnTimeTicks) {
+        faceIndex = 2;
         pem.position.x = position.x + size.x / 2;
         pem.position.y = position.y + size.y / 2;
         pem.emitting = true;
@@ -62,12 +69,26 @@ public class Player extends Entity {
     @Override
     public void tick() {
         super.tick();
+        face.frame = faceIndex;
+        idleTimer++;
+
+        if (idleTimer > 2000)
+            faceIndex = 3;
+
+
+        blinkTimer--;
+        if (idleTimer < 2000) {
+            if (blinkTimer <= 0) {
+                blinkTimer = 620;
+                faceIndex = 1;
+            }
+            if (blinkTimer == 600) {
+                faceIndex = 0;
+            }
+        }
 
 
         if (!alive) {
-            //if (respawnTimer < respawnTime - 2)
-            //    pem.emitting = false;
-
             respawnTimer--;
             if (respawnTimer <= 0)
                 respawn();
@@ -87,9 +108,9 @@ public class Player extends Entity {
         if (game.keyboardHandler.getKeyState(KeyboardHandler.UP) ||
                 game.keyboardHandler.getKeyState(KeyboardHandler.SPACE)) {
             wantToJump = true;
-
+            idleTimer = 0;
             if (game.mapEditing) {
-                moving.y -= speed*2;
+                moving.y -= speed * 2;
             } else if (canJump && !jumped) {
                 moving.y -= 13;
                 canJump = false;
@@ -98,12 +119,15 @@ public class Player extends Entity {
 
         if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
             moving.y += speed;
+            idleTimer = 0;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;
+            idleTimer = 0;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.RIGHT)) {
             moving.x += speed;
+            idleTimer = 0;
         }
 
         if (!locked && active) {
@@ -111,6 +135,21 @@ public class Player extends Entity {
             if (velocity.x > 8)
                 velocity.x = 8;
         }
+    }
+
+    @Override
+    public void render(BufferedImage img, Camera cam) {
+        if (!visible) return;
+        super.render(img, cam);
+
+        Graphics g = img.getGraphics();
+        if (face != null)
+            g.drawImage(face.getTexture(),
+                    position.xi() - cam.scroll.xi(),
+                    position.yi() - cam.scroll.yi(),
+                    size.xi(),
+                    size.yi(),
+                    null);
     }
 
     /*
