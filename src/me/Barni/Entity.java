@@ -74,7 +74,6 @@ public class Entity {
                 (int) position.y,
                 (int) size.x,
                 (int) size.y);
-        touchHitbox = null;
     }
 
     public void die(int respawnTimeTicks) {
@@ -88,6 +87,9 @@ public class Entity {
         if (!active) return;
     }
 
+    public void onTouch(Entity other) {
+    }
+
     public void render(BufferedImage img, Camera cam) {
         if (!visible) return;
 
@@ -99,14 +101,14 @@ public class Entity {
                     size.xi(),
                     size.yi(),
                     null);
-        /*
-        g.setColor(Color.RED);
+
+        /*g.setColor(Color.RED);
         g.drawRect(
                 position.xi() - cam.scroll.xi(),
                 position.yi() - cam.scroll.yi(),
                 size.xi()-1,
                 size.yi()-1);
-         */
+*/
     }
 
 }

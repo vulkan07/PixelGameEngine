@@ -3,7 +3,7 @@ package me.Barni;
 public class Material {
 
 
-    public static final int MAT_COUNT  = 9;
+    public static final int MAT_COUNT  = 10;
     public static final int VOID  = 0;
     public static final int DIRT = 1;
     public static final int GRASS_TILE = 2;
@@ -13,6 +13,7 @@ public class Material {
     public static final int BRICK = 6;
     public static final int WATER = 7;
     public static final int SPIKE = 8;
+    public static final int COBBLE_STONE = 9;
 
     //0 = not solid
     //1 = solid
@@ -29,6 +30,7 @@ public class Material {
                 1,
                 2,
                 3,
+                1,
         };
 
     public static final boolean[] translucent =
@@ -41,7 +43,8 @@ public class Material {
                     false,
                     false,
                     true,
-                    true
+                    true,
+                    false
             };
 
     public static final String[] materialPath =
@@ -54,5 +57,6 @@ public class Material {
             "brick",
             "water",
             "spike",
+            "cobble",
             };
 }

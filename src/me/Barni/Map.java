@@ -43,6 +43,10 @@ public class Map {
         tiles[y * width + x] = (byte) id;
     }
 
+    public byte getTile(int x, int y) {
+        return tiles[y * width + x];
+    }
+
     public int getTilesLength() {
         return tiles.length;
     }
@@ -123,7 +127,7 @@ public class Map {
 
         for (int i = 1; i < Material.materialPath.length; i++) {
             Texture t = new Texture();
-            t.loadTexture(game, Material.materialPath[i] + ".png", tileSize, tileSize, Material.materialPath[i] + ".anim");
+            t.loadTexture(game, Material.materialPath[i] + ".png", 32, 32, Material.materialPath[i] + ".anim");
             atlas.addTexture(t);
         }
     }
@@ -139,6 +143,13 @@ public class Map {
 
             int x = i % width; //x
             int y = i / width; //Y
+            if (
+                    x * tileSize + tileSize < cam.scroll.x ||
+                            x * tileSize > cam.scroll.x + game.WIDTH ||
+                                    y * tileSize + tileSize < cam.scroll.y ||
+                                            y * tileSize > cam.scroll.y + game.WIDTH
+            ) continue;
+
             //BG
             if (backTiles[i] != 0) {
                 txt = atlas.getTexture(backTiles[i] - 1);
@@ -146,8 +157,6 @@ public class Map {
                     g.drawImage(txt,
                             x * tileSize - cam.scroll.xi(),
                             y * tileSize - cam.scroll.yi(),
-                            tileSize,
-                            tileSize,
                             null);
                     if (!Material.translucent[backTiles[i]])
                         g.fillRect(x * tileSize - cam.scroll.xi(),
@@ -159,23 +168,19 @@ public class Map {
 
             //FG
             if (tiles[i] == 0) continue;
+
             txt = atlas.getTexture(tiles[i] - 1);
             if (tiles[i] == Material.WATER) {
                 g.drawImage(txt,
                         x * tileSize - cam.scroll.xi(),
                         y * tileSize - cam.scroll.yi() + 6,
-                        tileSize,
-                        tileSize,
                         null);
             } else
                 g.drawImage(txt,
                         x * tileSize - cam.scroll.xi(),
                         y * tileSize - cam.scroll.yi(),
                         null);
-
-
             //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
-
         }
 
         if (game.mapEditing)

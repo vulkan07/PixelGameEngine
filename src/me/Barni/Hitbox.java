@@ -44,7 +44,7 @@ public class Hitbox {
 
         boolean touching = AABB(other);
         if (other.solidType == 2 && touching) {
-            velocity.limit(1);
+            velocity.limit(2);
             return true;
         }
 
@@ -68,7 +68,7 @@ public class Hitbox {
             //FROM TOP
             if (realH >= other.y && realH < other.realH) {
                 if (velocity.y > 0) {
-                    ((Player)ent).canJump = true;
+                    if (ent instanceof Player) ((Player)ent).canJump = true;
                     velocity.y = 0;
                     pos.y = other.y - other.h + (other.h - h);
                     return true;

@@ -1,13 +1,11 @@
 package me.Barni;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
 public class Player extends Entity {
 
-    boolean crouching, jumping;
+    boolean canJump, wantToJump, jumped;
     private Vec2D moving;
     ParticleEmitter pem;
+
 
     private int respawnTimer;
     public Vec2D spawnLocation;
@@ -20,7 +18,6 @@ public class Player extends Entity {
         touchHitbox = new Hitbox((int) (pos.x), (int) (pos.y), (int) size.x / 2 * -1, (int) size.y / 2 * -1, (int) size.x * 2, (int) size.y * 2);
         colliderHitbox = new Hitbox((int) pos.x, (int) pos.y, (int) size.x, (int) size.y);
         resistance = 0.3f;
-        speed = 0.7f;
         alive = true;
         spawnLocation = new Vec2D();
 
@@ -28,8 +25,8 @@ public class Player extends Entity {
                 game,
                 "playerDieParticle",
                 new Vec2D(64, 64),
-                new Vec2D(-7,-7),
-                new Vec2D(7,7),
+                new Vec2D(-7, -7),
+                new Vec2D(7, 7),
                 true,
                 128,
                 2,
@@ -45,6 +42,8 @@ public class Player extends Entity {
         pem.createParticle(128);
         pem.emitting = false;
 
+
+        if (game.mapEditing) return;
         alive = false;
         visible = false;
 
@@ -76,19 +75,27 @@ public class Player extends Entity {
         }
 
         moving = new Vec2D(0, 0);
+        //CTRL slowdown
         if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL))
-            velocity.limit(3);
-        /*
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL)) {
-            speed = .35f;
-            colliderHitbox.h = 32;
-        } else
-            colliderHitbox.h = size.yi();*/
+            speed = 0.31f;
+        else
+            speed = 0.5f;
 
+        //Jump mechanism
+        jumped = wantToJump;
+        wantToJump = false;
         if (game.keyboardHandler.getKeyState(KeyboardHandler.UP) ||
                 game.keyboardHandler.getKeyState(KeyboardHandler.SPACE)) {
-            moving.y -= speed * 2;
+            wantToJump = true;
+
+            if (game.mapEditing) {
+                moving.y -= speed*2;
+            } else if (canJump && !jumped) {
+                moving.y -= 13;
+                canJump = false;
+            }
         }
+
         if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
             moving.y += speed;
         }
@@ -99,8 +106,11 @@ public class Player extends Entity {
             moving.x += speed;
         }
 
-        if (!locked && active)
+        if (!locked && active) {
             velocity.add(moving);
+            if (velocity.x > 8)
+                velocity.x = 8;
+        }
     }
 
     /*

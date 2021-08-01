@@ -29,6 +29,7 @@ public class ParticleEmitter extends Entity {
         super(game, name, pos);
         this.active = start_active;
         this.emitting = false;
+        this.collidesWithMap = false;
         this.noise = noise;
 
 

@@ -76,7 +76,7 @@ public class Game extends Canvas implements Runnable {
 
 
         //BufferStrategy
-        createBufferStrategy(3);
+        createBufferStrategy(2);
 
 
         //Utility
@@ -103,9 +103,14 @@ public class Game extends Canvas implements Runnable {
         map.loadTextures();
         map.physics.init();
 
+        //PLAYER
         player = new Player(this, "player", new Vec2D(48, 0));
         player.loadTexture("player.png", "player.anim");
         map.addEntity(player);
+
+        PressurePlate pp = new PressurePlate(this, null, new Vec2D(224, 736));
+        pp.loadTexture("pressure_plate.png", "");
+        map.addEntity(pp);
 
         //ClearBuffer
         clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
@@ -118,7 +123,6 @@ public class Game extends Canvas implements Runnable {
         running = true;
         thread = new Thread(this);
         thread.start();
-
     }
 
 
@@ -241,6 +245,7 @@ public class Game extends Canvas implements Runnable {
 
     public void render() {
         //=CLEAR CANVAS=\\
+
         System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
 
         Graphics g = getBufferStrategy().getDrawGraphics();

@@ -27,24 +27,29 @@ public class Physics {
     public void update() {
         for (Entity ent : map.entities) {
             if (ent == null) continue;
-
-            if (!ent.active || ent.locked || !ent.solid || !ent.alive || !ent.collidesWithMap) continue;
-
-            ent.velocity.add(gravity);
-            ent.velocity.limit(15);
-            ent.velocity.decrease(ent.resistance);
-            ent.position.add(ent.velocity);
+            if (!ent.active || !ent.collidesWithMap) continue;
 
             //Resolve collision: Entity VS Entity
-            /*
             //TODO optimize this
             for (Entity other : map.entities) {
                 if (other == null) continue;
                 if (other == ent) continue;
-                if (ent.touchHitbox.isColliding(other.touchHitbox))
-                    ent.colliderHitbox.resolveCollision(other.colliderHitbox, ent.velocity, ent.position);
+
+                if (ent.colliderHitbox.isColliding(other.colliderHitbox)) {
+                    ent.onTouch(other);
+                    if (ent.active && !ent.locked && ent.solid && ent.alive && ent.collidesWithMap)
+                        if (other.active && !other.locked && other.solid && other.alive && other.collidesWithMap)
+                        ent.colliderHitbox.resolveCollision(other, other.colliderHitbox, ent.velocity, ent.position);
+                }
             }
-            */
+
+            if (ent.locked || !ent.solid || !ent.alive) continue;
+
+            ent.velocity.add(gravity);
+            ent.velocity.limit(20);
+            ent.velocity.decrease(ent.resistance);
+            ent.position.add(ent.velocity);
+
 
             //Resolve collision: Entity VS map
             Hitbox[] hList = ent.touchHitbox.touchingMapTiles(map);
@@ -57,8 +62,8 @@ public class Physics {
                     ent.die(120);
 
                 //if (ent.touchHitbox.isCollidingWithAny(hList))
-                    if (hList[i] != null)
-                        ent.colliderHitbox.resolveCollision(ent, hList[i], ent.velocity, ent.position);
+                if (hList[i] != null)
+                    ent.colliderHitbox.resolveCollision(ent, hList[i], ent.velocity, ent.position);
             }
 
 
