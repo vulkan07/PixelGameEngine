@@ -15,6 +15,11 @@ public class Map {
     private byte[] backTiles;
     public Entity[] entities = new Entity[16];
     public Decorative[] decoratives = new Decorative[16];
+
+    public int getDecCount() {
+        return decCount;
+    }
+
     private int decCount = 0;
     public Vec2D playerStartPos, playerStartVel;
 
@@ -212,8 +217,9 @@ public class Map {
 
         atlas.update();
 
-        if (game.player.position.dist(cam.view) > 50 && game.player.alive)
-            cam.lookAt(game.player.position);
+        if (!game.decorativeEditor.editing)
+            if (game.player.position.dist(cam.view) > 50 && game.player.alive)
+                cam.lookAt(game.player.position);
         cam.update();
 
         for (Entity e : entities) {

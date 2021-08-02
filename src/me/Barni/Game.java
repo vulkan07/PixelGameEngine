@@ -18,6 +18,7 @@ public class Game extends Canvas implements Runnable {
     private BufferedImage image;        //Image
     private int[] buffer, clearBuffer;  //ImageBuffer
     int white = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
+    public DecorativeEditor decorativeEditor;
 
     MouseHandler mouseHandler;          //Mouse
     KeyboardHandler keyboardHandler;    //Keyboard
@@ -33,7 +34,7 @@ public class Game extends Canvas implements Runnable {
     public int mapPaintID;
     Vec2D selectedTile = new Vec2D(0, 0);
     boolean selectedTileVisible = true;
-    Font defaultFont = new Font("Verdana", Font.PLAIN, 24);
+    Font defaultFont = new Font("Verdana", Font.PLAIN, 20);
 
 
     public Game(String wDir) {
@@ -106,6 +107,8 @@ public class Game extends Canvas implements Runnable {
         player = new Player(this, "player", new Vec2D(48, 0));
         player.loadTexture("player.png", "player.anim");
         map.addEntity(player);
+
+        decorativeEditor = new DecorativeEditor(this, map);
 
         /*
         PressurePlate pp = new PressurePlate(this, null, new Vec2D(224, 736));
@@ -197,13 +200,10 @@ public class Game extends Canvas implements Runnable {
     }
 
     public void tick() {
-        if (keyboardHandler.getKeyState(KeyboardHandler.Q))
-            screenFadingOut = true;
-        if (keyboardHandler.getKeyState(KeyboardHandler.E))
-            screenFadingIn = true;
 
         mouseHandler.update();
         map.tick();
+        decorativeEditor.tick();
         //map.getEntity("test").velocity.x -= 0.11f;
 
         //Tile editor
@@ -245,15 +245,6 @@ public class Game extends Canvas implements Runnable {
                     }
                 }
         }
-
-        if (keyboardHandler.getKeyState(KeyboardHandler.R))
-            map.dumpCurrentMapIntoFile("currentMap.txt");
-
-
-        //TEST\\
-        //pem.position = mouseHandler.getPosition().div(PX_SIZE);
-        //pem.position = player.position;
-        //pem.active = mouseHandler.isPressed(mouseHandler.RMB);
     }
 
 
@@ -279,6 +270,9 @@ public class Game extends Canvas implements Runnable {
             if (map.cam.zoom != 1)
                 g2d.translate(-WIDTH / map.cam.zoom, -HEIGHT / map.cam.zoom);
             g2d.scale(map.cam.zoom, map.cam.zoom);
+
+            decorativeEditor.render(image, map.cam);
+
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
             //Selected tile
@@ -288,8 +282,10 @@ public class Game extends Canvas implements Runnable {
                 g.drawRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 31, 31);
             }
 
+
             //Selected tile type
             if (mapEditing) {
+
                 g.setColor(Color.WHITE);
                 g.setFont(defaultFont);
                 g.drawString("Editing", 8, 24);

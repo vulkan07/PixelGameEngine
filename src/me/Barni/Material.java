@@ -55,7 +55,7 @@ public class Material {
             "glass",
             "planks",
             "brick",
-            "water",
+            "lava",
             "spike",
             "cobble",
             };

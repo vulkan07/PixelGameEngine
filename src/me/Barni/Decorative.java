@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 public class Decorative {
     Game game;
     Texture texture;
+    String path;
     int x, y, z, w, h;
     float parallax;
     //Z = -1 : behind map
@@ -20,6 +21,7 @@ public class Decorative {
         this.z = zPlane;
         this.parallax = Math.abs(parallax);
         texture = new Texture();
+        this.path = path;
         texture.loadTexture(game, path + ".png", w, h, path + ".anim");
     }
 
