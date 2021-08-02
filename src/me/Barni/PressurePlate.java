@@ -5,7 +5,8 @@ import java.awt.image.BufferedImage;
 public class PressurePlate extends Entity {
 
 
-    int timer = 0;
+    int timer = 0, recharge = 100;
+    float force = 15f;
 
     public PressurePlate(Game g, String name, Vec2D pos) {
         super(g, name, pos);
@@ -14,9 +15,9 @@ public class PressurePlate extends Entity {
         solid = false;
 
         colliderHitbox = new Hitbox(
-                (int) (position.x + size.x / 2),
+                (int) (position.x + size.x / 3),
                 (int) position.y,
-                (int) size.x / 2,
+                (int) size.x / 3,
                 (int) size.y);
         //touchHitbox = colliderHitbox;
     }
@@ -26,20 +27,20 @@ public class PressurePlate extends Entity {
             timer--;
 
 
-        if (timer == 100 - 10)
+        if (timer == recharge - 10)
             texture.frame = 2;
 
-        if (timer == 100 - 20)
+        if (timer == recharge - 20)
             texture.frame = 0;
 
     }
 
     public void onTouch(Entity other) {
         if (timer == 0) {
-            other.velocity.y = -20;
+            other.velocity.y = -force;
             other.velocity.x = 0;
             other.position.x = position.x;
-            timer += 100;
+            timer += recharge;
             texture.frame = 1;
         }
     }

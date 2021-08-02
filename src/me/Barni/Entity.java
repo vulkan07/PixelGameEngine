@@ -10,7 +10,7 @@ public class Entity {
 
     public Vec2D position, size, velocity, gravity;
     public float speed, resistance;
-    public boolean visible, active, solid, locked, collidesWithMap, hasTexture, alive;
+    public boolean visible, active, solid, locked, collidesWithMap, alive;
 
     protected Hitbox touchHitbox;
     protected Hitbox colliderHitbox;
@@ -33,10 +33,38 @@ public class Entity {
     }
     //===================\\
 
+    public void loadFromEntityData(EntityData ed)
+    {
+        name = ed.name;
+
+        position = ed.position;
+        size = ed.size;
+
+        visible = ed.visible;
+        active = ed.active;
+        solid = ed.solid;
+        locked = ed.locked;
+        collidesWithMap = ed.collidesWithMap;
+        alive = ed.alive;
+
+        texture = ed.texture;
+
+        touchHitbox = new Hitbox(
+                (int) position.x,
+                (int) position.y,
+                (int) size.x / 2 * -1,
+                (int) size.y / 2 * -1,
+                (int) size.x * 2,
+                (int) size.y * 2);
+        colliderHitbox = new Hitbox(
+                (int) position.x,
+                (int) position.y,
+                (int) size.x,
+                (int) size.y);
+    }
 
     public void loadTexture(String imgPath, String animPath) {
         texture.loadTexture(game, imgPath, (int) size.x, (int) size.y, animPath);
-        hasTexture = true;
     }
 
     /**
@@ -94,7 +122,7 @@ public class Entity {
         if (!visible) return;
 
         Graphics g = img.getGraphics();
-        if (hasTexture)
+        if (texture != null)
             g.drawImage(texture.getTexture(),
                     position.xi() - cam.scroll.xi(),
                     position.yi() - cam.scroll.yi(),
@@ -102,13 +130,13 @@ public class Entity {
                     size.yi(),
                     null);
 
-        /*g.setColor(Color.RED);
+        g.setColor(Color.RED);
         g.drawRect(
                 position.xi() - cam.scroll.xi(),
                 position.yi() - cam.scroll.yi(),
                 size.xi()-1,
                 size.yi()-1);
-*/
+
     }
 
 }

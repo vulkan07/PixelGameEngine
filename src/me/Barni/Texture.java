@@ -24,6 +24,7 @@ public class Texture {
         height = h;
         String delayStr = null;
         BufferedImage fullImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
         frame = 0;
         counter = 0;
 

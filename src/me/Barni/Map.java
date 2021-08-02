@@ -235,6 +235,7 @@ public class Map {
             if (entities[i] == null) {
                 entities[i] = e;
                 physics.init();
+                game.logger.subInfo("[MAP] Added entity: " + e.getClass());
                 return;
             }
         }
@@ -246,6 +247,7 @@ public class Map {
         p.position = playerStartPos.copy();
         p.velocity = playerStartVel.copy();
         playerStartPos = null;
+
         playerStartVel = null;
     }
 

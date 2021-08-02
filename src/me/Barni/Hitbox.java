@@ -49,7 +49,7 @@ public class Hitbox {
         }
 
         if (other.solidType == 3 && touching) {
-            ent.die(120);
+            ent.die(20); //120
             return true;
         }
 
