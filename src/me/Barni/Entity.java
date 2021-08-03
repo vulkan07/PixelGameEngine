@@ -63,8 +63,8 @@ public class Entity {
                 (int) size.y);
     }
 
-    public void loadTexture(String imgPath, String animPath) {
-        texture.loadTexture(game, imgPath, (int) size.x, (int) size.y, animPath);
+    public void loadTexture(String path) {
+        texture.loadTexture(game, path, (int) size.x, (int) size.y, true);
     }
 
     /**
@@ -130,13 +130,14 @@ public class Entity {
                     size.yi(),
                     null);
 
+        /*
         g.setColor(Color.RED);
         g.drawRect(
                 position.xi() - cam.scroll.xi(),
                 position.yi() - cam.scroll.yi(),
                 size.xi()-1,
                 size.yi()-1);
-
+        */
     }
 
 }

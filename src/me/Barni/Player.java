@@ -25,7 +25,7 @@ public class Player extends Entity {
         alive = true;
         spawnLocation = new Vec2D();
 
-        face.loadTexture(g, "player_face.png", size.xi(), size.yi(), "player_face.anim");
+        face.loadTexture(g, "player_face", size.xi(), size.yi(), true);
 
         pem = new ParticleEmitter(
                 game,

@@ -14,7 +14,7 @@ public class MapLoader {
     Map map;
     private String fullPath; //Used by other methods
 
-    public static final String validMapHeader = "#bmap-v1.2";
+    public static final double validMapHeader = 1.3;
     public static final int maxLines = 128;
 
     public MapLoader(Game game) {
@@ -44,6 +44,11 @@ public class MapLoader {
             JSONObject jobj = new JSONObject(str);
             JSONObject mapObj = jobj.getJSONObject("bmap");
 
+            if (mapObj.getDouble("version") != validMapHeader)
+            {
+                fail("Invalid map version!");
+                return null;
+            }
             //MAP SIZE
             int w, h;
             w = mapObj.getInt("sizeX");
@@ -139,7 +144,7 @@ public class MapLoader {
         e.size = new Vec2D(w, h);
 
         e.texture = new Texture();
-        e.texture.loadTexture(game, texture + ".png", (int) w, (int) h, texture + ".anim");
+        e.texture.loadTexture(game, texture, (int) w, (int) h, true);
 
         if (entObj.has("visible"))
             e.visible = entObj.getBoolean("visible");

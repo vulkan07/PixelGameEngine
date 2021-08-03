@@ -8,61 +8,58 @@ public class Texture {
 
     Game game;
 
-
     private boolean animated;
     public BufferedImage[] textures;
     int width, height, counter, frame, frames;
     public int[] delay;
+    private String path, bonusPath = "textures\\";
+
+    public String getPath() {
+        return path;
+    }
+
 
     public boolean isAnimated() {
         return animated;
     }
 
-    public void loadTexture(Game g, String imgPath, int w, int h, String dataPath) {
+    public void loadTexture(Game g, String relativePath, int w, int h, boolean isAnimated) {
         game = g;
         width = w;
         height = h;
         String delayStr = null;
         BufferedImage fullImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        this.animated = isAnimated;
 
         frame = 0;
         counter = 0;
 
-        //READ .anim
-        if (dataPath == null)
-            game.logger.info("[TEXTURE] Not using .anim file");
-        else {
+        path = relativePath;
+        String imgPath = path + ".png";
+        String dataPath = path + ".anim";
+
+        if (animated)
             try {
-                BufferedReader br = new BufferedReader(new FileReader(new File(game.GAME_DIR + "textures\\" + dataPath)));
+                BufferedReader br = new BufferedReader(new FileReader(new File(game.GAME_DIR + bonusPath + dataPath)));
                 delayStr = br.readLine();
+            } catch (FileNotFoundException e) {
+                game.logger.subInfo("[TEXTURE] Couldn't find .anim file for " + game.GAME_DIR + bonusPath + imgPath + ", image will be stationary");
+                animated = false;
+            } catch (IOException e) {
+                game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + bonusPath + dataPath);
+                animated = false;
             }
-            catch (FileNotFoundException e) {
-                game.logger.subInfo("[TEXTURE] Couldn't find .anim file for " + game.GAME_DIR + imgPath + ", image will be stationary");
-            }
-            catch (IOException e) {
-                game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + dataPath);
-            }
-        }
+
 
         //READ IMAGE
         try {
-            fullImg = ImageIO.read(new File(game.GAME_DIR + "textures\\" + imgPath));
-        }
-        catch (IOException e)
-        {
-            game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + imgPath);
+            fullImg = ImageIO.read(new File(game.GAME_DIR + bonusPath + imgPath));
+        } catch (IOException e) {
+            game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + bonusPath + imgPath);
         }
 
-        //EMPTY .anim
-        if (delayStr == null )
-        {
-            //game.logger.subInfo("[TEXTURE] .anim file is empty"); //Removed from log, because it's working!
-            animated = false;
-            frames = 1;
-        }
 
-        //NOT EMPTY .anim
-        else {
+        if (animated) {
             //SPLIT UP & SET frames TO RIGHT AMOUNT
             String[] numsStr = delayStr.split(",");
             game.logger.subInfo("[TEXTURE] .anim frame count: " + numsStr.length);
@@ -75,19 +72,15 @@ public class Texture {
                 try {
                     delay[i] = Integer.parseInt(numsStr[i]);
                     //System.out.println(i + " is " + delay[i]);
-                }
-                catch (NumberFormatException nfe)
-                {
+                } catch (NumberFormatException nfe) {
                     game.logger.err("[TEXTURE] Invalid number format in .anim file");
                     animated = false;
                     frames = 1;
                 }
             }
 
-        }
-
-        if (frames == 1)
-        {
+        } else {
+            frames = 1;
             animated = false;
             delay = null;
         }
@@ -107,12 +100,6 @@ public class Texture {
                 textures[i] = img;
             }
         }
-
-        /*/SINGLE-TEXTURED
-        else {
-            textures = new BufferedImage[1];
-            textures[0] = fullImg;
-        }*/
     }
 
     public void update() {

@@ -31,6 +31,9 @@ public class Game extends Canvas implements Runnable {
     public boolean mapEditing, screenFadingIn, screenFadingOut;
     public int blankAlpha = 255;
 
+    JTextField textField;
+    Intro intro;
+
     public int mapPaintID;
     Vec2D selectedTile = new Vec2D(0, 0);
     boolean selectedTileVisible = true;
@@ -105,26 +108,19 @@ public class Game extends Canvas implements Runnable {
 
         //PLAYER
         player = new Player(this, "player", new Vec2D(48, 0));
-        player.loadTexture("player.png", "player.anim");
+        player.loadTexture("player");
         map.addEntity(player);
 
         decorativeEditor = new DecorativeEditor(this, map);
 
-        /*
-        PressurePlate pp = new PressurePlate(this, null, new Vec2D(224, 736));
-        pp.loadTexture("pressure_plate.png", "pressure_plate.anim");
-        map.addEntity(pp);
-
-        LevelExit exit = new LevelExit(this, "exit", new Vec2D(1867, 374), GAME_DIR + "01.map");
-        map.addEntity(exit);
-        */
+        textField = new JTextField();
+        window.add(textField);
 
         //ClearBuffer
         clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
         for (int i = 0; i < clearBuffer.length; i++)
             clearBuffer[i] = white;
 
-        screenFadingIn = true;
 
         //Actual start
         running = true;
@@ -138,13 +134,14 @@ public class Game extends Canvas implements Runnable {
         map = ml.loadMap(path);
         map.loadTextures();
         player = new Player(this, "player", new Vec2D(48, 0));
-        player.loadTexture("player.png", "player.anim");
+        player.loadTexture("player");
         map.addEntity(player);
         screenFadingIn = true;
     }
 
     @Override
     public void run() {
+
 
         //IMPORTANT! Frames and ticks are bounded together
         int fps = 60;
@@ -156,6 +153,9 @@ public class Game extends Canvas implements Runnable {
         last = System.nanoTime();
         logger.info("[GAME] Preferred FPS: " + fps);
         logger.info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
+
+        intro = new Intro(this, "test.png", image);
+        intro.start();
 
         while (running) {
 
@@ -200,6 +200,7 @@ public class Game extends Canvas implements Runnable {
     }
 
     public void tick() {
+        if (intro.isPlayingIntro()) return;
 
         mouseHandler.update();
         map.tick();
@@ -251,11 +252,16 @@ public class Game extends Canvas implements Runnable {
     public void render() {
         //=CLEAR CANVAS=\\
 
-        System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
+        if (blankAlpha != 255 && !intro.isPlayingIntro())
+            System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
 
         Graphics g = getBufferStrategy().getDrawGraphics();
         Graphics2D g2d = (Graphics2D) g;
-        if (blankAlpha != 255) {
+
+        intro.render();
+        g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+
+        if (blankAlpha != 255 && !intro.isPlayingIntro()) {
 
             //Map
             map.renderDecoratives(image, -1); //Behind map layer
@@ -274,7 +280,10 @@ public class Game extends Canvas implements Runnable {
             decorativeEditor.render(image, map.cam);
 
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-
+            try {
+                g2d.drawString(textField.getText(), 400, 400);
+            } catch (NullPointerException e) {
+            }
             //Selected tile
             if (selectedTileVisible) {
                 g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
@@ -304,54 +313,7 @@ public class Game extends Canvas implements Runnable {
                 }
 
             }
-        /*///
-        b1.x = mouseHandler.getPosition().x;
-        b1.y = mouseHandler.getPosition().y;
-
-        float a = (b1.y - a1.y);
-        float b = (a1.x - b1.x);
-        float c = (a * a1.x + b * a1.y);
-
-        float aa = (b2.y - a2.y);
-        float bb = (a2.x - b2.x);
-        float cc = (aa * a2.x + bb * a2.y);
-
-        float det = a * bb - aa * b;
-        if (det == 0)
-            g.setColor(Color.BLUE);
-
-        float x = (bb * c - b * cc) / det;
-        float y = (a * cc - aa * c) / det;
-
-        Vec2D cPoint = new Vec2D(x, y);
-
-        Vec2D AB = vecWithUniqueOrigin(a2, b2);
-        Vec2D AC = vecWithUniqueOrigin(a2, cPoint);
-        float kAC = AC.dot(AB);
-        float kAB = AB.dot(AB);
-
-        if (!(0 < kAC && kAC < kAB) || a1.dist(cPoint) > a1.dist(b1)) {
-                x = b1.x;
-                y = b1.y;
         }
-
-        g.drawLine((int) a2.x, (int) a2.y, (int) b2.x, (int) b2.y);
-        g.drawLine((int) a1.x, (int) a1.y, (int) x, (int) y);
-        */
-
-        /*
-        int xmap = (int) remap(kx, -16, 1920, 0, 255);
-        g.setColor(new Color(xmap, xmap, xmap, 255));
-        g.fillOval((int) kx, (int) ky, 32, 32);
-        if (mouseHandler.isPressed(mouseHandler.LMB | mouseHandler.RMB)) {
-            tx = mouseHandler.getPosition().x - 16;
-            ty = mouseHandler.getPosition().y - 16;
-        }
-        kx = lerp(kx, tx, 0.1f);
-        ky = lerp(ky, ty, 0.1f);
-        */
-        }
-
         //None -> back
         if (screenFadingOut) {
             blankAlpha += 5;

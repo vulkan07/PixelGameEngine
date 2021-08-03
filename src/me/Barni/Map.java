@@ -1,5 +1,8 @@
 package me.Barni;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -21,7 +24,7 @@ public class Map {
     }
 
     private int decCount = 0;
-    public Vec2D playerStartPos, playerStartVel;
+    public Vec2D playerStartPos = new Vec2D(), playerStartVel = new Vec2D();
 
 
     Camera cam;
@@ -43,7 +46,6 @@ public class Map {
         tiles[i] = (byte) id;
     }
 
-
     public void setTile(int x, int y, int id) {
         tiles[y * width + x] = (byte) id;
     }
@@ -59,6 +61,8 @@ public class Map {
     public void setTileArray(byte[] newTiles) {
         tiles = newTiles;
     }
+
+
 
     public Map(Game g, int w, int h, int tSize) {
         width = h;
@@ -80,62 +84,155 @@ public class Map {
             backTiles[i] = 0;
     }
 
-
     public void dumpCurrentMapIntoFile(String path) {
         game.logger.info("[MAP] Writing out current map");
 
-        String data = ".map=\n";
-        File file = new File(game.GAME_DIR + path);
+
+        File file = new File(game.GAME_DIR + path + ".json");
         try {
             file.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        //FG
-        for (int i = 0; i < tiles.length; i++) {
-            if (i % width == 0 && i != 0) {
-                data += '\n';
-            }
-            data += tiles[i] + ",";
-        }
-        data += "\n\n.backMap=\n";
-        //BG
-        for (int i = 0; i < backTiles.length; i++) {
-            if (i % width == 0 && i != 0) {
-                data += '\n';
-            }
-            data += backTiles[i] + ",";
-        }
+        JSONObject jobj = new JSONObject();
+        JSONObject mapObj = new JSONObject();
+        mapObj.put("version", MapLoader.validMapHeader);
+        mapObj.put("sizeX", width);
+        mapObj.put("sizeY", height);
 
+        mapObj.put("spawnPos", playerStartPos.xi() + "," + playerStartPos.yi());
+        mapObj.put("spawnVel", playerStartVel.xi() + "," + playerStartVel.yi());
+
+        String data = "";
+        JSONArray grid = new JSONArray();
+        for (int y = 0; y < height; y++)
+        {
+            data = "";
+            for (int x = 0; x < width; x++)
+            {
+                data += tiles[y * width + x] + ",";
+            }
+            grid.put(y, data);
+        }
+        mapObj.put("grid", grid);
+
+
+        JSONArray grid2 = new JSONArray();
+        for (int y = 0; y < height; y++)
+        {
+            data = "";
+            for (int x = 0; x < width; x++)
+            {
+                data += backTiles[y * width + x] + ",";
+            }
+            grid2.put(y, data);
+        }
+        mapObj.put("backGrid", grid2);
+
+
+        JSONObject objList = new JSONObject();
+        objList.put("Decoratives", decsToJSON());
+        objList.put("Entities", entsToJSON());
+
+        mapObj.put("ObjectList", objList);
+
+        jobj.put("bmap", mapObj);
         try {
             FileWriter writer = new FileWriter(file);
-            writer.write(data);
+            writer.write(jobj.toString(4));
             writer.close();
-            game.logger.info("[MAP] Dumped map file into " + game.GAME_DIR + path);
+            game.logger.info("[MAP] Dumped map file into " + game.GAME_DIR + path + ".json");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
 
-    public void addDecorative(Decorative dec) {
-        if (decCount >= decoratives.length) {
-            game.logger.err("Decoratives array is full!");
-            return;
+    private JSONArray decsToJSON()
+    {
+        JSONArray array = new JSONArray();
+        JSONObject decObj;
+
+        int place = -1;
+        for (int i = 0; i < decoratives.length; i++)
+        {
+            Decorative d = decoratives[i];
+
+            if (d == null) continue;
+            decObj = new JSONObject();
+
+            place++;
+            decObj.put("x", d.x);
+            decObj.put("y", d.y);
+            decObj.put("w", d.w);
+            decObj.put("h", d.h);
+            decObj.put("z-layer", d.z);
+            decObj.put("parallax", d.parallax);
+            decObj.put("texture", d.texture.getPath());
+            array.put(place, decObj);
         }
-        decoratives[decCount] = dec;
-        decCount++;
+
+        return array;
+    }
+
+    private JSONArray entsToJSON()
+    {
+        JSONArray array = new JSONArray();
+        JSONObject entObj;
+
+        int place = -1;
+        for (int i = 0; i < entities.length; i++)
+        {
+            Entity e = entities[i];
+
+            if (e == null) continue;
+            if (e.name.equals("player") || e.name.equals("playerDieParticle")) continue;
+
+            entObj = new JSONObject();
+
+            place++;
+            String[] className = e.getClass().toString().split("\\.");
+            entObj.put("class", className[className.length-1]);
+            entObj.put("name", e.name);
+            entObj.put("x", e.position.xi());
+            entObj.put("y", e.position.yi());
+            entObj.put("w", e.size.xi());
+            entObj.put("h", e.size.yi());
+            entObj.put("texture", e.texture.getPath());
+
+            entObj.put("visible", e.visible);
+            entObj.put("active", e.active);
+            entObj.put("solid", e.solid);
+            entObj.put("locked", e.locked);
+            entObj.put("collidesWithMap", e.collidesWithMap);
+            entObj.put("alive", e.alive);
+
+            if (e instanceof PressurePlate)
+            {
+                entObj.put("force", ((PressurePlate)e).force);
+                entObj.put("recharge", ((PressurePlate)e).recharge);
+            }
+            if (e instanceof LevelExit)
+            {
+                entObj.put("nextLevel", ((LevelExit)e).getNextMap());
+            }
+
+            array.put(place, entObj);
+        }
+
+        return array;
     }
 
     public void loadTextures() {
 
         for (int i = 1; i < Material.materialPath.length; i++) {
             Texture t = new Texture();
-            t.loadTexture(game, Material.materialPath[i] + ".png", 32, 32, Material.materialPath[i] + ".anim");
+            t.loadTexture(game, Material.materialPath[i], 32, 32, true);
             atlas.addTexture(t);
         }
     }
+
 
     public void renderTiles(BufferedImage img) {
 
@@ -175,7 +272,7 @@ public class Map {
             if (tiles[i] == 0) continue;
 
             txt = atlas.getTexture(tiles[i] - 1);
-            if (tiles[i] == Material.WATER) {
+            if (tiles[i] == Material.WATER || tiles[i] == Material.LAVA) {
                 g.drawImage(txt,
                         x * tileSize - cam.scroll.xi(),
                         y * tileSize - cam.scroll.yi() + 6,
@@ -213,6 +310,7 @@ public class Map {
         }
     }
 
+
     public void tick() {
 
         atlas.update();
@@ -234,6 +332,16 @@ public class Map {
         }
     }
 
+
+    public void addDecorative(Decorative dec) {
+        if (decCount >= decoratives.length) {
+            game.logger.err("Decoratives array is full!");
+            return;
+        }
+        decoratives[decCount] = dec;
+        decCount++;
+    }
+
     public void addEntity(Entity e) {
         if (e instanceof Player)
             initPlayer((Player) e);
@@ -252,9 +360,6 @@ public class Map {
         p.spawnLocation = playerStartPos.copy();
         p.position = playerStartPos.copy();
         p.velocity = playerStartVel.copy();
-        playerStartPos = null;
-
-        playerStartVel = null;
     }
 
     public Entity getEntity(String name) {
