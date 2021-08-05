@@ -7,17 +7,35 @@ public class Player extends Entity {
 
     boolean canJump, wantToJump, jumped;
     private Vec2D moving;
-    ParticleEmitter pem;
-
-    private Texture face = new Texture();
-    public int faceIndex = 0;
-    private int respawnTimer, blinkTimer = 100, idleTimer;
     public Vec2D spawnLocation;
 
+    ParticleEmitter pem;
+    private Texture face = new Texture();
+
+    public int faceIndex = 0;
+
+    private int respawnTimer, respawnTime;
+    private int blinkTimer = 100;
+    private int idleTimer;
+
+
+    private int level = 1, maxLevel = 3;
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int nLevel) {
+        this.level = nLevel;
+        if (level > maxLevel)
+            level = maxLevel;
+        if (level < 1)
+            level = 1;
+        loadTexture("player_" + level);
+    }
 
     public Player(Game g, String name, Vec2D pos) {
         super(g, name, pos);
-        size.y = 63;
+        size.y = 64;
         size.x = 32;
         touchHitbox = new Hitbox((int) (pos.x), (int) (pos.y), (int) size.x / 2 * -1, (int) size.y / 2 * -1, (int) size.x * 2, (int) size.y * 2);
         colliderHitbox = new Hitbox((int) pos.x, (int) pos.y, (int) size.x, (int) size.y);
@@ -42,6 +60,8 @@ public class Player extends Entity {
     }
 
     public void die(int respawnTimeTicks) {
+
+
         faceIndex = 2;
         pem.position.x = position.x + size.x / 2;
         pem.position.y = position.y + size.y / 2;
@@ -56,7 +76,8 @@ public class Player extends Entity {
 
         velocity.mult(0);
         position = spawnLocation.copy();
-        respawnTimer = respawnTimeTicks;
+        respawnTimer = respawnTimeTicks/level;
+        respawnTime = respawnTimeTicks/level;
         //game.screenFadingOut = true;
     }
 
@@ -121,6 +142,7 @@ public class Player extends Entity {
             moving.y += speed;
             idleTimer = 0;
         }
+
         if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;
             idleTimer = 0;
@@ -137,12 +159,19 @@ public class Player extends Entity {
         }
     }
 
+
     @Override
     public void render(BufferedImage img, Camera cam) {
+        Graphics g = img.getGraphics();
+        if (!alive)
+        {
+            g.setColor(Color.BLUE);
+            g.fillRect(0,0,  (int)Vec2D.remap(respawnTimer, 0, respawnTime, 0, game.WIDTH), 16);
+        }
+
         if (!visible) return;
         super.render(img, cam);
 
-        Graphics g = img.getGraphics();
         if (face != null)
             g.drawImage(face.getTexture(),
                     position.xi() - cam.scroll.xi(),

@@ -17,7 +17,7 @@ public class Map {
     private byte[] tiles;
     private byte[] backTiles;
     public Entity[] entities = new Entity[16];
-    public Decorative[] decoratives = new Decorative[16];
+    public Decorative[] decoratives = new Decorative[32];
 
     public int getDecCount() {
         return decCount;
@@ -63,7 +63,6 @@ public class Map {
     }
 
 
-
     public Map(Game g, int w, int h, int tSize) {
         width = h;
         height = w;
@@ -106,11 +105,9 @@ public class Map {
 
         String data = "";
         JSONArray grid = new JSONArray();
-        for (int y = 0; y < height; y++)
-        {
+        for (int y = 0; y < height; y++) {
             data = "";
-            for (int x = 0; x < width; x++)
-            {
+            for (int x = 0; x < width; x++) {
                 data += tiles[y * width + x] + ",";
             }
             grid.put(y, data);
@@ -119,11 +116,9 @@ public class Map {
 
 
         JSONArray grid2 = new JSONArray();
-        for (int y = 0; y < height; y++)
-        {
+        for (int y = 0; y < height; y++) {
             data = "";
-            for (int x = 0; x < width; x++)
-            {
+            for (int x = 0; x < width; x++) {
                 data += backTiles[y * width + x] + ",";
             }
             grid2.put(y, data);
@@ -149,14 +144,12 @@ public class Map {
 
     }
 
-    private JSONArray decsToJSON()
-    {
+    private JSONArray decsToJSON() {
         JSONArray array = new JSONArray();
         JSONObject decObj;
 
         int place = -1;
-        for (int i = 0; i < decoratives.length; i++)
-        {
+        for (int i = 0; i < decoratives.length; i++) {
             Decorative d = decoratives[i];
 
             if (d == null) continue;
@@ -176,14 +169,12 @@ public class Map {
         return array;
     }
 
-    private JSONArray entsToJSON()
-    {
+    private JSONArray entsToJSON() {
         JSONArray array = new JSONArray();
         JSONObject entObj;
 
         int place = -1;
-        for (int i = 0; i < entities.length; i++)
-        {
+        for (int i = 0; i < entities.length; i++) {
             Entity e = entities[i];
 
             if (e == null) continue;
@@ -193,7 +184,7 @@ public class Map {
 
             place++;
             String[] className = e.getClass().toString().split("\\.");
-            entObj.put("class", className[className.length-1]);
+            entObj.put("class", className[className.length - 1]);
             entObj.put("name", e.name);
             entObj.put("x", e.position.xi());
             entObj.put("y", e.position.yi());
@@ -208,14 +199,12 @@ public class Map {
             entObj.put("collidesWithMap", e.collidesWithMap);
             entObj.put("alive", e.alive);
 
-            if (e instanceof PressurePlate)
-            {
-                entObj.put("force", ((PressurePlate)e).force);
-                entObj.put("recharge", ((PressurePlate)e).recharge);
+            if (e instanceof PressurePlate) {
+                entObj.put("force", ((PressurePlate) e).force);
+                entObj.put("recharge", ((PressurePlate) e).recharge);
             }
-            if (e instanceof LevelExit)
-            {
-                entObj.put("nextLevel", ((LevelExit)e).getNextMap());
+            if (e instanceof LevelExit) {
+                entObj.put("nextLevel", ((LevelExit) e).getNextMap());
             }
 
             array.put(place, entObj);
@@ -272,12 +261,7 @@ public class Map {
             if (tiles[i] == 0) continue;
 
             txt = atlas.getTexture(tiles[i] - 1);
-            if (tiles[i] == Material.WATER || tiles[i] == Material.LAVA) {
-                g.drawImage(txt,
-                        x * tileSize - cam.scroll.xi(),
-                        y * tileSize - cam.scroll.yi() + 6,
-                        null);
-            } else
+
                 g.drawImage(txt,
                         x * tileSize - cam.scroll.xi(),
                         y * tileSize - cam.scroll.yi(),
@@ -347,6 +331,8 @@ public class Map {
             initPlayer((Player) e);
         for (int i = 0; i < entities.length; i++) {
             if (entities[i] == null) {
+                if (e.name == null || e.name.equals(""))
+                    game.logger.warn("[MAP] Entity added with empty name: " + e.getClass());
                 entities[i] = e;
                 physics.init();
                 game.logger.subInfo("[MAP] Added entity: " + e.getClass());
@@ -357,6 +343,7 @@ public class Map {
     }
 
     public void initPlayer(Player p) {
+        p.setLevel(1);
         p.spawnLocation = playerStartPos.copy();
         p.position = playerStartPos.copy();
         p.velocity = playerStartVel.copy();
@@ -376,5 +363,15 @@ public class Map {
                 if (entities[i].name == name) entities[i] = null;
     }
 
+    /**Only for editor! Don't use it!**/
+    public void removeDecorative(int i) {
+        decoratives[i] = null;
+        decCount--;
+
+        for (int j = i; j < decoratives.length-1; j++)
+        {
+            decoratives[j] = decoratives[j+1];
+        }
+    }
 
 }

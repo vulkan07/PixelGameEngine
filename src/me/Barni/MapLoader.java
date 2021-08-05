@@ -34,7 +34,7 @@ public class MapLoader {
         fullPath = completePath;
 
         try {
-            File file = new File(game.GAME_DIR + "json.map");
+            File file = new File(completePath);
             FileInputStream fis = new FileInputStream(file);
             byte[] data = new byte[(int) file.length()];
             fis.read(data);
@@ -72,6 +72,8 @@ public class MapLoader {
             JSONArray entList = objList.getJSONArray("Entities");
             loadEntities(entList);
 
+            logger.info("[MAP+] Loaded map: " + fullPath);
+            System.out.println();
             return map;
 
         } catch (IOException e) {
@@ -113,6 +115,18 @@ public class MapLoader {
                     pp.recharge = entObj.getInt("recharge");
                     pp.force = entObj.getFloat("force");
                     map.addEntity(pp);
+                    break;
+
+                case "Checkpoint":
+                    Checkpoint cp = new Checkpoint(game, null, new Vec2D());
+                    cp.loadFromEntityData(generalEntityLoader(entObj));
+                    map.addEntity(cp);
+                    break;
+
+                case "Collectable":
+                    Collectable c = new Collectable(game, null, new Vec2D());
+                    c.loadFromEntityData(generalEntityLoader(entObj));
+                    map.addEntity(c);
                     break;
 
                 case "Entity":
