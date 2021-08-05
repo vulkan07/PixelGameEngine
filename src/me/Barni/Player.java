@@ -20,6 +20,7 @@ public class Player extends Entity {
 
 
     private int level = 1, maxLevel = 3;
+
     public int getLevel() {
         return level;
     }
@@ -73,11 +74,14 @@ public class Player extends Entity {
         if (game.mapEditing) return;
         alive = false;
         visible = false;
+        HUDNotification n  = (HUDNotification) game.hud.root.getElement("PlayerNotification");
+        n.message = "You died.";
+        n.show(respawnTimeTicks/level-30);
 
         velocity.mult(0);
         position = spawnLocation.copy();
-        respawnTimer = respawnTimeTicks/level;
-        respawnTime = respawnTimeTicks/level;
+        respawnTimer = respawnTimeTicks / level;
+        respawnTime = respawnTimeTicks / level;
         //game.screenFadingOut = true;
     }
 
@@ -163,10 +167,9 @@ public class Player extends Entity {
     @Override
     public void render(BufferedImage img, Camera cam) {
         Graphics g = img.getGraphics();
-        if (!alive)
-        {
+        if (!alive) {
             g.setColor(Color.BLUE);
-            g.fillRect(0,0,  (int)Vec2D.remap(respawnTimer, 0, respawnTime, 0, game.WIDTH), 16);
+            g.fillRect(0, 0, (int) Vec2D.remap(respawnTimer, 0, respawnTime, 0, game.WIDTH), 16);
         }
 
         if (!visible) return;

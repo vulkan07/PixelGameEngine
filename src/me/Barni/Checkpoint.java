@@ -21,6 +21,11 @@ public class Checkpoint extends Entity {
                 reached = true;
                 loadTexture("check_point");
                 ((Player) other).spawnLocation = position.copy();
+
+
+                HUDNotification n  = (HUDNotification) game.hud.root.getElement("PlayerNotification");
+                n.message = "Checkpoint reached!";
+                n.show(220);
             }
         }
     }

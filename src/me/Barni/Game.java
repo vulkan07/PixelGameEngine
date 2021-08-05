@@ -60,6 +60,7 @@ public class Game extends Canvas implements Runnable {
             "Kick your bot"
             };
 
+    HUD hud;
     MouseHandler mouseHandler;          //Mouse
     KeyboardHandler keyboardHandler;    //Keyboard
     Logger logger;                      //Logger
@@ -157,6 +158,9 @@ public class Game extends Canvas implements Runnable {
         textField = new JTextField();
         window.add(textField);
 
+        hud = new HUD(this);
+        hud.root.add(new HUDNotification(this, "PlayerNotification", "You died.", 30,30));
+
         //ClearBuffer
         clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
         for (int i = 0; i < clearBuffer.length; i++)
@@ -243,6 +247,8 @@ public class Game extends Canvas implements Runnable {
     public void tick() {
         if (intro.isPlayingIntro()) return;
 
+        hud.update();
+
         if (textField.getText().contains(" ")) {
             decorativeEditor.fieldListening = false;
             setFocusable(true);
@@ -325,6 +331,7 @@ public class Game extends Canvas implements Runnable {
 
             decorativeEditor.render(image, map.cam);
 
+            hud.render(image);
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
             //Selected tile
