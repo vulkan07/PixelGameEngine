@@ -1,5 +1,8 @@
 package me.Barni;
 
+import javax.sound.sampled.*;
+import java.io.File;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -7,6 +10,21 @@ public class Main {
         //System.out.println("\\u001B[31m"+"test"); //NOT WORKING for IDEA try to use cmd
         //System.getProperty("user.home");          //Good to get some paths
 
+
+/*
+        try {
+            File yourFile = new File("D:\\Inspire.wav");
+
+            Clip clip = AudioSystem.getClip();
+            clip.open(AudioSystem.getAudioInputStream(yourFile));
+
+            clip.getControls()
+            clip.start();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+*/
 
         Game game;
 
@@ -20,7 +38,7 @@ public class Main {
         else
             game = new Game("C:\\Dev\\");
 
-        game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), 1, false, false, Logger.LOG_SUPER);
+        game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), 1, false, false, Logger.LOG_ALL);
     }
 }
 

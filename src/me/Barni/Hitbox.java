@@ -32,6 +32,13 @@ public class Hitbox {
                 return true;
         return false;
     }
+
+    private boolean smallAABB(Hitbox other, int smaller) {
+        if (!(other.realH - smaller < y || y + h - smaller < other.y))
+            if (!(other.realW - smaller < x || x + w - smaller < other.x))
+                return true;
+        return false;
+    }
     //if (x >= other.x && x <= other.w + other.x || x + w >= other.x && x + w <= other.w + other.x)
     //    if (y >= other.y && y <= other.h + other.y || y + h >= other.y && y + h <= other.h + other.y)
     //        return true;
@@ -42,14 +49,20 @@ public class Hitbox {
         if (other.solidType == 0)
             return true;
 
-        boolean touching = AABB(other);
-        if (other.solidType == 2 && touching) {
-            velocity.limit(2);
+        boolean touching = smallAABB(other, 1);
+
+        if (other.solidType == 2) {
+            if (touching)
+                velocity.limit(2);
             return true;
         }
 
-        if (other.solidType == 3 && touching) {
-            ent.die(20); //120
+        if (other.solidType == 3) {
+            if (ent instanceof Player)
+                if (((Player) ent).getLevel() > 2)
+                    touching = smallAABB(other, 10);
+            if (touching)
+                ent.die(200); //120
             return true;
         }
 
@@ -68,7 +81,7 @@ public class Hitbox {
             //FROM TOP
             if (realH >= other.y && realH < other.realH) {
                 if (velocity.y > 0) {
-                    if (ent instanceof Player) ((Player)ent).canJump = true;
+                    if (ent instanceof Player) ((Player) ent).canJump = true;
                     velocity.y = 0;
                     pos.y = other.y - other.h + (other.h - h);
                     return true;

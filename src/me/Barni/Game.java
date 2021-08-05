@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.Random;
 
 public class Game extends Canvas implements Runnable {
     //public String title;                //Title
@@ -19,6 +20,45 @@ public class Game extends Canvas implements Runnable {
     private int[] buffer, clearBuffer;  //ImageBuffer
     int white = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
     public DecorativeEditor decorativeEditor;
+
+    private Random r = new Random();
+    private String[] titleMsgs = {
+            "ZeroPointerException",
+            "Ereasing C:\\",
+            "Apple.",
+            "Random message",
+            "FLIP THE SAUSAGE!!",
+            "Roses are red, violets are blue, and you're the biggest assh*le",
+            "1 + 1 = 404 not found",
+            "RTX is just good ray casting",
+            "42 I guess!?",
+            "WHY IS IT 3AM ALREADY???",
+            "I don't need sleep. I need answers",
+            "Fucking JSON writer rearranges my file",
+            "DO NOT EVEN THINK ABOUT DOING IT",
+            "The cake is a lie.",
+            "HAHA U DED",
+            "Don't look behind",
+            "Yeah 20% CPU for a hello world",
+            "\"Java works on every pc.\" Not even on my friends'",
+            "Pointers you idiot, pointers!",
+            "C++ in a java app title will un-virgin your oil",
+            "If you know what JFrame is, i'll hug you",
+            "Pass by reference is good",
+            "OpenGL",
+            "Ceremonia Matcha tea tastes awesome",
+            "Yeah my phone is at -1%",
+            "I just wrote ONE LINE, now nothing's working...",
+            "40+ bytes used just for this title",
+            "yeah it has 45 FPS in fullscreen lol",
+            "Trigonometry",
+            "Excel is not a database!",
+            "Hyper text transfer protocol (HTTP)",
+            "I know, this is bad graphics. Still better than pacman, huh?",
+            "I totally have a healthy lifestyle",
+            "That sniper is a spy!",
+            "Kick your bot"
+            };
 
     MouseHandler mouseHandler;          //Mouse
     KeyboardHandler keyboardHandler;    //Keyboard
@@ -62,7 +102,7 @@ public class Game extends Canvas implements Runnable {
         buffer = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
 
         //WINDOW\\
-        window = new JFrame(title);
+        window = new JFrame(title + "  -  " + titleMsgs[r.nextInt(titleMsgs.length-1)]);
         //Fullscreen
         if (fullscreen) {
             window.setUndecorated(true);
@@ -95,7 +135,7 @@ public class Game extends Canvas implements Runnable {
 
         //Map
         MapLoader ml = new MapLoader(this);
-        map = ml.loadMap(GAME_DIR + "01.map");
+        map = ml.loadMap(GAME_DIR + "03.map");
 
         //If map doesnt load, a hardcoded map loads
         if (map == null) {
@@ -108,8 +148,9 @@ public class Game extends Canvas implements Runnable {
 
         //PLAYER
         player = new Player(this, "player", new Vec2D(48, 0));
-        player.loadTexture("player");
+        player.loadTexture("player_1");
         map.addEntity(player);
+
 
         decorativeEditor = new DecorativeEditor(this, map);
 
@@ -134,7 +175,7 @@ public class Game extends Canvas implements Runnable {
         map = ml.loadMap(path);
         map.loadTextures();
         player = new Player(this, "player", new Vec2D(48, 0));
-        player.loadTexture("player");
+        player.loadTexture("player_1");
         map.addEntity(player);
         screenFadingIn = true;
     }
@@ -154,7 +195,7 @@ public class Game extends Canvas implements Runnable {
         logger.info("[GAME] Preferred FPS: " + fps);
         logger.info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
 
-        intro = new Intro(this, "test.png", image);
+        intro = new Intro(this, "logo", image);
         intro.start();
 
         while (running) {
@@ -202,6 +243,11 @@ public class Game extends Canvas implements Runnable {
     public void tick() {
         if (intro.isPlayingIntro()) return;
 
+        if (textField.getText().contains(" ")) {
+            decorativeEditor.fieldListening = false;
+            setFocusable(true);
+            requestFocus();
+        }
         mouseHandler.update();
         map.tick();
         decorativeEditor.tick();
@@ -280,10 +326,7 @@ public class Game extends Canvas implements Runnable {
             decorativeEditor.render(image, map.cam);
 
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-            try {
-                g2d.drawString(textField.getText(), 400, 400);
-            } catch (NullPointerException e) {
-            }
+
             //Selected tile
             if (selectedTileVisible) {
                 g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
@@ -343,11 +386,7 @@ public class Game extends Canvas implements Runnable {
     }
 
 
-    public int colorRangeLimit(int value) {
-        return value > 255 ? 255 : (value < 0 ? 0 : value);
-    }
-
-    public Vec2D vecWithUniqueOrigin(Vec2D o, Vec2D v) {
-        return new Vec2D(v.x - o.x, v.y - o.y);
-    }
+    //public Vec2D vecWithUniqueOrigin(Vec2D o, Vec2D v) {
+    //    return new Vec2D(v.x - o.x, v.y - o.y);
+    //}
 }

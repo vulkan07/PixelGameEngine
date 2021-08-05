@@ -36,7 +36,8 @@ public class Physics {
                 if (other == ent) continue;
 
                 if (ent.colliderHitbox.isColliding(other.colliderHitbox)) {
-                    ent.onTouch(other);
+                    if (!(other instanceof ParticleEmitter))
+                        ent.onTouch(other);
                     if (ent.active && !ent.locked && ent.solid && ent.alive && ent.collidesWithMap)
                         if (other.active && !other.locked && other.solid && other.alive && other.collidesWithMap)
                         ent.colliderHitbox.resolveCollision(other, other.colliderHitbox, ent.velocity, ent.position);

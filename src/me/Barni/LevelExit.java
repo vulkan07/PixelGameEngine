@@ -35,6 +35,6 @@ public class LevelExit extends Entity {
     public void tick()
     {
         if (triggered && game.blankAlpha == 255)
-            game.loadNewMap(nextMap);
+            game.loadNewMap(game.GAME_DIR +  nextMap + ".map");
     }
 }

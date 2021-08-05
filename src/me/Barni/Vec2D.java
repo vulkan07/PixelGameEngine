@@ -157,7 +157,7 @@ public class Vec2D {
         return x * other.x + y * other.y;
     }
 
-    float lerp(float v0, float v1, float t) {
+    static float lerp(float v0, float v1, float t) {
         return (1 - t) * v0 + t * v1;
     }
 
