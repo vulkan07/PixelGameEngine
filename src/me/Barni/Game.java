@@ -136,7 +136,7 @@ public class Game extends Canvas implements Runnable {
 
         //Map
         MapLoader ml = new MapLoader(this);
-        map = ml.loadMap(GAME_DIR + "03.map");
+        map = ml.loadMap(GAME_DIR + "01.map");
 
         //If map doesnt load, a hardcoded map loads
         if (map == null) {

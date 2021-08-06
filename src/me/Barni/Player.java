@@ -14,9 +14,10 @@ public class Player extends Entity {
 
     public int faceIndex = 0;
 
-    private int respawnTimer, respawnTime;
+    private int respawnTimer, respawnTime, reducedRespawnTime = 1;
     private int blinkTimer = 100;
     private int idleTimer;
+    private int deaths;
 
 
     private int level = 1, maxLevel = 3;
@@ -31,6 +32,7 @@ public class Player extends Entity {
             level = maxLevel;
         if (level < 1)
             level = 1;
+        reducedRespawnTime = 1;
         loadTexture("player_" + level);
     }
 
@@ -72,16 +74,23 @@ public class Player extends Entity {
 
 
         if (game.mapEditing) return;
+        deaths++;
         alive = false;
         visible = false;
-        HUDNotification n  = (HUDNotification) game.hud.root.getElement("PlayerNotification");
-        n.message = "You died.";
-        n.show(respawnTimeTicks/level-30);
-
+        HUDNotification n = (HUDNotification) game.hud.root.getElement("PlayerNotification");
+        if (deaths == 20 && level == 1) {
+            n.message = "Calm down! Reducing respawn time";
+            reducedRespawnTime = 2;
+            n.show(220);
+        }
+        else {
+            n.message = "Deaths: " + deaths;
+            n.show(180);
+        }
         velocity.mult(0);
         position = spawnLocation.copy();
-        respawnTimer = respawnTimeTicks / level;
-        respawnTime = respawnTimeTicks / level;
+        respawnTimer = respawnTimeTicks / level / reducedRespawnTime;
+        respawnTime = respawnTimeTicks / level / reducedRespawnTime;
         //game.screenFadingOut = true;
     }
 
