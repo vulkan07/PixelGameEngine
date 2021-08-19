@@ -114,7 +114,7 @@ public class Hitbox {
     }
 
     public boolean isColliding(Hitbox other) {
-        return AABB(other) || other.AABB(this);
+        return smallAABB(other, 1) || other.smallAABB(this, 1);
     }
 
     public boolean isCollidingWithAny(Hitbox[] others) {

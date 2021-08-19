@@ -46,7 +46,7 @@ public class Logger {
 
     public void err(String msg) {
         if (logLevel >= 1)
-            System.out.println("[X] " + msg);
+            System.err.println("[X] " + msg);
     }
 
     public void info(String msg) {

@@ -3,7 +3,6 @@ package me.Barni;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
@@ -24,11 +23,25 @@ public class Map {
     }
 
     private int decCount = 0;
+
+    private String title;
+    private Color bgColor;
     public Vec2D playerStartPos = new Vec2D(), playerStartVel = new Vec2D();
 
 
     Camera cam;
     BufferedImage txt;
+
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setBackGroundColor(Color c) {
+        bgColor = c;
+        for (int i = 0; i < game.clearBuffer.length; i++)
+            game.clearBuffer[i] = bgColor.getRGB();
+    }
 
     public byte getBackTile(int i) {
         return backTiles[i];
@@ -99,6 +112,11 @@ public class Map {
         mapObj.put("version", MapLoader.validMapHeader);
         mapObj.put("sizeX", width);
         mapObj.put("sizeY", height);
+        if (bgColor.getRGB() != game.white)
+        {
+            String cData = bgColor.getRed() + "," + bgColor.getGreen() + "," +bgColor.getBlue();
+            mapObj.put("backGround", cData);
+        }
 
         mapObj.put("spawnPos", playerStartPos.xi() + "," + playerStartPos.yi());
         mapObj.put("spawnVel", playerStartVel.xi() + "," + playerStartVel.yi());
@@ -262,10 +280,10 @@ public class Map {
 
             txt = atlas.getTexture(tiles[i] - 1);
 
-                g.drawImage(txt,
-                        x * tileSize - cam.scroll.xi(),
-                        y * tileSize - cam.scroll.yi(),
-                        null);
+            g.drawImage(txt,
+                    x * tileSize - cam.scroll.xi(),
+                    y * tileSize - cam.scroll.yi(),
+                    null);
             //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
         }
 
@@ -363,14 +381,15 @@ public class Map {
                 if (entities[i].name == name) entities[i] = null;
     }
 
-    /**Only for editor! Don't use it!**/
+    /**
+     * Only for editor! Don't use it!
+     **/
     public void removeDecorative(int i) {
         decoratives[i] = null;
         decCount--;
 
-        for (int j = i; j < decoratives.length-1; j++)
-        {
-            decoratives[j] = decoratives[j+1];
+        for (int j = i; j < decoratives.length - 1; j++) {
+            decoratives[j] = decoratives[j + 1];
         }
     }
 

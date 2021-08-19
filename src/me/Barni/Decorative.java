@@ -1,5 +1,6 @@
 package me.Barni;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Decorative {
@@ -28,6 +29,7 @@ public class Decorative {
     }
 
     public void render(BufferedImage img, Camera cam) {
-        img.getGraphics().drawImage(texture.getTexture(), (int)(x - cam.scroll.xi()*parallax), (int)(y - cam.scroll.yi()*parallax), w, h, null);
+        Graphics g = img.getGraphics();
+        g.drawImage(texture.getTexture(), (int)(x - cam.scroll.xi()*parallax), (int)(y - cam.scroll.yi()*parallax), w, h, null);
     }
 }

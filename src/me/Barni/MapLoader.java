@@ -4,6 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.awt.*;
 import java.io.*;
 
 
@@ -21,7 +22,6 @@ public class MapLoader {
         this.game = game;
         this.logger = game.logger;
     }
-
 
 
     /**
@@ -44,8 +44,7 @@ public class MapLoader {
             JSONObject jobj = new JSONObject(str);
             JSONObject mapObj = jobj.getJSONObject("bmap");
 
-            if (mapObj.getDouble("version") != validMapHeader)
-            {
+            if (mapObj.getDouble("version") != validMapHeader) {
                 fail("Invalid map version!");
                 return null;
             }
@@ -71,6 +70,17 @@ public class MapLoader {
 
             JSONArray entList = objList.getJSONArray("Entities");
             loadEntities(entList);
+
+            if (mapObj.has("backGround")) {
+                String[] cData = mapObj.getString("backGround").split(",");
+                map.setBackGroundColor(new Color(
+                        Integer.parseInt(cData[0]),
+                        Integer.parseInt(cData[1]),
+                        Integer.parseInt(cData[2]))
+                );
+            } else {
+                map.setBackGroundColor(new Color(game.white));
+            }
 
             logger.info("[MAP+] Loaded map: " + fullPath);
             System.out.println();

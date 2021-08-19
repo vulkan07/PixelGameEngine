@@ -8,7 +8,7 @@ import java.awt.image.DataBufferInt;
 import java.util.Random;
 
 public class Game extends Canvas implements Runnable {
-    //public String title;                //Title
+    //public String title;               //Title
     public int WIDTH, HEIGHT;           //Size
     public int PX_SIZE;                 //For pixel art: 2 or 4, for normal: 1
     private boolean running = false;    //Running
@@ -17,7 +17,8 @@ public class Game extends Canvas implements Runnable {
 
     public JFrame window;               //Window
     private BufferedImage image;        //Image
-    private int[] buffer, clearBuffer;  //ImageBuffer
+    private int[] buffer;  //ImageBuffer
+    public int[] clearBuffer;  //Background
     int white = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
     public DecorativeEditor decorativeEditor;
 
@@ -30,29 +31,40 @@ public class Game extends Canvas implements Runnable {
             "FLIP THE SAUSAGE!!",
             "Roses are red, violets are blue, and you're the biggest assh*le",
             "1 + 1 = 404 not found",
-            "RTX is just good ray casting",
+            "RTX is just good ray CASTING",
             "42 I guess!?",
             "WHY IS IT 3AM ALREADY???",
-            "I don't need sleep. I need answers",
-            "Fucking JSON writer rearranges my file",
+            "I don't need sleep. I need answers.",
+            "Fucking JSON writer rearranged my files",
             "DO NOT EVEN THINK ABOUT DOING IT",
             "The cake is a lie.",
             "HAHA U DED",
-            "Don't look behind",
+            "Right behind you",
             "Yeah 20% CPU for a hello world",
             "\"Java works on every pc.\" Not even on my friends'",
-            "Pointers you idiot, pointers!",
-            "C++ in a java app title will un-virgin your oil",
-            "If you know what JFrame is, i'll hug you",
-            "Pass by reference is good",
+            "Pointers you idiot! Pointers!",
+            "C++ in a java window title will un-virgin your oil",
+            "If you know what JFrame is, i'll marry you",
+            "Passing by reference is good",
             "OpenGL",
-            "Ceremonia Matcha tea tastes awesome",
+            "DirectX",
+            "Ceremonia Matcha",
+            "Jon Hopkins - Circle",
+            "Vessel",
+            "Chemically unstable Fluros in the orchard",
+            "When life gives you lemons...",
             "Yeah my phone is at -1%",
             "I just wrote ONE LINE, now nothing's working...",
-            "40+ bytes used just for this title",
-            "yeah it has 45 FPS in fullscreen lol",
+            "500+ bytes used just for this title",
+            "yeah this has 45 FPS in fullscreen lol",
             "Trigonometry",
+            "\"And that initializes the vertex buffers...\"",
             "Excel is not a database!",
+            "DO NOT LEARN C++",
+            "#Programming memes in my titles",
+            ":wqa!",
+            "CTRL + ALT + SHIFT + S",
+            "for (int c = 0; c < 10; c++)",
             "Hyper text transfer protocol (HTTP)",
             "I know, this is bad graphics. Still better than pacman, huh?",
             "I totally have a healthy lifestyle",
@@ -61,10 +73,10 @@ public class Game extends Canvas implements Runnable {
             };
 
     HUD hud;
-    MouseHandler mouseHandler;          //Mouse
-    KeyboardHandler keyboardHandler;    //Keyboard
-    Logger logger;                      //Logger
-    Map map;                            //Map
+    MouseHandler mouseHandler;
+    KeyboardHandler keyboardHandler;
+    Logger logger;
+    Map map;
     Player player;
 
     public final String GAME_DIR;
@@ -123,6 +135,11 @@ public class Game extends Canvas implements Runnable {
         //BufferStrategy
         createBufferStrategy(2);
 
+        //ClearBuffer (backGround)
+        clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
+        for (int i = 0; i < clearBuffer.length; i++)
+            clearBuffer[i] = white;
+
 
         //Utility
         this.logger = new Logger(logLevel);
@@ -155,16 +172,14 @@ public class Game extends Canvas implements Runnable {
 
         decorativeEditor = new DecorativeEditor(this, map);
 
+        intro = new Intro(this, "logo", image);
+        intro.start();
+
         textField = new JTextField();
         window.add(textField);
 
         hud = new HUD(this);
         hud.root.add(new HUDNotification(this, "PlayerNotification", "You died.", 30,30));
-
-        //ClearBuffer
-        clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
-        for (int i = 0; i < clearBuffer.length; i++)
-            clearBuffer[i] = white;
 
 
         //Actual start
@@ -199,8 +214,6 @@ public class Game extends Canvas implements Runnable {
         logger.info("[GAME] Preferred FPS: " + fps);
         logger.info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
 
-        intro = new Intro(this, "logo", image);
-        intro.start();
 
         while (running) {
 
