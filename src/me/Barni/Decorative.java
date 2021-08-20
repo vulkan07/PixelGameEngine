@@ -1,5 +1,7 @@
 package me.Barni;
 
+import me.Barni.texture.Texture;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 

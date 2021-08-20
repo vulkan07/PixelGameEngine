@@ -1,4 +1,9 @@
-package me.Barni;
+package me.Barni.physics;
+
+import me.Barni.Map;
+import me.Barni.Material;
+import me.Barni.entity.childs.Player;
+import me.Barni.entity.Entity;
 
 public class Hitbox {
 
@@ -39,12 +44,13 @@ public class Hitbox {
                 return true;
         return false;
     }
-    //if (x >= other.x && x <= other.w + other.x || x + w >= other.x && x + w <= other.w + other.x)
-    //    if (y >= other.y && y <= other.h + other.y || y + h >= other.y && y + h <= other.h + other.y)
-    //        return true;
 
+    void handleTileCollisionForEntities(Entity ent, Hitbox other)
+    {
 
-    public boolean resolveCollision(Entity ent, Hitbox other, Vec2D velocity, Vec2D pos) {
+    }
+
+    public boolean resolveTileVSEntityCollision(Entity ent, Hitbox other) {
 
         if (other.solidType == 0)
             return true;
@@ -53,7 +59,7 @@ public class Hitbox {
 
         if (other.solidType == 2) {
             if (touching)
-                velocity.limit(2);
+                ent.velocity.limit(2);
             return true;
         }
 
@@ -71,19 +77,19 @@ public class Hitbox {
 
             //FROM BOTTOM
             if (y <= other.realH && y > other.y) {
-                if (velocity.y < 0) {
-                    velocity.y = 0;
-                    pos.y = other.realH;
+                if (ent.velocity.y < 0) {
+                    ent.velocity.y = 0;
+                    ent.position.y = other.realH;
                     return true;
                 }
             }
 
             //FROM TOP
             if (realH >= other.y && realH < other.realH) {
-                if (velocity.y > 0) {
-                    if (ent instanceof Player) ((Player) ent).canJump = true;
-                    velocity.y = 0;
-                    pos.y = other.y - other.h + (other.h - h);
+                if (ent.velocity.y > 0) {
+                    if (ent instanceof Player) ((Player) ent).setCanJump(true);
+                    ent.velocity.y = 0;
+                    ent.position.y = other.y - other.h + (other.h - h);
                     return true;
                 }
             }
@@ -94,18 +100,18 @@ public class Hitbox {
 
             //FROM LEFT
             if (realW >= other.x && realW < other.realW) {
-                if (velocity.x > 0) {
-                    velocity.x = 0;
-                    pos.x = other.x - other.w + (other.w - w);
+                if (ent.velocity.x > 0) {
+                    ent.velocity.x = 0;
+                    ent.position.x = other.x - other.w + (other.w - w);
                     return true;
                 }
             }
 
             //FROM RIGHT
             if (x <= other.realW && x > other.x) {
-                if (velocity.x < 0) {
-                    velocity.x = 0;
-                    pos.x = other.realW;
+                if (ent.velocity.x < 0) {
+                    ent.velocity.x = 0;
+                    ent.position.x = other.realW;
                     return true;
                 }
             }
@@ -123,14 +129,6 @@ public class Hitbox {
                 if (AABB(h))
                     return true;
         return false;
-    }
-
-    //OLD BECAUSE DOESN'T HANDLE OFFSET
-    private void move(Vec2D m) {
-        x += (int) m.x;
-        y += (int) m.y;
-        realW += (int) m.x;
-        realH += (int) m.y;
     }
 
     public void update(Vec2D newPos) {

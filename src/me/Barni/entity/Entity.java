@@ -1,20 +1,51 @@
-package me.Barni;
+package me.Barni.entity;
+
+import me.Barni.*;
+import me.Barni.physics.Hitbox;
+import me.Barni.physics.Vec2D;
+import me.Barni.texture.Texture;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class Entity {
+public abstract class Entity {
 
-    Game game;
+    protected Game game;
     public String name;
 
     public Vec2D position, size, velocity, gravity;
     public float speed, resistance;
     public boolean visible, active, solid, locked, collidesWithMap, alive;
 
+
     protected Hitbox touchHitbox;
     protected Hitbox colliderHitbox;
     public Texture texture;
+    private int mapID = -1;
+
+
+    public Hitbox getTouchHitbox() {
+        return touchHitbox;
+    }
+
+    public Hitbox getColliderHitbox() {
+        return colliderHitbox;
+    }
+
+    public int getID()
+    {
+        return mapID;
+    }
+
+    public void setID(int id)
+    {
+        if (mapID != -1)
+        {
+            game.logger.err("[ENT] ID already set!");
+            return;
+        }
+        mapID = id;
+    }
 
     //====CONSTRUCTOR====\\
     public Entity(Game g, String name) {

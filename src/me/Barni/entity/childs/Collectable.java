@@ -1,5 +1,10 @@
-package me.Barni;
+package me.Barni.entity.childs;
 
+
+import me.Barni.Game;
+import me.Barni.entity.Entity;
+import me.Barni.hud.HUDNotification;
+import me.Barni.physics.Vec2D;
 
 public class Collectable extends Entity {
 
@@ -24,7 +29,7 @@ public class Collectable extends Entity {
             Player p = (Player) other;
             p.setLevel(p.getLevel() + 1);
             visible = false;
-            HUDNotification n = (HUDNotification) game.hud.root.getElement("PlayerNotification");
+            HUDNotification n = (HUDNotification) game.getHud().getRoot().getElement("PlayerNotification");
             n.message = "Player level ugraded (" + p.getLevel() + "/3)";
             n.show(220);
         }

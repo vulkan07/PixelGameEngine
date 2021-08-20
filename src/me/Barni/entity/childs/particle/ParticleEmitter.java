@@ -1,4 +1,9 @@
-package me.Barni;
+package me.Barni.entity.childs.particle;
+
+import me.Barni.Camera;
+import me.Barni.Game;
+import me.Barni.entity.Entity;
+import me.Barni.physics.Vec2D;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

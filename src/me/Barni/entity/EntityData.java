@@ -1,4 +1,7 @@
-package me.Barni;
+package me.Barni.entity;
+
+import me.Barni.texture.Texture;
+import me.Barni.physics.Vec2D;
 
 public class EntityData {
     public String name;

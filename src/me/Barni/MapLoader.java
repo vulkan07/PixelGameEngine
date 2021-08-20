@@ -1,5 +1,12 @@
 package me.Barni;
 
+import me.Barni.entity.*;
+import me.Barni.entity.childs.Checkpoint;
+import me.Barni.entity.childs.Collectable;
+import me.Barni.entity.childs.LevelExit;
+import me.Barni.entity.childs.PressurePlate;
+import me.Barni.physics.Vec2D;
+import me.Barni.texture.Texture;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

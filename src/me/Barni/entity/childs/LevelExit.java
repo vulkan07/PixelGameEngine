@@ -1,4 +1,9 @@
-package me.Barni;
+package me.Barni.entity.childs;
+
+import me.Barni.Game;
+import me.Barni.entity.Entity;
+import me.Barni.physics.Hitbox;
+import me.Barni.physics.Vec2D;
 
 public class LevelExit extends Entity {
 

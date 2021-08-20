@@ -1,11 +1,14 @@
 package me.Barni;
 
+import me.Barni.physics.Hitbox;
+import me.Barni.physics.Vec2D;
+
 public class Camera {
 
-    Vec2D scroll, view;
-    Hitbox visibleArea;
+    public Vec2D scroll, view;
+    private Hitbox visibleArea;
     private Vec2D target;
-    Game game;
+    private Game game;
     Map map;
     float lerp = .05f;
     float zoom = 1f;

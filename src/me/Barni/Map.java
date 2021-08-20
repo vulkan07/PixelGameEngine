@@ -1,5 +1,13 @@
 package me.Barni;
 
+import me.Barni.entity.Entity;
+import me.Barni.entity.childs.LevelExit;
+import me.Barni.entity.childs.Player;
+import me.Barni.entity.childs.PressurePlate;
+import me.Barni.physics.Physics;
+import me.Barni.physics.Vec2D;
+import me.Barni.texture.Texture;
+import me.Barni.texture.TextureAtlas;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -352,6 +360,7 @@ public class Map {
                 if (e.name == null || e.name.equals(""))
                     game.logger.warn("[MAP] Entity added with empty name: " + e.getClass());
                 entities[i] = e;
+                e.setID(i);
                 physics.init();
                 game.logger.subInfo("[MAP] Added entity: " + e.getClass());
                 return;

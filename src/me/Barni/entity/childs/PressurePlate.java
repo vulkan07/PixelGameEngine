@@ -1,12 +1,17 @@
-package me.Barni;
+package me.Barni.entity.childs;
 
-import java.awt.image.BufferedImage;
+import me.Barni.Game;
+import me.Barni.entity.Entity;
+import me.Barni.physics.Hitbox;
+import me.Barni.texture.Texture;
+import me.Barni.physics.Vec2D;
 
 public class PressurePlate extends Entity {
 
+    private int timer = 0;
 
-    int timer = 0, recharge = 100;
-    float force = 15f;
+    public int recharge = 100;
+    public float force = 15f;
 
     public PressurePlate(Game g, String name, Vec2D pos) {
         super(g, name, pos);
@@ -28,10 +33,10 @@ public class PressurePlate extends Entity {
 
 
         if (timer == recharge - 10)
-            texture.frame = 2;
+            texture.setFrame(2);
 
         if (timer == recharge - 20)
-            texture.frame = 0;
+            texture.setFrame(2);
 
     }
 
@@ -41,7 +46,7 @@ public class PressurePlate extends Entity {
             other.velocity.x = 0;
             other.position.x = position.x;
             timer += recharge;
-            texture.frame = 1;
+            texture.setFrame(1);
         }
     }
 

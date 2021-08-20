@@ -1,4 +1,6 @@
-package me.Barni;
+package me.Barni.texture;
+
+import me.Barni.Game;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -10,7 +12,32 @@ public class Texture {
 
     private boolean animated;
     public BufferedImage[] textures;
-    int width, height, counter, frame, frames;
+    private int width;
+    private int height;
+    private int counter;
+    private int frame;
+
+    public int getFrame() {
+        return frame;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setFrame(int frame) {
+        if (frame > frameCount - 1)
+            frame = frameCount - 1;
+        if (frame < 0)
+            frame = 0;
+        this.frame = frame;
+    }
+
+    private int frameCount;
     public int[] delay;
     private String path, bonusPath = "textures\\";
 
@@ -63,8 +90,8 @@ public class Texture {
             //SPLIT UP & SET frames TO RIGHT AMOUNT
             String[] numsStr = delayStr.split(",");
             game.logger.subInfo("[TEXTURE] .anim frame count: " + numsStr.length);
-            frames = numsStr.length;
-            delay = new int[frames];
+            frameCount = numsStr.length;
+            delay = new int[frameCount];
             animated = true;
 
             //PARSE STRINGS TO NUMBERS -> delay[]
@@ -75,12 +102,12 @@ public class Texture {
                 } catch (NumberFormatException nfe) {
                     game.logger.err("[TEXTURE] Invalid number format in .anim file");
                     animated = false;
-                    frames = 1;
+                    frameCount = 1;
                 }
             }
 
         } else {
-            frames = 1;
+            frameCount = 1;
             animated = false;
             delay = null;
         }
@@ -90,11 +117,11 @@ public class Texture {
         textures[0] = fullImg;
 
         if (animated) {
-            textures = new BufferedImage[frames];
-            for (int i = 0; i < frames; i++) {
+            textures = new BufferedImage[frameCount];
+            for (int i = 0; i < frameCount; i++) {
 
                 int[] px = fullImg.getRGB(width * i, 0, w, h, null, 0, w * h);
-                BufferedImage img = new BufferedImage(fullImg.getWidth() / frames, h, BufferedImage.TYPE_INT_ARGB);
+                BufferedImage img = new BufferedImage(fullImg.getWidth() / frameCount, h, BufferedImage.TYPE_INT_ARGB);
                 img.setRGB(0, 0, w, h, px, 0, w * h);
 
                 textures[i] = img;

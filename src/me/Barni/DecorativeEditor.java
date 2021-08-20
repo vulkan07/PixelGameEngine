@@ -1,5 +1,7 @@
 package me.Barni;
 
+import me.Barni.physics.Vec2D;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 

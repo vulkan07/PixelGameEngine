@@ -1,4 +1,6 @@
-package me.Barni;
+package me.Barni.entity.childs.particle;
+
+import me.Barni.physics.Vec2D;
 
 public class Particle {
 

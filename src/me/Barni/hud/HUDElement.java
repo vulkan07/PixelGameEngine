@@ -1,4 +1,6 @@
-package me.Barni;
+package me.Barni.hud;
+
+import me.Barni.Game;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,8 +13,9 @@ public class HUDElement {
     protected String name;
     public Game game;
     public Color color;
-    protected int x, y, w, h;
+    protected float x, y, w, h;
     protected boolean visible;
+
 
     public HUDElement(Game g, String name, int x, int y, int w, int h) {
         this.game = g;
@@ -21,7 +24,7 @@ public class HUDElement {
         this.y = y;
         this.w = w;
         this.h = h;
-        this.color = new Color(0,0,0,100);
+        this.color = new Color(0, 0, 0, 100);
         this.visible = true;
 
     }
@@ -32,6 +35,10 @@ public class HUDElement {
 
     public boolean isVisible() {
         return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     public void add(HUDElement elem) {
@@ -46,6 +53,7 @@ public class HUDElement {
             }
         }
     }
+
     public HUDElement getElement(String name) {
         for (int i = 0; i < childs.size(); i++) {
             if (childs.get(i).name.equals(name)) {
@@ -55,21 +63,17 @@ public class HUDElement {
         return null;
     }
 
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
 
-
-    public void setPosition(int x, int y) {
+    public void setPosition(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
 
-    public int getY() {
+    public float getY() {
         return y;
     }
 
@@ -78,11 +82,11 @@ public class HUDElement {
         this.h = h;
     }
 
-    public int getWidth() {
+    public float getWidth() {
         return w;
     }
 
-    public int getHeight() {
+    public float getHeight() {
         return h;
     }
 

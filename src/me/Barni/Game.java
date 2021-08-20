@@ -1,6 +1,11 @@
 package me.Barni;
 
 
+import me.Barni.entity.childs.Player;
+import me.Barni.hud.HUD;
+import me.Barni.hud.HUDNotification;
+import me.Barni.physics.Vec2D;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -72,11 +77,15 @@ public class Game extends Canvas implements Runnable {
             "Kick your bot"
             };
 
+    public HUD getHud() {
+        return hud;
+    }
+
     HUD hud;
-    MouseHandler mouseHandler;
-    KeyboardHandler keyboardHandler;
-    Logger logger;
-    Map map;
+    public MouseHandler mouseHandler;
+    public KeyboardHandler keyboardHandler;
+    public Logger logger;
+    public Map map;
     Player player;
 
     public final String GAME_DIR;
@@ -95,6 +104,10 @@ public class Game extends Canvas implements Runnable {
 
     public Game(String wDir) {
         GAME_DIR = wDir;
+    }
+
+    public Font getDefaultFont() {
+        return defaultFont;
     }
 
     public synchronized void start(String title, int w, int h, int px_size, boolean fullscreen, boolean resizeable, byte logLevel) {
@@ -179,7 +192,7 @@ public class Game extends Canvas implements Runnable {
         window.add(textField);
 
         hud = new HUD(this);
-        hud.root.add(new HUDNotification(this, "PlayerNotification", "You died.", 30,30));
+        hud.getRoot().add(new HUDNotification(this, "PlayerNotification", "You died.", 16,30));
 
 
         //Actual start

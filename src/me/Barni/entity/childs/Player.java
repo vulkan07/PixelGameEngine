@@ -1,11 +1,29 @@
-package me.Barni;
+package me.Barni.entity.childs;
+
+import me.Barni.Camera;
+import me.Barni.Game;
+import me.Barni.KeyboardHandler;
+import me.Barni.entity.Entity;
+import me.Barni.entity.childs.particle.ParticleEmitter;
+import me.Barni.hud.HUDNotification;
+import me.Barni.physics.Hitbox;
+import me.Barni.physics.Vec2D;
+import me.Barni.texture.Texture;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 
-    boolean canJump, wantToJump, jumped;
+    public boolean canJump() {
+        return canJump;
+    }
+
+    public void setCanJump(boolean canJump) {
+        this.canJump = canJump;
+    }
+
+    private boolean canJump, wantToJump, jumped;
     private Vec2D moving;
     public Vec2D spawnLocation;
 
@@ -77,16 +95,16 @@ public class Player extends Entity {
         deaths++;
         alive = false;
         visible = false;
-        HUDNotification n = (HUDNotification) game.hud.root.getElement("PlayerNotification");
+        HUDNotification n = (HUDNotification) game.getHud().getRoot().getElement("PlayerNotification");
         if (deaths == 20 && level == 1) {
             n.message = "Calm down! Reducing respawn time";
             reducedRespawnTime = 2;
             n.show(220);
-        }
-        else {
+        } else {
             n.message = "Deaths: " + deaths;
             n.show(180);
         }
+
         velocity.mult(0);
         position = spawnLocation.copy();
         respawnTimer = respawnTimeTicks / level / reducedRespawnTime;
@@ -103,7 +121,7 @@ public class Player extends Entity {
     @Override
     public void tick() {
         super.tick();
-        face.frame = faceIndex;
+        face.setFrame(faceIndex);
         idleTimer++;
 
         if (idleTimer > 2000)

@@ -1,5 +1,7 @@
 package me.Barni;
 
+import me.Barni.texture.Texture;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -21,8 +23,8 @@ public class Intro {
         this.game = game;
         t = new Texture();
         t.loadTexture(game, imgPath, 794, 734, false);
-        xPos = game.WIDTH / 2 - t.width / 2;
-        yPos = game.HEIGHT / 2 - t.height / 2;
+        xPos = game.WIDTH / 2 - t.getWidth() / 2;
+        yPos = game.HEIGHT / 2 - t.getHeight() / 2;
     }
 
     public void start() {

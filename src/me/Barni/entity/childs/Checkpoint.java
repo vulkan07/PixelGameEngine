@@ -1,4 +1,9 @@
-package me.Barni;
+package me.Barni.entity.childs;
+
+import me.Barni.Game;
+import me.Barni.entity.Entity;
+import me.Barni.hud.HUDNotification;
+import me.Barni.physics.Vec2D;
 
 public class Checkpoint extends Entity {
 
@@ -23,7 +28,7 @@ public class Checkpoint extends Entity {
                 ((Player) other).spawnLocation = position.copy();
 
 
-                HUDNotification n  = (HUDNotification) game.hud.root.getElement("PlayerNotification");
+                HUDNotification n  = (HUDNotification) game.getHud().getRoot().getElement("PlayerNotification");
                 n.message = "Checkpoint reached!";
                 n.show(220);
             }

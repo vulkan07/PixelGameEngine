@@ -1,4 +1,6 @@
-package me.Barni;
+package me.Barni.texture;
+
+import me.Barni.Game;
 
 import java.awt.image.BufferedImage;
 

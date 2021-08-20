@@ -1,4 +1,9 @@
-package me.Barni;
+package me.Barni.physics;
+
+import me.Barni.Game;
+import me.Barni.Map;
+import me.Barni.entity.Entity;
+import me.Barni.entity.childs.particle.ParticleEmitter;
 
 public class Physics {
 
@@ -35,12 +40,12 @@ public class Physics {
                 if (other == null) continue;
                 if (other == ent) continue;
 
-                if (ent.colliderHitbox.isColliding(other.colliderHitbox)) {
+                if (ent.getColliderHitbox().isColliding(other.getColliderHitbox())) {
                     if (!(other instanceof ParticleEmitter))
                         ent.onTouch(other);
                     if (ent.active && !ent.locked && ent.solid && ent.alive && ent.collidesWithMap)
                         if (other.active && !other.locked && other.solid && other.alive && other.collidesWithMap)
-                        ent.colliderHitbox.resolveCollision(other, other.colliderHitbox, ent.velocity, ent.position);
+                        ent.getColliderHitbox().resolveTileVSEntityCollision(other, other.getColliderHitbox());
                 }
             }
 
@@ -53,23 +58,23 @@ public class Physics {
 
 
             //Resolve collision: Entity VS map
-            Hitbox[] hList = ent.touchHitbox.touchingMapTiles(map);
+            Hitbox[] hList = ent.getTouchHitbox().touchingMapTiles(map);
             for (int i = 0; i < hList.length - 1; i++) {
 
                 ent.position.lowLimit(0);
-                if (ent.position.x + ent.colliderHitbox.w > boundX)
-                    ent.position.x = boundX - ent.colliderHitbox.w;
+                if (ent.position.x + ent.getColliderHitbox().w > boundX)
+                    ent.position.x = boundX - ent.getColliderHitbox().w;
                 if (ent.position.y > boundY)
                     ent.die(120);
 
                 //if (ent.touchHitbox.isCollidingWithAny(hList))
                 if (hList[i] != null)
-                    ent.colliderHitbox.resolveCollision(ent, hList[i], ent.velocity, ent.position);
+                    ent.getColliderHitbox().resolveTileVSEntityCollision(ent, hList[i]);
             }
 
 
-            ent.touchHitbox.update(ent.position);
-            ent.colliderHitbox.update(ent.position);
+            ent.getTouchHitbox().update(ent.position);
+            ent.getColliderHitbox().update(ent.position);
         }
     }
 }
