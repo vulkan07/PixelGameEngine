@@ -4,6 +4,7 @@ import me.Barni.Camera;
 import me.Barni.Game;
 import me.Barni.KeyboardHandler;
 import me.Barni.entity.Entity;
+import me.Barni.hud.HUDButton;
 import me.Barni.particle.ParticleData;
 import me.Barni.hud.HUDNotification;
 import me.Barni.particle.render.BloodParticleRenderer;
@@ -70,12 +71,11 @@ public class Player extends Entity {
 
         pData.moveForceMin = new Vec2D(-7, -7);
         pData.moveForceMax = new Vec2D(7, 7);
-        pData.emitting = true;
+        pData.emitting = false;
         pData.max_particles = 128;
         pData.noise = 2;
         pData.lifespanMin = 16;
         pData.lifespanMax = 92;
-
 
         pem = new ParticleEmitter(
                 game,

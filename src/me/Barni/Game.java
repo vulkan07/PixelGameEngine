@@ -3,6 +3,7 @@ package me.Barni;
 
 import me.Barni.entity.childs.Player;
 import me.Barni.hud.HUD;
+import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
 import me.Barni.physics.Vec2D;
 
@@ -75,7 +76,7 @@ public class Game extends Canvas implements Runnable {
             "I totally have a healthy lifestyle",
             "That sniper is a spy!",
             "Kick your bot"
-            };
+    };
 
     public HUD getHud() {
         return hud;
@@ -128,7 +129,7 @@ public class Game extends Canvas implements Runnable {
         buffer = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
 
         //WINDOW\\
-        window = new JFrame(title + "  -  " + titleMsgs[r.nextInt(titleMsgs.length-1)]);
+        window = new JFrame(title + "  -  " + titleMsgs[r.nextInt(titleMsgs.length - 1)]);
         //Fullscreen
         if (fullscreen) {
             window.setUndecorated(true);
@@ -192,8 +193,11 @@ public class Game extends Canvas implements Runnable {
         window.add(textField);
 
         hud = new HUD(this);
-        hud.getRoot().add(new HUDNotification(this, "PlayerNotification", "You died.", 16,30));
+        hud.getRoot().add(new HUDNotification(this, "PlayerNotification", "You died.", 16, 30));
 
+        hud.getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
+        ((HUDButton) hud.getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
+        ((HUDButton) hud.getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
 
         //Actual start
         running = true;
@@ -360,12 +364,14 @@ public class Game extends Canvas implements Runnable {
             hud.render(image);
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
+            /*
             //Selected tile
             if (selectedTileVisible) {
                 g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
                 g.fillRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 32, 32);
                 g.drawRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 31, 31);
             }
+            */
 
 
             //Selected tile type
