@@ -4,8 +4,9 @@ import me.Barni.Camera;
 import me.Barni.Game;
 import me.Barni.KeyboardHandler;
 import me.Barni.entity.Entity;
-import me.Barni.entity.childs.particle.ParticleEmitter;
+import me.Barni.particle.ParticleData;
 import me.Barni.hud.HUDNotification;
+import me.Barni.particle.render.BloodParticleRenderer;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
@@ -24,11 +25,10 @@ public class Player extends Entity {
     }
 
     private boolean canJump, wantToJump, jumped;
-    private Vec2D moving;
     public Vec2D spawnLocation;
 
     ParticleEmitter pem;
-    private Texture face = new Texture();
+    private final Texture face = new Texture();
 
     public int faceIndex = 0;
 
@@ -66,17 +66,23 @@ public class Player extends Entity {
 
         face.loadTexture(g, "player_face", size.xi(), size.yi(), true);
 
+        ParticleData pData = new ParticleData();
+
+        pData.moveForceMin = new Vec2D(-7, -7);
+        pData.moveForceMax = new Vec2D(7, 7);
+        pData.emitting = true;
+        pData.max_particles = 128;
+        pData.noise = 2;
+        pData.lifespanMin = 16;
+        pData.lifespanMax = 92;
+
+
         pem = new ParticleEmitter(
                 game,
                 "playerDieParticle",
                 new Vec2D(64, 64),
-                new Vec2D(-7, -7),
-                new Vec2D(7, 7),
-                true,
-                128,
-                2,
-                16,
-                92);
+                pData,
+                new BloodParticleRenderer());
         game.map.addEntity(pem);
     }
 
@@ -86,9 +92,9 @@ public class Player extends Entity {
         faceIndex = 2;
         pem.position.x = position.x + size.x / 2;
         pem.position.y = position.y + size.y / 2;
-        pem.emitting = true;
+        pem.pData.emitting = true;
         pem.createParticle(128);
-        pem.emitting = false;
+        pem.pData.emitting = false;
 
 
         if (game.mapEditing) return;
@@ -147,7 +153,7 @@ public class Player extends Entity {
             return;
         }
 
-        moving = new Vec2D(0, 0);
+        Vec2D moving = new Vec2D(0, 0);
         //CTRL slowdown
         if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL))
             speed = 0.31f;

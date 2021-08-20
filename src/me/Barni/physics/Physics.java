@@ -3,7 +3,7 @@ package me.Barni.physics;
 import me.Barni.Game;
 import me.Barni.Map;
 import me.Barni.entity.Entity;
-import me.Barni.entity.childs.particle.ParticleEmitter;
+import me.Barni.entity.childs.ParticleEmitter;
 
 public class Physics {
 

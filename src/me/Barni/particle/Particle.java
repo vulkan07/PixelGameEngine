@@ -1,11 +1,11 @@
-package me.Barni.entity.childs.particle;
+package me.Barni.particle;
 
 import me.Barni.physics.Vec2D;
 
 public class Particle {
 
-    Vec2D pos, force, gravity;
-    int lifetime, drag;
+    public Vec2D pos, force, gravity;
+    public int lifetime, drag;
 
     public Particle(Vec2D pos, Vec2D force, Vec2D gravity,  int lifetime) {
         this.pos = pos;

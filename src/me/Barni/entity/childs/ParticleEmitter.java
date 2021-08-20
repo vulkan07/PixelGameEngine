@@ -1,66 +1,55 @@
-package me.Barni.entity.childs.particle;
+package me.Barni.entity.childs;
 
+import com.sun.istack.internal.NotNull;
 import me.Barni.Camera;
 import me.Barni.Game;
 import me.Barni.entity.Entity;
+import me.Barni.particle.Particle;
+import me.Barni.particle.ParticleData;
+import me.Barni.particle.render.ParticleRenderer;
 import me.Barni.physics.Vec2D;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public class ParticleEmitter extends Entity {
     private final Random r;
     private final Particle[] particles;
-    private int max_particles;
-    public boolean emitting;
-    public int lifespanMin, lifespanMax;
-    public int noise;
-    public Vec2D gravity = new Vec2D(0, 0.1f);
-    private Vec2D moveForceMin;
-    private Vec2D moveForceMax;
+    public ParticleData pData;
+    public ParticleRenderer renderer;
 
     public ParticleEmitter(
             Game game,
             String name,
             Vec2D pos,
-            Vec2D forceMin,
-            Vec2D forceMax,
-            boolean start_active,
-            int max_particles,
-            int noise,
-            int lifeTimeMin,
-            int lifeTimeMax) {
+            @NotNull ParticleData pData,
+            @NotNull ParticleRenderer renderer) {
+
         super(game, name, pos);
-        this.active = start_active;
-        this.emitting = false;
+        this.pData = pData;
+        this.renderer = renderer;
+        renderer.init(this);
+
+        this.active = true;
         this.collidesWithMap = false;
-        this.noise = noise;
-
-
-        this.moveForceMin = forceMin;
-        this.moveForceMax = forceMax;
-
-
-        this.lifespanMin = lifeTimeMin;
-        this.lifespanMax = lifeTimeMax;
         this.r = new Random();
         this.position = pos;
-        this.max_particles = max_particles;
-        this.particles = new Particle[max_particles];
+        this.particles = new Particle[pData.max_particles];
     }
 
     public void createParticle(int count) {
-        if (emitting) {
-            for (int i = 0; i < max_particles; i++) {
+        if (pData.emitting) {
+            for (int i = 0; i < pData.max_particles; i++) {
 
                 if (particles[i] != null) continue;
 
                 particles[i] = new Particle(
                         position.copy(),
-                        moveForceMin == moveForceMax ? moveForceMax.copy() : randomVector(moveForceMin, moveForceMax),
-                        gravity,
-                        random(lifespanMin, lifespanMax));
+                        pData.moveForceMin == pData.moveForceMax ?
+                                pData.moveForceMax.copy() :
+                                randomVector(pData.moveForceMin, pData.moveForceMax),
+                        pData.gravity,
+                        random(pData.lifespanMin, pData.lifespanMax));
                 count--;
                 if (count == 0)
                     break;
@@ -103,7 +92,7 @@ public class ParticleEmitter extends Entity {
         createParticle(1);
 
         //UPDATE
-        for (int i = 0; i < max_particles; i++) {
+        for (int i = 0; i < pData.max_particles; i++) {
 
             //If empty place
             if (particles[i] == null)
@@ -117,8 +106,11 @@ public class ParticleEmitter extends Entity {
 
 
             //If not dead
-            if (noise != 0)
-                particles[i].pos.add(new Vec2D(r.nextInt(noise + 1) - noise / 2, r.nextInt(noise + 1) - noise / 2));
+            if (pData.noise != 0)
+                particles[i].pos.add(
+                        new Vec2D(
+                                r.nextInt(pData.noise + 1) - pData.noise / 2,
+                                r.nextInt(pData.noise + 1) - pData.noise / 2));
             particles[i].tick();
         }
     }
@@ -126,13 +118,7 @@ public class ParticleEmitter extends Entity {
     public void render(BufferedImage img, Camera cam) {
         if (!visible || !active) return;
 
-        for (Particle pt : particles) {
-            if (pt == null) continue;
-            Graphics g = img.getGraphics();
-            g.setColor(new Color(255,0,0,100));
-            int pSize = (int)Vec2D.remap(pt.lifetime/2, 0, lifespanMax, 1, 16);
-            g.fillOval(pt.pos.xi() - cam.scroll.xi(), pt.pos.yi() - cam.scroll.yi(), pSize, pSize);
-        }
+        renderer.renderParticles(img, cam, particles);
     }
 
 }
