@@ -10,16 +10,13 @@ public class Texture {
 
     Game game;
 
-    private boolean animated;
+    private boolean animated, hasAnimation;
     public BufferedImage[] textures;
     private int width;
     private int height;
-    private int counter;
-    private int frame;
+    private AnimSequence[] sequences;
+    int currSequence, frameCount;
 
-    public int getFrame() {
-        return frame;
-    }
 
     public int getWidth() {
         return width;
@@ -29,15 +26,7 @@ public class Texture {
         return height;
     }
 
-    public void setFrame(int frame) {
-        if (frame > frameCount - 1)
-            frame = frameCount - 1;
-        if (frame < 0)
-            frame = 0;
-        this.frame = frame;
-    }
 
-    private int frameCount;
     public int[] delay;
     private String path, bonusPath = "textures\\";
 
@@ -45,37 +34,30 @@ public class Texture {
         return path;
     }
 
-
-    public boolean isAnimated() {
-        return animated;
-    }
-
     public void loadTexture(Game g, String relativePath, int w, int h, boolean isAnimated) {
         game = g;
         width = w;
         height = h;
-        String delayStr = null;
         BufferedImage fullImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         this.animated = isAnimated;
-
-        frame = 0;
-        counter = 0;
 
         path = relativePath;
         String imgPath = path + ".png";
         String dataPath = path + ".anim";
 
-        if (animated)
-            try {
-                BufferedReader br = new BufferedReader(new FileReader(new File(game.GAME_DIR + bonusPath + dataPath)));
-                delayStr = br.readLine();
-            } catch (FileNotFoundException e) {
-                game.logger.subInfo("[TEXTURE] Couldn't find .anim file for " + game.GAME_DIR + bonusPath + imgPath + ", image will be stationary");
-                animated = false;
-            } catch (IOException e) {
-                game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + bonusPath + dataPath);
-                animated = false;
-            }
+        sequences = null;
+
+        File dFile = new File(game.GAME_DIR + bonusPath + dataPath);
+        if (dFile.exists()) {
+            sequences = AnimSequenceLoader.loadSequences(game.logger, game.GAME_DIR + bonusPath + dataPath, this);
+            hasAnimation = true;
+            animated = true;
+        }
+
+        if (sequences == null) {
+            animated = false;
+            hasAnimation = false;
+        }
 
 
         //READ IMAGE
@@ -85,38 +67,11 @@ public class Texture {
             game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + bonusPath + imgPath);
         }
 
-
-        if (animated) {
-            //SPLIT UP & SET frames TO RIGHT AMOUNT
-            String[] numsStr = delayStr.split(",");
-            game.logger.subInfo("[TEXTURE] .anim frame count: " + numsStr.length);
-            frameCount = numsStr.length;
-            delay = new int[frameCount];
-            animated = true;
-
-            //PARSE STRINGS TO NUMBERS -> delay[]
-            for (int i = 0; i < numsStr.length; i++) {
-                try {
-                    delay[i] = Integer.parseInt(numsStr[i]);
-                    //System.out.println(i + " is " + delay[i]);
-                } catch (NumberFormatException nfe) {
-                    game.logger.err("[TEXTURE] Invalid number format in .anim file");
-                    animated = false;
-                    frameCount = 1;
-                }
-            }
-
-        } else {
-            frameCount = 1;
-            animated = false;
-            delay = null;
-        }
-
         //CHOP TEXTURES
         textures = new BufferedImage[1];
         textures[0] = fullImg;
 
-        if (animated) {
+        if (hasAnimation) {
             textures = new BufferedImage[frameCount];
             for (int i = 0; i < frameCount; i++) {
 
@@ -131,19 +86,66 @@ public class Texture {
 
     public void update() {
         if (animated) {
-            counter++;
-            if (counter == delay[frame]) {
-                frame++;
-                if (frame == textures.length) {
-                    frame = 0;
+            if (sequences[currSequence].isEnded()) {
+
+                String n = sequences[currSequence].nextName;
+
+                for (int i = 0; i < sequences.length; i++) {
+                    if (sequences[i].name.equals(n)) {
+                        currSequence = i;
+                        sequences[i].reset();
+                        return;
+                    }
                 }
-                counter = 0;
+                game.logger.err("[TEXTURE] Can't find sequence \"" + n + "\"!");
+                return;
             }
+            sequences[currSequence].update();
         }
     }
 
+    public boolean setAnimationSequence(String seqName) {
+        for (int i = 0; i < sequences.length; i++) {
+            if (sequences[i].name.equals(seqName)) {
+                currSequence = i;
+                sequences[i].reset();
+                return true;
+            }
+        }
+        game.logger.err("[TEXTURE] There's no animation sequence: " + seqName);
+        return false;
+    }
+
+    public void setCurrentFrame(int frame)
+    {
+        sequences[currSequence].setCurrentFrame(frame);
+    }
+
+    public AnimSequence getAnimationSequence(String seqName) {
+        for (int i = 0; i < sequences.length; i++) {
+            if (sequences[i].name.equals(seqName)) {
+                currSequence = i;
+                return sequences[i];
+            }
+        }
+        game.logger.err("[TEXTURE] There's no animation sequence: " + seqName);
+        return null;
+    }
+
+    public void setAnimated(boolean animated) {
+        if (hasAnimation)
+            this.animated = animated;
+    }
+
+    public boolean isAnimated() {
+        return this.animated;
+    }
+
     public BufferedImage getTexture() {
-        return textures[this.frame];
+        if (hasAnimation) {
+            return textures[sequences[currSequence].getCurrentFrame()];
+        } else
+            return textures[0];
     }
 
 }

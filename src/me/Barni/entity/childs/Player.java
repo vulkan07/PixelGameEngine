@@ -4,7 +4,6 @@ import me.Barni.Camera;
 import me.Barni.Game;
 import me.Barni.KeyboardHandler;
 import me.Barni.entity.Entity;
-import me.Barni.hud.HUDButton;
 import me.Barni.particle.ParticleData;
 import me.Barni.hud.HUDNotification;
 import me.Barni.particle.render.BloodParticleRenderer;
@@ -66,6 +65,7 @@ public class Player extends Entity {
         spawnLocation = new Vec2D();
 
         face.loadTexture(g, "player_face", size.xi(), size.yi(), true);
+        //face.setAnimated(false);
 
         ParticleData pData = new ParticleData();
 
@@ -115,19 +115,18 @@ public class Player extends Entity {
         position = spawnLocation.copy();
         respawnTimer = respawnTimeTicks / level / reducedRespawnTime;
         respawnTime = respawnTimeTicks / level / reducedRespawnTime;
-        //game.screenFadingOut = true;
     }
 
     public void respawn() {
         visible = true;
         alive = true;
-        //game.screenFadingIn = true;
+        game.screenFadingIn = true;
     }
 
     @Override
     public void tick() {
         super.tick();
-        face.setFrame(faceIndex);
+        face.setCurrentFrame(faceIndex);
         idleTimer++;
 
         if (idleTimer > 2000)

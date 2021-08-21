@@ -51,12 +51,14 @@ public class HUDButton extends HUDElement {
                 //LMB is pressed
                 if (game.mouseHandler.isPressed(game.mouseHandler.LMB)) {
                     this.pressed = true;
-                    if (!pressed0)
-                        myListener.onPressed();
+                    if (myListener != null)
+                        if (!pressed0)
+                            myListener.onPressed();
                 }
             }
-        if (!pressed && pressed0)
-            myListener.onReleased();
+        if (myListener != null)
+            if (!pressed && pressed0)
+                myListener.onReleased();
     }
 
     @Override

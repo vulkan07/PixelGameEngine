@@ -24,20 +24,13 @@ public class PressurePlate extends Entity {
                 (int) position.y,
                 (int) size.x / 3,
                 (int) size.y);
-        //touchHitbox = colliderHitbox;
     }
 
     public void tick() {
         if (timer > 0)
             timer--;
 
-
-        if (timer == recharge - 10)
-            texture.setFrame(2);
-
-        if (timer == recharge - 20)
-            texture.setFrame(2);
-
+        texture.update();
     }
 
     public void onTouch(Entity other) {
@@ -46,7 +39,8 @@ public class PressurePlate extends Entity {
             other.velocity.x = 0;
             other.position.x = position.x;
             timer += recharge;
-            texture.setFrame(1);
+
+            texture.setAnimationSequence("launch");
         }
     }
 
