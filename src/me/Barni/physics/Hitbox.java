@@ -38,40 +38,32 @@ public class Hitbox {
         return false;
     }
 
-    private boolean smallAABB(Hitbox other, int smaller) {
+    public boolean smallAABB(Hitbox other, int smaller) {
         if (!(other.realH - smaller < y || y + h - smaller < other.y))
             if (!(other.realW - smaller < x || x + w - smaller < other.x))
                 return true;
         return false;
     }
 
-    void handleTileCollisionForEntities(Entity ent, Hitbox other)
-    {
+    public void resolveTileVSEntityCollision(Entity ent, Hitbox other) {
 
-    }
-
-    public boolean resolveTileVSEntityCollision(Entity ent, Hitbox other) {
-
+        //return if the tile is void
         if (other.solidType == 0)
-            return true;
+            return;
 
-        boolean touching = smallAABB(other, 1);
+        //Are they touching?
+        boolean touching = smallAABB(other,1);
 
-        if (other.solidType == 2) {
-            if (touching)
-                ent.velocity.limit(2);
-            return true;
-        }
+        //If touching, call entity's onTouchTile
+        if (touching)
+            if ( !ent.onTouchTile(other) ) //onTouchTile returns if collision resolution should be continued
+                return;
 
-        if (other.solidType == 3) {
-            if (ent instanceof Player)
-                if (((Player) ent).getLevel() > 2)
-                    touching = smallAABB(other, 10);
-            if (touching)
-                ent.die(200); //120
-            return true;
-        }
+        //If Material class says other.solidType is not solid, return
+        if ( !Material.isTypeSolid(other.solidType) )
+            return;
 
+        //Actual collision handling
         //IN X ZONE
         if (!(other.realW <= x || realW <= other.x)) {
 
@@ -80,7 +72,7 @@ public class Hitbox {
                 if (ent.velocity.y < 0) {
                     ent.velocity.y = 0;
                     ent.position.y = other.realH;
-                    return true;
+                    return;
                 }
             }
 
@@ -90,7 +82,7 @@ public class Hitbox {
                     if (ent instanceof Player) ((Player) ent).setCanJump(true);
                     ent.velocity.y = 0;
                     ent.position.y = other.y - other.h + (other.h - h);
-                    return true;
+                    return;
                 }
             }
         }
@@ -103,7 +95,7 @@ public class Hitbox {
                 if (ent.velocity.x > 0) {
                     ent.velocity.x = 0;
                     ent.position.x = other.x - other.w + (other.w - w);
-                    return true;
+                    return;
                 }
             }
 
@@ -112,11 +104,11 @@ public class Hitbox {
                 if (ent.velocity.x < 0) {
                     ent.velocity.x = 0;
                     ent.position.x = other.realW;
-                    return true;
+                    return;
                 }
             }
         }
-        return false;
+        return;
     }
 
     public boolean isColliding(Hitbox other) {

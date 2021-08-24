@@ -124,6 +124,26 @@ public class Player extends Entity {
     }
 
     @Override
+    public boolean onTouchTile(Hitbox tile) {
+
+        switch (tile.solidType)
+        {
+            case 2:
+                velocity.clamp(2);
+                return false;
+
+            case 3:
+                if (level > 2)
+                    if (!colliderHitbox.smallAABB(tile, 10))
+                        return false;
+                die(200);
+                return false;
+
+        }
+        return true;
+    }
+
+    @Override
     public void tick() {
         super.tick();
         face.setCurrentFrame(faceIndex);
@@ -215,33 +235,5 @@ public class Player extends Entity {
                     size.yi(),
                     null);
     }
-
-    /*
-    @Override
-    public void render(Graphics2D g, Camera cam) {
-
-        super.render(g, cam);
-
-        Graphics g = img.getGraphics();
-
-        //Draw hitbox
-        g.setColor(Color.BLUE);
-        g.drawRect(touchHitbox.x - cam.scroll.xi(), touchHitbox.y - cam.scroll.yi(), touchHitbox.w, touchHitbox.h);
-
-
-        if (colliding)
-            g.setColor(Color.RED);
-        g.drawRect(colliderHitbox.x, colliderHitbox.y, colliderHitbox.w, colliderHitbox.h);
-
-        Hitbox[] hitboxes = touchHitbox.touchingMapTiles(game.map);
-        for (Hitbox hg : hitboxes) {
-            if (hg == null) continue;
-            g.drawRect(hg.x, hg.y, hg.w, hg.h);
-        }
-
-        g.setColor(Color.ORANGE);
-        g.fillRect((int) position.x, (int) position.y, 5, 5);
-
-    }*/
 
 }

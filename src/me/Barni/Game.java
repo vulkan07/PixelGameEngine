@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.util.Random;
 
-public class Game extends Canvas implements Runnable {
+public final class Game extends Canvas implements Runnable {
     //public String title;               //Title
     public int WIDTH, HEIGHT;           //Size
     public int PX_SIZE;                 //For pixel art: 2 or 4, for normal: 1
@@ -169,7 +169,7 @@ public class Game extends Canvas implements Runnable {
         MapLoader ml = new MapLoader(this);
         map = ml.loadMap(GAME_DIR + "01.map");
 
-        //If map doesnt load, a hardcoded map loads
+        //If map doesn't load, a hardcoded map loads
         if (map == null) {
             map = new Map(this, 3, 5, 32);
             byte[] defaultmap = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2,};
@@ -188,6 +188,7 @@ public class Game extends Canvas implements Runnable {
 
         intro = new Intro(this, "logo", image);
         intro.start();
+
 
         textField = new JTextField();
         window.add(textField);

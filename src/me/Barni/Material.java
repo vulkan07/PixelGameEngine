@@ -37,6 +37,11 @@ public class Material {
                 1,
         };
 
+    public static boolean isTypeSolid(int solidity)
+    {
+        return solidity == 1;
+    }
+
     public static final boolean[] translucent =
             {
                     false,
@@ -50,7 +55,7 @@ public class Material {
                     true,
                     false,
                     false,
-                    true
+                    false
             };
 
     public static final String[] materialPath =

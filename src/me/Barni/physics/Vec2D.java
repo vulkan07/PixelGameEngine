@@ -2,28 +2,30 @@ package me.Barni.physics;
 
 public class Vec2D {
 
-    public static final Vec2D ZERO = new Vec2D(0, 0);
 
     public float x, y;
 
-    //CONSTRUCTORS
+    /*
+    * VECTOR 2D CLASS
+    *
+    * HAS ARITHMETICS & UTILITY & VECTOR MATH
+    *
+    * (Almost) every function returns *this*
+    * This allows easy chaining of functions.
+    * i.e. position.add(velocity).clamp(10)
+    *
+    * IMPORTANT:
+    *   Copy a Vec2D with copy();    a2 = a.copy();
+    *
+    *
+    * */
+
+
+    /*--------------------*/
+    /*--- CONSTRUCTORS ---*/
     public Vec2D() {
         x = 0;
         y = 0;
-    }
-
-    /**
-     * Same as (int)x
-     **/
-    public int xi() {
-        return (int) x;
-    }
-
-    /**
-     * Same as (int)y
-     **/
-    public int yi() {
-        return (int) y;
     }
 
     public Vec2D(float x, float y) {
@@ -31,12 +33,35 @@ public class Vec2D {
         this.y = y;
     }
 
+    public Vec2D(float degrees) {
+        float rads = (float) Math.toRadians(degrees);
+        this.x = (float) Math.sin(rads);
+        this.y = (float) Math.cos(rads);
+    }
+
+
+    /*--------------------*/
+    /*--- VALUES & COPY --*/
+    public int xi() {
+        return (int) x;
+    }
+
+    public int yi() {
+        return (int) y;
+    }
+
+    /**Sets x, y to 0**/
+    public void nullify() {
+        mult(0);
+    }
+
     public Vec2D copy() {
         return new Vec2D(x, y);
     }
 
-    //Arithmetics
-    //With Vec2D
+
+    /*--------------------*/
+    /*--- ARITHMETICS  ---*/
     public Vec2D add(Vec2D b) {
         x += b.x;
         y += b.y;
@@ -61,7 +86,9 @@ public class Vec2D {
         return this;
     }
 
-    //With scalar
+
+    /*-----------------------------*/
+    /*--- ARITHMETICS (Scalar)  ---*/
     public Vec2D add(float b) {
         x += b;
         y += b;
@@ -86,62 +113,93 @@ public class Vec2D {
         return this;
     }
 
-    //UTILITY
+
+    /*-----------------*/
+    /*--- LIMITING  ---*/
+    public Vec2D clamp(float bound) {
+        limit(bound);
+        lowLimit(-bound);
+        return this;
+    }
+
+    public Vec2D clamp(float max, float min) {
+        limit(max);
+        lowLimit(min);
+        return this;
+    }
+
+    public Vec2D limit(float max) {
+        if (x > max)
+            x = max;
+
+        if (y > max)
+            y = max;
+        return this;
+    }
+
+    public Vec2D limit(float maxX, float maxY) {
+        if (x > maxX)
+            x = maxX;
+
+        if (y > maxY)
+            y = maxY;
+        return this;
+    }
+
+    public Vec2D lowLimit(float min) {
+        if (x < min)
+            x = min;
+
+        if (y < min)
+            y = min;
+        return this;
+    }
+
+    public Vec2D lowLimit(float minX, float minY) {
+        if (x < minX)
+            x = minX;
+
+        if (y < minY)
+            y = minY;
+        return this;
+    }
+
+
+    /*--------------------*/
+    /*---   UTILITY    ---*/
     public Vec2D scale(float scalar) {
         x *= scalar;
         y *= scalar;
         return this;
     }
 
-    public Vec2D lowLimit(float min) {
-        if (x < min) x = min;
-        if (y < min) y = min;
-        return this;
-    }
-
-
-    public Vec2D limit(float max) {
-        if (Math.abs(x) > max)
-            if (x > 0)
-                x = max;
-            else
-                x = max * -1;
-
-
-        if (Math.abs(y) > max)
-            if (y > 0)
-                y = max;
-            else
-                y = max * -1;
-        return this;
-    }
-
-
     public float mag() {
         return (float) Math.sqrt((x * x + y * y));
     }
 
-    public Vec2D normalize() {
+    public Vec2D norm() {
         x /= mag();
         y /= mag();
         return this;
     }
 
     public void print() {
-        System.out.println("Vec: " + x + ", " + y);
+        System.out.println("[" + x + ", " + y + "]");
     }
 
     public Vec2D decrease(float am) {
         if (Math.abs(x) - am < 0) x = 0;
-        else if (x != 0) x -= x > 0 ? am : am * -1;
+        else if (x != 0) x -= x > 0 ? am : -am;
 
         if (Math.abs(y) - am < 0) y = 0;
-        else if (y != 0) y -= y > 0 ? am : am * -1;
+        else if (y != 0) y -= y > 0 ? am : -am;
 
         return this;
     }
 
-    public float dist(Vec2D a, Vec2D b) {
+
+
+    public static float dist(Vec2D a, Vec2D b) {
         return (float) Math.sqrt(Math.pow((a.x - b.x), 2) + Math.pow((a.y - b.y), 2));
     }
 
@@ -153,6 +211,9 @@ public class Vec2D {
         return x * other.x + y * other.y;
     }
 
+
+    /*-----------------------*/
+    /*--- INTERPOLATIONS  ---*/
     public static float lerp(float v0, float v1, float t) {
         return (1 - t) * v0 + t * v1;
     }

@@ -146,9 +146,11 @@ public abstract class Entity {
         if (!active) return;
     }
 
-
-
+    //Overrideable events
     public void onTouch(Entity other) {
+    }
+    public boolean onTouchTile(Hitbox tile) {
+        return true;
     }
 
     public void render(BufferedImage img, Camera cam) {
