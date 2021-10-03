@@ -6,6 +6,7 @@ import me.Barni.hud.HUD;
 import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
 import me.Barni.physics.Vec2D;
+import me.Barni.superhexagon.SuperHexagonWorld;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,17 +32,17 @@ public final class Game extends Canvas implements Runnable {
     private Random r = new Random();
     private String[] titleMsgs = {
             "ZeroPointerException",
-            "Ereasing C:\\",
+            "Erasing C:\\",
             "Apple.",
             "Random message",
             "FLIP THE SAUSAGE!!",
             "Roses are red, violets are blue, and you're the biggest assh*le",
             "1 + 1 = 404 not found",
-            "RTX is just good ray CASTING",
+            "RTX is just better ray CASTING",
             "42 I guess!?",
             "WHY IS IT 3AM ALREADY???",
             "I don't need sleep. I need answers.",
-            "Fucking JSON writer rearranged my files",
+            "F*cking JSON writer rearranged my files",
             "DO NOT EVEN THINK ABOUT DOING IT",
             "The cake is a lie.",
             "HAHA U DED",
@@ -50,10 +51,11 @@ public final class Game extends Canvas implements Runnable {
             "\"Java works on every pc.\" Not even on my friends'",
             "Pointers you idiot! Pointers!",
             "C++ in a java window title will un-virgin your oil",
-            "If you know what JFrame is, i'll marry you",
+            "If you know what JFrame is, i'll give you a new Thanks()",
             "Passing by reference is good",
             "OpenGL",
             "DirectX",
+            "Vulkan",
             "Ceremonia Matcha",
             "Jon Hopkins - Circle",
             "Vessel",
@@ -200,11 +202,16 @@ public final class Game extends Canvas implements Runnable {
         ((HUDButton) hud.getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
         ((HUDButton) hud.getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
 
+
+        shWorld = new SuperHexagonWorld(this);
+
         //Actual start
         running = true;
         thread = new Thread(this);
         thread.start();
     }
+
+    SuperHexagonWorld shWorld;
 
     public void loadNewMap(String path) {
 
@@ -232,7 +239,6 @@ public final class Game extends Canvas implements Runnable {
         logger.info("[GAME] Preferred FPS: " + fps);
         logger.info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
 
-
         while (running) {
 
             now = System.nanoTime();
@@ -243,9 +249,13 @@ public final class Game extends Canvas implements Runnable {
 
             if (delta >= 1) {
                 //=TICK=\\
-                tick();
+
+                //tick();
+                shWorld.tick();
+
                 //=RENDER=\\
                 render();
+
                 frames++;
 
 
@@ -258,7 +268,7 @@ public final class Game extends Canvas implements Runnable {
             if (timer >= 1000000000) {
                 System.out.println("FPS: " + frames);
                 frames = 0;
-                timer = 0;
+                timer = 40;
             }
         }
         stop();
@@ -296,7 +306,7 @@ public final class Game extends Canvas implements Runnable {
         selectedTile.div(32);
 
 
-        mapPaintID = mapPaintID < 1 ? 1 : (mapPaintID > Material.MAT_COUNT - 1 ? Material.MAT_COUNT - 1 : mapPaintID);
+        mapPaintID = mapPaintID < 1 ? 1 : (Math.min(mapPaintID, Material.MAT_COUNT - 1));
 
         if (mapEditing) {
             tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
@@ -335,10 +345,15 @@ public final class Game extends Canvas implements Runnable {
     public void render() {
         //=CLEAR CANVAS=\\
 
-        if (blankAlpha != 255 && !intro.isPlayingIntro())
-            System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
+
+        //if (blankAlpha != 255 && !intro.isPlayingIntro())
+        System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
 
         Graphics g = getBufferStrategy().getDrawGraphics();
+
+        shWorld.render(image);
+        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+        /*
         Graphics2D g2d = (Graphics2D) g;
 
         intro.render();
@@ -356,23 +371,14 @@ public final class Game extends Canvas implements Runnable {
             map.renderDecoratives(image, 1); //Before entities
 
 
-            if (map.cam.zoom != 1)
-                g2d.translate(-WIDTH / map.cam.zoom, -HEIGHT / map.cam.zoom);
-            g2d.scale(map.cam.zoom, map.cam.zoom);
 
             decorativeEditor.render(image, map.cam);
 
             hud.render(image);
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
-            /*
-            //Selected tile
-            if (selectedTileVisible) {
-                g.setColor(new Color(150, 150, 150, mapEditing ? 180 : 50));
-                g.fillRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 32, 32);
-                g.drawRect((int) selectedTile.x * 32 - map.cam.scroll.xi(), (int) selectedTile.y * 32 - map.cam.scroll.yi(), 31, 31);
-            }
-            */
+
+
 
 
             //Selected tile type
@@ -420,13 +426,8 @@ public final class Game extends Canvas implements Runnable {
             g2d.setColor(new Color(0, 0, 0, blankAlpha));
             g2d.fillRect(0, 0, WIDTH, HEIGHT);
         }
-
+        */
         g.dispose();
         getBufferStrategy().show();
     }
-
-
-    //public Vec2D vecWithUniqueOrigin(Vec2D o, Vec2D v) {
-    //    return new Vec2D(v.x - o.x, v.y - o.y);
-    //}
 }

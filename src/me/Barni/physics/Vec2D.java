@@ -15,7 +15,7 @@ public class Vec2D {
     * i.e. position.add(velocity).clamp(10)
     *
     * IMPORTANT:
-    *   Copy a Vec2D with copy();    a2 = a.copy();
+    *   Copy a Vec2D with .copy();    a2 = a.copy();
     *
     *
     * */
