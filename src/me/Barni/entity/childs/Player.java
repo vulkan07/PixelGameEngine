@@ -28,7 +28,7 @@ public class Player extends Entity {
     public Vec2D spawnLocation;
 
     ParticleEmitter pem;
-    private final Texture face = new Texture();
+    private Texture face = new Texture();
 
     public int faceIndex = 0;
 
@@ -126,8 +126,7 @@ public class Player extends Entity {
     @Override
     public boolean onTouchTile(Hitbox tile) {
 
-        switch (tile.solidType)
-        {
+        switch (tile.solidType) {
             case 2:
                 velocity.clamp(2);
                 return false;

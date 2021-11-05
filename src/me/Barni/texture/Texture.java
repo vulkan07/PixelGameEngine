@@ -14,6 +14,7 @@ public class Texture {
     public BufferedImage[] textures;
     private int width;
     private int height;
+    private String generalPathName;
     private AnimSequence[] sequences;
     int currSequence, frameCount;
 
@@ -46,6 +47,7 @@ public class Texture {
         String dataPath = path + ".anim";
 
         sequences = null;
+        generalPathName = game.GAME_DIR + bonusPath;
 
         File dFile = new File(game.GAME_DIR + bonusPath + dataPath);
         if (dFile.exists()) {
@@ -64,24 +66,36 @@ public class Texture {
         try {
             fullImg = ImageIO.read(new File(game.GAME_DIR + bonusPath + imgPath));
         } catch (IOException e) {
-            game.logger.err("[TEXTURE] Can't read " + game.GAME_DIR + bonusPath + imgPath);
+            errMsg("Can't read file!");
         }
 
         //CHOP TEXTURES
         textures = new BufferedImage[1];
         textures[0] = fullImg;
 
-        if (hasAnimation) {
-            textures = new BufferedImage[frameCount];
-            for (int i = 0; i < frameCount; i++) {
+        try {
+            if (hasAnimation) {
+                textures = new BufferedImage[frameCount];
+                for (int i = 0; i < frameCount; i++) {
 
-                int[] px = fullImg.getRGB(width * i, 0, w, h, null, 0, w * h);
-                BufferedImage img = new BufferedImage(fullImg.getWidth() / frameCount, h, BufferedImage.TYPE_INT_ARGB);
-                img.setRGB(0, 0, w, h, px, 0, w * h);
+                    int[] px = fullImg.getRGB(width * i, 0, w, h, null, 0, w * h);
+                    BufferedImage img = new BufferedImage(fullImg.getWidth() / frameCount, h, BufferedImage.TYPE_INT_ARGB);
+                    img.setRGB(0, 0, w, h, px, 0, w * h);
 
-                textures[i] = img;
+                    textures[i] = img;
+                }
             }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            sequences = null;
+            frameCount = 1;
+            animated = false;
+            hasAnimation = false;
+            errMsg("Can't chop texture frames!");
         }
+    }
+
+    private void errMsg(String msg) {
+        game.logger.err("[TEXTURE] " + msg + " \n" + game.logger.getIndentStr() + "    At: " + generalPathName);
     }
 
     public void update() {
@@ -98,6 +112,8 @@ public class Texture {
                     }
                 }
                 game.logger.err("[TEXTURE] Can't find sequence \"" + n + "\"!");
+                animated = false;
+                setCurrentFrame(0);
                 return;
             }
             sequences[currSequence].update();
@@ -112,12 +128,11 @@ public class Texture {
                 return true;
             }
         }
-        game.logger.err("[TEXTURE] There's no animation sequence: " + seqName);
+        errMsg("There's no animation sequence: " + seqName);
         return false;
     }
 
-    public void setCurrentFrame(int frame)
-    {
+    public void setCurrentFrame(int frame) {
         sequences[currSequence].setCurrentFrame(frame);
     }
 
@@ -128,7 +143,7 @@ public class Texture {
                 return sequences[i];
             }
         }
-        game.logger.err("[TEXTURE] There's no animation sequence: " + seqName);
+        errMsg("There's no animation sequence: " + seqName);
         return null;
     }
 

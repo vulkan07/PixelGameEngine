@@ -117,7 +117,7 @@ public class Map {
 
         JSONObject jobj = new JSONObject();
         JSONObject mapObj = new JSONObject();
-        mapObj.put("version", MapLoader.validMapHeader);
+        mapObj.put("version", MapLoader.VALID_MAP_FILE_VERSION);
         mapObj.put("sizeX", width);
         mapObj.put("sizeY", height);
         if (bgColor.getRGB() != game.white)
@@ -358,7 +358,7 @@ public class Map {
         for (int i = 0; i < entities.length; i++) {
             if (entities[i] == null) {
                 if (e.name == null || e.name.equals(""))
-                    game.logger.warn("[MAP] Entity added with empty name: " + e.getClass());
+                    game.logger.warn("[MAP] Entity added without name: " + e.getClass());
                 entities[i] = e;
                 e.setID(i);
                 physics.init();

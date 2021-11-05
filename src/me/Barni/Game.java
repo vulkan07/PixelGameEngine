@@ -203,7 +203,7 @@ public final class Game extends Canvas implements Runnable {
         ((HUDButton) hud.getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
 
 
-        shWorld = new SuperHexagonWorld(this);
+        //shWorld = new SuperHexagonWorld(this);
 
         //Actual start
         running = true;
@@ -250,8 +250,8 @@ public final class Game extends Canvas implements Runnable {
             if (delta >= 1) {
                 //=TICK=\\
 
-                //tick();
-                shWorld.tick();
+                tick();
+                //shWorld.tick();
 
                 //=RENDER=\\
                 render();
@@ -346,14 +346,14 @@ public final class Game extends Canvas implements Runnable {
         //=CLEAR CANVAS=\\
 
 
-        //if (blankAlpha != 255 && !intro.isPlayingIntro())
-        System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
+        if (blankAlpha != 255 && !intro.isPlayingIntro())
+            System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
 
         Graphics g = getBufferStrategy().getDrawGraphics();
 
-        shWorld.render(image);
-        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-        /*
+        //shWorld.render(image);
+        //g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+
         Graphics2D g2d = (Graphics2D) g;
 
         intro.render();
@@ -426,7 +426,7 @@ public final class Game extends Canvas implements Runnable {
             g2d.setColor(new Color(0, 0, 0, blankAlpha));
             g2d.fillRect(0, 0, WIDTH, HEIGHT);
         }
-        */
+
         g.dispose();
         getBufferStrategy().show();
     }

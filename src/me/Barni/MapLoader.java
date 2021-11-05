@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import java.awt.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 
 public class MapLoader {
@@ -22,8 +23,7 @@ public class MapLoader {
     Map map;
     private String fullPath; //Used by other methods
 
-    public static final double validMapHeader = 1.3;
-    public static final int maxLines = 128;
+    public static final double VALID_MAP_FILE_VERSION = 1.3;
 
     public MapLoader(Game game) {
         this.game = game;
@@ -36,7 +36,7 @@ public class MapLoader {
      **/
     public Map loadMap(String completePath) {
 
-        System.out.println();
+        logger.increaseIndention("MAP LOADER");
         logger.info("[MAP+] Loading map: " + completePath);
         fullPath = completePath;
 
@@ -46,13 +46,13 @@ public class MapLoader {
             byte[] data = new byte[(int) file.length()];
             fis.read(data);
             fis.close();
-            String str = new String(data, "UTF-8");
+            String str = new String(data, StandardCharsets.UTF_8);
 
             JSONObject jobj = new JSONObject(str);
             JSONObject mapObj = jobj.getJSONObject("bmap");
 
-            if (mapObj.getDouble("version") != validMapHeader) {
-                fail("Invalid map version!");
+            if (mapObj.getDouble("version") != VALID_MAP_FILE_VERSION) {
+                errMsg("Invalid map version!");
                 return null;
             }
             //MAP SIZE
@@ -71,12 +71,17 @@ public class MapLoader {
             map.playerStartPos = strToVector(mapObj.getString("spawnPos"));
             map.playerStartVel = strToVector(mapObj.getString("spawnVel"));
 
+            logger.increaseIndention("DECORATIVES");
             JSONObject objList = mapObj.getJSONObject("ObjectList");
             JSONArray decList = objList.getJSONArray("Decoratives");
             loadDecoratives(decList);
+            logger.decreaseIndention("DECORATIVES");
 
+            logger.increaseIndention("ENTITIES");
             JSONArray entList = objList.getJSONArray("Entities");
             loadEntities(entList);
+            logger.decreaseIndention("ENTITIES");
+
 
             if (mapObj.has("backGround")) {
                 String[] cData = mapObj.getString("backGround").split(",");
@@ -90,14 +95,13 @@ public class MapLoader {
             }
 
             logger.info("[MAP+] Loaded map: " + fullPath);
-            System.out.println();
+            logger.decreaseIndention("MAP LOADER");
             return map;
 
         } catch (IOException e) {
-            fail("Can't read map file!");
-        } catch (
-                JSONException e) {
-            fail("Invalid JSON file!\n" + e.getMessage());
+            errMsg("Can't read map file!");
+        } catch (JSONException e) {
+            errMsg("Invalid JSON file!\n" + e.getMessage());
         }
 
         return null;
@@ -110,14 +114,21 @@ public class MapLoader {
                 Integer.parseInt(data[1]));
     }
 
-    private void fail(String msg) {
+
+    private void errMsg(String msg) {
         logger.err("[MAP+] " + msg + "\n   In: " + fullPath);
+        logger.decreaseIndention("MAP LOADER");
     }
 
+
+    //*Load entities into Map entity from JSON*//
+    //*Abstracted specific load to every entity class*//
     private void loadEntities(JSONArray lines) {
+
         for (int lineIndex = 0; lineIndex < lines.length(); lineIndex++) {
             JSONObject entObj = (JSONObject) lines.get(lineIndex);
-            Entity ent = null;
+
+            //*Entity-unique load*//
             switch (entObj.getString("class")) {
                 case "LevelExit":
                     LevelExit l = new LevelExit(game, null, new Vec2D(), null);
@@ -147,16 +158,17 @@ public class MapLoader {
                     break;
 
                 case "Entity":
-                    fail("Entity class cannot be instantiated!");
+                    errMsg("Entity class cannot be instantiated!");
                     break;
                 default:
-                    fail("Unknown entity class: " + entObj.getString("class") + "!");
+                    errMsg("Unknown entity class: " + entObj.getString("class") + "!");
                     return;
             }
 
         }
     }
 
+    //*Loads an entity's common data*//
     private EntityData generalEntityLoader(JSONObject entObj) {
         String texture;
         float x, y, w, h;
@@ -198,6 +210,7 @@ public class MapLoader {
         return e;
     }
 
+    //*Load decoratives into Map entity from JSON*//
     private void loadDecoratives(JSONArray lines) {
         //loop trough lines
         for (int lineIndex = 0; lineIndex < lines.length(); lineIndex++) {
@@ -220,7 +233,7 @@ public class MapLoader {
         }
     }
 
-
+    //*Moves JSON grid text data into Map entity *//
     private void loadGrid(JSONArray lines, boolean backGround) {
         String[] tilesRaw;
         //For every row
@@ -228,17 +241,22 @@ public class MapLoader {
             try {
                 tilesRaw = ((String) lines.get(y)).split(",");
             } catch (NullPointerException e) {
-                fail("Invalid map grid format: too few lines!");
+                errMsg("Invalid map grid format: too few lines!");
                 return;
             }
             if (tilesRaw.length > map.width) {
-                fail("Invalid map grid format: too much tiles!");
+                errMsg("Invalid map grid format: \"sizeX\" doesn't match row count! Too few rows!");
                 return;
             }
 
             //For every column
             for (int x = 0; x < map.width; x++) {
-                tilesRaw[x] = tilesRaw[x].replace(" ", "");
+                try {
+                    tilesRaw[x] = tilesRaw[x].replace(" ", "");
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    errMsg("Invalid map grid format: \"sizeX\" doesn't match row count! Too few rows!");
+                    return;
+                }
                 if (backGround)
                     map.setBackTile(y * map.width + x, Integer.parseInt(tilesRaw[x]));
                 else
