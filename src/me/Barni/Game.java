@@ -12,6 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.Arrays;
 import java.util.Random;
 
 public final class Game extends Canvas implements Runnable {
@@ -25,12 +26,11 @@ public final class Game extends Canvas implements Runnable {
     public JFrame window;               //Window
     private BufferedImage image;        //Image
     private int[] buffer;  //ImageBuffer
-    public int[] clearBuffer;  //Background
-    int white = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
+    int bgColor = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
     public DecorativeEditor decorativeEditor;
 
-    private Random r = new Random();
-    private String[] titleMsgs = {
+    private final Random r = new Random();
+    private final String[] titleMsgs = {
             "ZeroPointerException",
             "Erasing C:\\",
             "Apple.",
@@ -39,11 +39,11 @@ public final class Game extends Canvas implements Runnable {
             "Roses are red, violets are blue, and you're the biggest assh*le",
             "1 + 1 = 404 not found",
             "RTX is just better ray CASTING",
-            "42 I guess!?",
+            "life = 42",
             "WHY IS IT 3AM ALREADY???",
             "I don't need sleep. I need answers.",
-            "F*cking JSON writer rearranged my files",
-            "DO NOT EVEN THINK ABOUT DOING IT",
+            "F*cking JSON writer rearranged my files by alphabetic order",
+            "DO NOT EVEN THINK ABOUT IT",
             "The cake is a lie.",
             "HAHA U DED",
             "Right behind you",
@@ -77,7 +77,9 @@ public final class Game extends Canvas implements Runnable {
             "I know, this is bad graphics. Still better than pacman, huh?",
             "I totally have a healthy lifestyle",
             "That sniper is a spy!",
-            "Kick your bot"
+            "Kick your bot",
+            "ALT + F4 = FREE DIAMONDS!",
+            "sus"
     };
 
     public HUD getHud() {
@@ -150,11 +152,6 @@ public final class Game extends Canvas implements Runnable {
 
         //BufferStrategy
         createBufferStrategy(2);
-
-        //ClearBuffer (backGround)
-        clearBuffer = new int[(WIDTH / PX_SIZE) * (HEIGHT / PX_SIZE)];
-        for (int i = 0; i < clearBuffer.length; i++)
-            clearBuffer[i] = white;
 
 
         //Utility
@@ -230,8 +227,8 @@ public final class Game extends Canvas implements Runnable {
 
         //IMPORTANT! Frames and ticks are bounded together
         int fps = 60;
-        double framePerTick = 1000000000 / fps;
-        double delta = 0;
+        float framePerTick = 1000000000 / fps;
+        float delta = 0;
         long now, last, timer = 0;
         int frames = 0;
 
@@ -345,12 +342,17 @@ public final class Game extends Canvas implements Runnable {
     public void render() {
         //=CLEAR CANVAS=\\
 
-
+        //Clear buffer
         if (blankAlpha != 255 && !intro.isPlayingIntro())
-            System.arraycopy(clearBuffer, 0, buffer, 0, buffer.length);
+            Arrays.fill(buffer, bgColor);
 
         Graphics g = getBufferStrategy().getDrawGraphics();
 
+        /*if (blankAlpha != 255 && !intro.isPlayingIntro()) {
+            Graphics gg = image.getGraphics();
+            gg.setColor(new Color(255,255,255,80));
+            gg.fillRect(0,0, WIDTH, HEIGHT);
+        }*/
         //shWorld.render(image);
         //g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
@@ -371,14 +373,10 @@ public final class Game extends Canvas implements Runnable {
             map.renderDecoratives(image, 1); //Before entities
 
 
-
             decorativeEditor.render(image, map.cam);
 
             hud.render(image);
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-
-
-
 
 
             //Selected tile type

@@ -45,7 +45,7 @@ public class Physics {
                         ent.onTouch(other);
                     if (ent.active && !ent.locked && ent.solid && ent.alive && ent.collidesWithMap)
                         if (other.active && !other.locked && other.solid && other.alive && other.collidesWithMap)
-                        ent.getColliderHitbox().resolveTileVSEntityCollision(other, other.getColliderHitbox());
+                            ent.getColliderHitbox().resolveTileVSEntityCollision(other, other.getColliderHitbox());
                 }
             }
 

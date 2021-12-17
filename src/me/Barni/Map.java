@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.Arrays;
 
 public class Map {
     Game game;
@@ -46,9 +47,7 @@ public class Map {
     }
 
     public void setBackGroundColor(Color c) {
-        bgColor = c;
-        for (int i = 0; i < game.clearBuffer.length; i++)
-            game.clearBuffer[i] = bgColor.getRGB();
+        game.bgColor = c.getRGB();
     }
 
     public byte getBackTile(int i) {
@@ -100,8 +99,7 @@ public class Map {
         cam = new Camera(game, this);
 
         //TEST
-        for (int i = 0; i < backTiles.length; i++)
-            backTiles[i] = 0;
+        Arrays.fill(backTiles, (byte) 0);
     }
 
     public void dumpCurrentMapIntoFile(String path) {
@@ -120,9 +118,8 @@ public class Map {
         mapObj.put("version", MapLoader.VALID_MAP_FILE_VERSION);
         mapObj.put("sizeX", width);
         mapObj.put("sizeY", height);
-        if (bgColor.getRGB() != game.white)
-        {
-            String cData = bgColor.getRed() + "," + bgColor.getGreen() + "," +bgColor.getBlue();
+        if (bgColor.getRGB() != game.bgColor) {
+            String cData = bgColor.getRed() + "," + bgColor.getGreen() + "," + bgColor.getBlue();
             mapObj.put("backGround", cData);
         }
 
@@ -228,6 +225,7 @@ public class Map {
             if (e instanceof PressurePlate) {
                 entObj.put("force", ((PressurePlate) e).force);
                 entObj.put("recharge", ((PressurePlate) e).recharge);
+                entObj.put("strictTrigger", ((PressurePlate) e).strictTrigger);
             }
             if (e instanceof LevelExit) {
                 entObj.put("nextLevel", ((LevelExit) e).getNextMap());

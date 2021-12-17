@@ -91,7 +91,7 @@ public class MapLoader {
                         Integer.parseInt(cData[2]))
                 );
             } else {
-                map.setBackGroundColor(new Color(game.white));
+                map.setBackGroundColor(new Color(game.bgColor));
             }
 
             logger.info("[MAP+] Loaded map: " + fullPath);
@@ -142,6 +142,9 @@ public class MapLoader {
                     pp.loadFromEntityData(generalEntityLoader(entObj));
                     pp.recharge = entObj.getInt("recharge");
                     pp.force = entObj.getFloat("force");
+                    try {
+                        pp.strictTrigger = entObj.getBoolean("strictTrigger");
+                    } catch (JSONException e) {}
                     map.addEntity(pp);
                     break;
 

@@ -43,10 +43,10 @@ public class SuperHexagonWorld {
         game = g;
         mapWidth = 360;
 
-        polygonLines = new PolygonLine[polySideCount][2]; //Only 2 blocks can be in a line at once //TEST ONLY
+        polygonLines = new PolygonLine[polySideCount][4]; //Only 2 blocks can be in a line at once //TEST ONLY
         for (int i = 0; i < polygonLines.length; i++) {
             for (int j = 0; j < polygonLines[i].length; j++) {
-                polygonLines[i][j] = new PolygonLine(r.nextInt(500) * -1 + 700, -20);
+                polygonLines[i][j] = new PolygonLine(r.nextInt(800) * -1 + 700, -20);
                 //polygonLines[i][j].disable();
             }
         }
@@ -208,7 +208,7 @@ public class SuperHexagonWorld {
                 //      o________________
                 //      \               /
                 //       \_____________/
-                currentPolyVertexBuffer[0][0] = origin.copy().add(polyRotVector.copy().mult(1.2f)).xi();
+                currentPolyVertexBuffer[0][0] = origin.copy().add(polyRotVector.copy().mult(1.2f)).xi(); //.add(20)
                 currentPolyVertexBuffer[1][0] = origin.copy().add(polyRotVector.copy().mult(1.2f)).yi();
 
                 //      ________________o
@@ -251,15 +251,15 @@ public class SuperHexagonWorld {
 
         //===DRAW CENTER HECAGON===
         //Calculate hexagon points
-        for (int i = 0; i < polySideCount; i++) {
-            Vec2D point = origin.copy();
-            Vec2D offset = new Vec2D(360 / polySideCount * i + overallRotation);
-            point.add(offset.mult(48));
-            hexagonVertexBuffer[0][i] = point.xi();
-            hexagonVertexBuffer[1][i] = point.yi();
-        }
-        g.drawPolygon(hexagonVertexBuffer[0], hexagonVertexBuffer[1], polySideCount);
-        g.setFont(game.getDefaultFont());
+            for (int i = 0; i < polySideCount; i++) {
+                Vec2D point = origin.copy();
+                Vec2D offset = new Vec2D(360 / polySideCount * i + overallRotation);
+                point.add(offset.mult(48));
+                hexagonVertexBuffer[0][i] = point.xi();
+                hexagonVertexBuffer[1][i] = point.yi();
+            }
+            g.drawPolygon(hexagonVertexBuffer[0], hexagonVertexBuffer[1], polySideCount);
+            g.setFont(game.getDefaultFont());
         //========================
 
         g.drawString(Integer.toString(secondsTimer), origin.xi()-8, origin.yi());

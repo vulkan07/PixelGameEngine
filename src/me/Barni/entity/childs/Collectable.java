@@ -30,7 +30,7 @@ public class Collectable extends Entity {
             p.setLevel(p.getLevel() + 1);
             visible = false;
             HUDNotification n = (HUDNotification) game.getHud().getRoot().getElement("PlayerNotification");
-            n.message = "Player level ugraded (" + p.getLevel() + "/3)";
+            n.message = "Player level upgraded (" + p.getLevel() + "/3)";
             n.show(220);
         }
     }

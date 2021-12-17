@@ -14,7 +14,9 @@ public class BloodParticleRenderer implements ParticleRenderer {
 
     @Override
     public void init(ParticleEmitter pem) {
+
         this.pem = pem;
+        //this.pem.pData.gravity.y = 0.05f;
     }
 
     @Override

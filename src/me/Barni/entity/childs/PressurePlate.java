@@ -12,6 +12,7 @@ public class PressurePlate extends Entity {
 
     public int recharge = 100;
     public float force = 15f;
+    public boolean strictTrigger = false;
 
     public PressurePlate(Game g, String name, Vec2D pos) {
         super(g, name, pos);
@@ -35,9 +36,16 @@ public class PressurePlate extends Entity {
 
     public void onTouch(Entity other) {
         if (timer == 0) {
+
+            if (strictTrigger)
+                if (Math.abs(other.position.x - position.x) > 2 || other.velocity.x > 4)
+                    return;
+
             other.velocity.y = -force;
-            other.velocity.x = 0;
-            other.position.x = position.x;
+            if (strictTrigger) {
+                other.velocity.x = 0;
+                other.position.x = position.x;
+            }
             timer += recharge;
 
             texture.setAnimationSequence("launch");
