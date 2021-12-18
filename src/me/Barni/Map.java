@@ -33,17 +33,21 @@ public class Map {
 
     private int decCount = 0;
 
-    private String title;
+    private String title, fileName;
     private Color bgColor;
     public Vec2D playerStartPos = new Vec2D(), playerStartVel = new Vec2D();
 
 
-    Camera cam;
+    public Camera cam;
     BufferedImage txt;
 
 
     public String getTitle() {
         return title;
+    }
+
+    public String getFileName() {
+        return fileName;
     }
 
     public void setBackGroundColor(Color c) {
@@ -83,7 +87,8 @@ public class Map {
     }
 
 
-    public Map(Game g, int w, int h, int tSize) {
+    public Map(Game g, int w, int h, int tSize, String fName) {
+        fileName = fName;
         width = h;
         height = w;
         tileSize = tSize;
@@ -98,6 +103,7 @@ public class Map {
 
         cam = new Camera(game, this);
 
+
         //TEST
         Arrays.fill(backTiles, (byte) 0);
     }
@@ -106,7 +112,7 @@ public class Map {
         game.logger.info("[MAP] Writing out current map");
 
 
-        File file = new File(game.GAME_DIR + path + ".json");
+        File file = new File(game.GAME_DIR + path + ".map");
         try {
             file.createNewFile();
         } catch (IOException e) {
@@ -118,10 +124,11 @@ public class Map {
         mapObj.put("version", MapLoader.VALID_MAP_FILE_VERSION);
         mapObj.put("sizeX", width);
         mapObj.put("sizeY", height);
-        if (bgColor.getRGB() != game.bgColor) {
-            String cData = bgColor.getRed() + "," + bgColor.getGreen() + "," + bgColor.getBlue();
-            mapObj.put("backGround", cData);
-        }
+        if (bgColor != null)
+            if (bgColor.getRGB() != game.bgColor) {
+                String cData = bgColor.getRed() + "," + bgColor.getGreen() + "," + bgColor.getBlue();
+                mapObj.put("backGround", cData);
+            }
 
         mapObj.put("spawnPos", playerStartPos.xi() + "," + playerStartPos.yi());
         mapObj.put("spawnVel", playerStartVel.xi() + "," + playerStartVel.yi());
@@ -323,9 +330,6 @@ public class Map {
 
         atlas.update();
 
-        if (!game.decorativeEditor.editing)
-            if (game.player.position.dist(cam.view) > 50 && game.player.alive)
-                cam.lookAt(game.player.position);
         cam.update();
 
         for (Entity e : entities) {
@@ -341,13 +345,14 @@ public class Map {
     }
 
 
-    public void addDecorative(Decorative dec) {
+    public int addDecorative(Decorative dec) {
         if (decCount >= decoratives.length) {
             game.logger.err("Decoratives array is full!");
-            return;
+            return -1;
         }
         decoratives[decCount] = dec;
         decCount++;
+        return decCount-1;
     }
 
     public void addEntity(Entity e) {

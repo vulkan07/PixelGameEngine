@@ -34,11 +34,12 @@ public class Player extends Entity {
 
     private int respawnTimer, respawnTime, reducedRespawnTime = 1;
     private int blinkTimer = 100;
-    private int idleTimer;
+    //private int idleTimer;
     private int deaths;
 
 
     private int level = 1, maxLevel = 3;
+    public boolean godMode;
 
     public int getLevel() {
         return level;
@@ -88,16 +89,17 @@ public class Player extends Entity {
 
     public void die(int respawnTimeTicks) {
 
-
-        faceIndex = 2;
         pem.position.x = position.x + size.x / 2;
         pem.position.y = position.y + size.y / 2;
         pem.pData.emitting = true;
         pem.createParticle(128);
         pem.pData.emitting = false;
 
+        if (godMode) //particles still spawn even if godmode is on
+            return;
 
-        if (game.mapEditing) return;
+        game.map.cam.lerp = 0.02f;
+        faceIndex = 2;
         deaths++;
         alive = false;
         visible = false;
@@ -118,6 +120,7 @@ public class Player extends Entity {
     }
 
     public void respawn() {
+        game.map.cam.lerp = game.map.cam.DEFAULT_LERP;
         visible = true;
         alive = true;
         game.screenFadingIn = true;
@@ -146,23 +149,25 @@ public class Player extends Entity {
     public void tick() {
         super.tick();
         face.setCurrentFrame(faceIndex);
-        idleTimer++;
+        //idleTimer++;
 
-        if (idleTimer > 2000)
-            faceIndex = 3;
+        //if (idleTimer > 2000)
+        //    faceIndex = 3;
 
 
         blinkTimer--;
-        if (idleTimer < 2000) {
-            if (blinkTimer <= 0) {
-                blinkTimer = 620;
-                faceIndex = 1;
-            }
-            if (blinkTimer == 600) {
-                faceIndex = 0;
-            }
+        //if (idleTimer < 2000) {
+        if (blinkTimer <= 0) {
+            blinkTimer = 620;
+            faceIndex = 1;
         }
+        if (blinkTimer == 600) {
+            faceIndex = 0;
+        }
+        //}
 
+        if (godMode)
+            faceIndex = 3;
 
         if (!alive) {
             respawnTimer--;
@@ -184,8 +189,8 @@ public class Player extends Entity {
         if (game.keyboardHandler.getKeyState(KeyboardHandler.UP) ||
                 game.keyboardHandler.getKeyState(KeyboardHandler.SPACE)) {
             wantToJump = true;
-            idleTimer = 0;
-            if (game.mapEditing) {
+            //idleTimer = 0;
+            if (game.mapEditing || godMode) {
                 moving.y -= speed * 2;
             } else if (canJump && !jumped) {
                 moving.y -= 13;
@@ -195,16 +200,16 @@ public class Player extends Entity {
 
         if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
             moving.y += speed;
-            idleTimer = 0;
+            //idleTimer = 0;
         }
 
         if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;
-            idleTimer = 0;
+            //idleTimer = 0;
         }
         if (game.keyboardHandler.getKeyState(KeyboardHandler.RIGHT)) {
             moving.x += speed;
-            idleTimer = 0;
+            //idleTimer = 0;
         }
 
         if (!locked && active) {

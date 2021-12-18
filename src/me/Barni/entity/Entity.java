@@ -32,15 +32,12 @@ public abstract class Entity {
         return colliderHitbox;
     }
 
-    public int getID()
-    {
+    public int getID() {
         return mapID;
     }
 
-    public void setID(int id)
-    {
-        if (mapID != -1)
-        {
+    public void setID(int id) {
+        if (mapID != -1) {
             game.logger.err("[ENT] ID already set!");
             return;
         }
@@ -64,8 +61,7 @@ public abstract class Entity {
     }
     //===================\\
 
-    public void loadFromEntityData(EntityData ed)
-    {
+    public void loadFromEntityData(EntityData ed) {
         name = ed.name;
 
         position = ed.position;
@@ -149,6 +145,7 @@ public abstract class Entity {
     //Overrideable events
     public void onTouch(Entity other) {
     }
+
     public boolean onTouchTile(Hitbox tile) {
         return true;
     }
@@ -165,6 +162,17 @@ public abstract class Entity {
                     size.yi(),
                     null);
 
+    }
+
+    public void renderDebug(Graphics g, Camera cam, boolean selected) {
+        g.setColor(Color.RED);
+        g.drawRect(position.xi() - cam.scroll.xi(), position.yi() - cam.scroll.yi(), size.xi(), size.yi());
+        String[] className = getClass().toString().split("\\.");
+        if (selected) {
+            g.setColor(Color.ORANGE);
+            g.drawRect(position.xi() - cam.scroll.xi() - 2, position.yi() - cam.scroll.yi() - 2, size.xi() + 4, size.yi() + 4);
+        }
+        g.drawString(("<" + className[className.length - 1] + "> " + name), position.xi() - cam.scroll.xi(), position.yi() - cam.scroll.yi() - 10);
     }
 
 }

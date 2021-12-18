@@ -86,16 +86,16 @@ public class Texture {
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
+            hasAnimation = false;
             sequences = null;
             frameCount = 1;
             animated = false;
-            hasAnimation = false;
             errMsg("Can't chop texture frames!");
         }
     }
 
     private void errMsg(String msg) {
-        game.logger.err("[TEXTURE] " + msg + " \n" + game.logger.getIndentStr() + "    At: " + generalPathName);
+        game.logger.err("[TEXTURE] " + msg + " \n" + game.logger.getIndentStr() + "\n    At: " + generalPathName);
     }
 
     public void update() {
@@ -133,6 +133,11 @@ public class Texture {
     }
 
     public void setCurrentFrame(int frame) {
+        if (sequences == null)
+        {
+            errMsg("No sequences loaded!");
+            return;
+        }
         sequences[currSequence].setCurrentFrame(frame);
     }
 

@@ -1,5 +1,6 @@
 package me.Barni;
 
+import me.Barni.entity.Entity;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 
@@ -7,15 +8,18 @@ public class Camera {
 
     public Vec2D scroll, view;
     private Hitbox visibleArea;
-    private Vec2D target;
+    private Vec2D vecTarget;
     private Game game;
     Map map;
-    float lerp = .05f;
-    float zoom = 1f;
+    public float lerp = .05f;
+    public final float DEFAULT_LERP = .05f;
+    private float zoom = 1f; //TODO
+    public Entity followEntity;
+    public int followDistTreshold = 50;
 
     public Camera(Game game, Map map) {
         this.scroll = new Vec2D(0, 0);
-        this.target = new Vec2D(0, 0);
+        this.vecTarget = new Vec2D(0, 0);
         this.view = new Vec2D(0, 0);
         this.game = game;
         this.map = map;
@@ -23,7 +27,10 @@ public class Camera {
     }
 
     public void update() {
-        scroll = scroll.lerp(target, lerp); //lerp animation
+        if (followEntity != null)
+            if (followEntity.position.dist(view) >= followDistTreshold)
+                lookAt(followEntity.position.copy().sub(followEntity.size.copy().div(2)));
+        scroll = scroll.lerp(vecTarget, lerp); //lerp animation
         //scroll.lowLimit(0); //Crop view for top and left
         view.x = scroll.x + game.WIDTH / 2;
         view.y = scroll.y + game.HEIGHT / 2;
@@ -35,7 +42,7 @@ public class Camera {
     }
 
     public void lookAt(Vec2D target) {
-        this.target.x = target.x - game.WIDTH / 2;
-        this.target.y = target.y - game.HEIGHT / 2;
+        this.vecTarget.x = target.x - game.WIDTH / 2;
+        this.vecTarget.y = target.y - game.HEIGHT / 2;
     }
 }

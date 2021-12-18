@@ -60,7 +60,9 @@ public class MapLoader {
             w = mapObj.getInt("sizeX");
             h = mapObj.getInt("sizeY");
 
-            map = new Map(game, h, w, 32);
+
+            String[] pathBroken = completePath.split("\\\\");
+            map = new Map(game, h, w, 32, pathBroken[pathBroken.length-1]);
 
             JSONArray grid = mapObj.getJSONArray("grid");
             loadGrid(grid, false);
@@ -229,10 +231,9 @@ public class MapLoader {
             h = decObj.getInt("h");
 
             Decorative d = new Decorative(game, x, y, z, 0, w, h, path);
+
             d.parallax = decObj.getFloat("parallax");
-
-
-            map.addDecorative(d);
+            d.id = map.addDecorative(d); //TODO make this better look
         }
     }
 

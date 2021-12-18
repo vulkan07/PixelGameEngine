@@ -39,7 +39,7 @@ public class Main {
 //TODO [ ] PHYSICS optimize ent to ent collision
 //TODO [ ] PHYSICS fix side stuck collision
 
-//TODO [ ] *Camera: Abstract render from Game
+//DONE [X] *Camera: Abstract render from Game
 //                  Do scrolling in directions
 
 

@@ -17,7 +17,7 @@ public class KeyboardHandler implements KeyListener {
     public static final int SHIFT = 16;
     public static final int CTRL = 17;
     public static final int ESC = 27;
-    public static final int F2 = 113;
+    public static final int F1 = 112;
     public static final int PLUS = 107;
     public static final int MINUS = 109;
     public static final int ARROW_UP = 38;
@@ -54,10 +54,13 @@ public class KeyboardHandler implements KeyListener {
 
     private void handleCommonPresses(int id) {
         switch (id) {
-            case F2:
+            case F1+1:
                 game.mapEditing = !game.mapEditing;
                 break;
-            case F2 + 1:
+            case F1+3:
+                game.levelEditor.setEditing(!game.levelEditor.isEditing());
+                break;
+            case F1 + 2:
                 game.decorativeEditor.editing = !game.decorativeEditor.editing;
                 break;
             case MINUS:

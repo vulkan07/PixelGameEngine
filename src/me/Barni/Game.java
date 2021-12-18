@@ -6,7 +6,7 @@ import me.Barni.hud.HUD;
 import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
 import me.Barni.physics.Vec2D;
-import me.Barni.superhexagon.SuperHexagonWorld;
+import me.Barni.tools.LevelEditor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -91,7 +91,7 @@ public final class Game extends Canvas implements Runnable {
     public KeyboardHandler keyboardHandler;
     public Logger logger;
     public Map map;
-    Player player;
+    public Player player;
 
     public final String GAME_DIR;
 
@@ -104,6 +104,8 @@ public final class Game extends Canvas implements Runnable {
     public int mapPaintID;
     Vec2D selectedTile = new Vec2D(0, 0);
     boolean selectedTileVisible = true;
+    public LevelEditor levelEditor;
+    public String defaultWindowTitle;
     Font defaultFont = new Font("Verdana", Font.PLAIN, 20);
 
 
@@ -133,7 +135,8 @@ public final class Game extends Canvas implements Runnable {
         buffer = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
 
         //WINDOW\\
-        window = new JFrame(title + "  -  " + titleMsgs[r.nextInt(titleMsgs.length - 1)]);
+        defaultWindowTitle = title + "  -  " + titleMsgs[r.nextInt(titleMsgs.length - 1)];
+        window = new JFrame("Starting...");
         //Fullscreen
         if (fullscreen) {
             window.setUndecorated(true);
@@ -170,7 +173,7 @@ public final class Game extends Canvas implements Runnable {
 
         //If map doesn't load, a hardcoded map loads
         if (map == null) {
-            map = new Map(this, 3, 5, 32);
+            map = new Map(this, 3, 5, 32, "<default>");
             byte[] defaultmap = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2,};
             map.setTileArray(defaultmap);
         }
@@ -181,6 +184,7 @@ public final class Game extends Canvas implements Runnable {
         player = new Player(this, "player", new Vec2D(48, 0));
         player.loadTexture("player_1");
         map.addEntity(player);
+        map.cam.followEntity = player;
 
 
         decorativeEditor = new DecorativeEditor(this, map);
@@ -199,6 +203,7 @@ public final class Game extends Canvas implements Runnable {
         ((HUDButton) hud.getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
         ((HUDButton) hud.getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
 
+        levelEditor = new LevelEditor(this);
 
         //shWorld = new SuperHexagonWorld(this);
 
@@ -208,7 +213,7 @@ public final class Game extends Canvas implements Runnable {
         thread.start();
     }
 
-    SuperHexagonWorld shWorld;
+    //SuperHexagonWorld shWorld;
 
     public void loadNewMap(String path) {
 
@@ -218,6 +223,8 @@ public final class Game extends Canvas implements Runnable {
         player = new Player(this, "player", new Vec2D(48, 0));
         player.loadTexture("player_1");
         map.addEntity(player);
+        map.cam.followEntity = player;
+        levelEditor.reloadMap(map);
         screenFadingIn = true;
     }
 
@@ -263,7 +270,9 @@ public final class Game extends Canvas implements Runnable {
             } catch (InterruptedException e) {
             }*/
             if (timer >= 1000000000) {
-                System.out.println("FPS: " + frames);
+
+                window.setTitle(defaultWindowTitle + "   |   " + frames + " FPS");
+                //System.out.println("FPS: " + frames);
                 frames = 0;
                 timer = 40;
             }
@@ -295,7 +304,7 @@ public final class Game extends Canvas implements Runnable {
         mouseHandler.update();
         map.tick();
         decorativeEditor.tick();
-        //map.getEntity("test").velocity.x -= 0.11f;
+        levelEditor.update();
 
         //Tile editor
         selectedTile = mouseHandler.getPosition().copy();
@@ -377,7 +386,7 @@ public final class Game extends Canvas implements Runnable {
 
             hud.render(image);
             g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-
+            levelEditor.overlayRender(g);
 
             //Selected tile type
             if (mapEditing) {

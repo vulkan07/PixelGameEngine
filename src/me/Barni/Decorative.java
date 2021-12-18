@@ -7,9 +7,10 @@ import java.awt.image.BufferedImage;
 
 public class Decorative {
     Game game;
-    Texture texture;
-    int x, y, z, w, h;
-    float parallax;
+    public Texture texture;
+    public int x, y, z, w, h;
+    public int id;
+    public float parallax;
     //Z = -1 : behind map
     //Z =  0 : before map
     //Z =  1 : before entities
@@ -33,5 +34,14 @@ public class Decorative {
     public void render(BufferedImage img, Camera cam) {
         Graphics g = img.getGraphics();
         g.drawImage(texture.getTexture(), (int)(x - cam.scroll.xi()*parallax), (int)(y - cam.scroll.yi()*parallax), w, h, null);
+    }
+    public void renderDebug(Graphics g, Camera cam, boolean selected) {
+        g.setColor(Color.GREEN);
+        g.drawRect(x - cam.scroll.xi(), y - cam.scroll.yi(), w, h);
+        if (selected) {
+            g.setColor(Color.WHITE);
+            g.drawRect(x - cam.scroll.xi() - 2, y - cam.scroll.yi() - 2, w + 4, h + 4);
+        }
+        g.drawString((texture.getPath() + "(#" + id + ")"), x - cam.scroll.xi(), y - cam.scroll.yi() - 10);
     }
 }

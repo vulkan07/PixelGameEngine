@@ -5,7 +5,7 @@ public class Logger {
     private int indentLevel = 0;
     public static final String INDENT = "    ";
     private static String currentIndent = "";
-    public static final boolean LOG_ERRORS_TO_SYS_OUT = false;
+    public static final boolean LOG_ERRORS_TO_SYS_OUT = true;
     public static final byte LOG_SUPER = 4;
     public static final byte LOG_ALL = 3;
     public static final byte LOG_WARN_ERR = 2;
