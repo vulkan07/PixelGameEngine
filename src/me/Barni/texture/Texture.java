@@ -29,7 +29,8 @@ public class Texture {
 
 
     public int[] delay;
-    private String path, bonusPath = "textures\\";
+    private String path;
+    public static final String TEXTURE_BONUS_PATH = "textures\\";
 
     public String getPath() {
         return path;
@@ -47,11 +48,11 @@ public class Texture {
         String dataPath = path + ".anim";
 
         sequences = null;
-        generalPathName = game.GAME_DIR + bonusPath;
+        generalPathName = game.GAME_DIR + TEXTURE_BONUS_PATH;
 
-        File dFile = new File(game.GAME_DIR + bonusPath + dataPath);
+        File dFile = new File(game.GAME_DIR + TEXTURE_BONUS_PATH + dataPath);
         if (dFile.exists()) {
-            sequences = AnimSequenceLoader.loadSequences(game.logger, game.GAME_DIR + bonusPath + dataPath, this);
+            sequences = AnimSequenceLoader.loadSequences(game.logger, game.GAME_DIR + TEXTURE_BONUS_PATH + dataPath, this);
             hasAnimation = true;
             animated = true;
         }
@@ -64,7 +65,7 @@ public class Texture {
 
         //READ IMAGE
         try {
-            fullImg = ImageIO.read(new File(game.GAME_DIR + bonusPath + imgPath));
+            fullImg = ImageIO.read(new File(game.GAME_DIR + TEXTURE_BONUS_PATH + imgPath));
         } catch (IOException e) {
             errMsg("Can't read file!");
         }
@@ -103,14 +104,9 @@ public class Texture {
             if (sequences[currSequence].isEnded()) {
 
                 String n = sequences[currSequence].nextName;
+                if (setAnimationSequence(n))
+                    return;
 
-                for (int i = 0; i < sequences.length; i++) {
-                    if (sequences[i].name.equals(n)) {
-                        currSequence = i;
-                        sequences[i].reset();
-                        return;
-                    }
-                }
                 game.logger.err("[TEXTURE] Can't find sequence \"" + n + "\"!");
                 animated = false;
                 setCurrentFrame(0);
@@ -120,7 +116,9 @@ public class Texture {
         }
     }
 
+
     public boolean setAnimationSequence(String seqName) {
+
         for (int i = 0; i < sequences.length; i++) {
             if (sequences[i].name.equals(seqName)) {
                 currSequence = i;
@@ -133,8 +131,7 @@ public class Texture {
     }
 
     public void setCurrentFrame(int frame) {
-        if (sequences == null)
-        {
+        if (sequences == null) {
             errMsg("No sequences loaded!");
             return;
         }

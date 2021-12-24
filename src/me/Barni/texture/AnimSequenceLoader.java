@@ -83,6 +83,7 @@ public class AnimSequenceLoader {
 
                 //Generate object from processed data
                 AnimSequence currentSeq = new AnimSequence(
+                        txt,
                         jo.getString("name"),
                         jo.getString("next"),
                         framesArray,

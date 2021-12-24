@@ -1,10 +1,14 @@
 package me.Barni.texture;
 
+import java.util.Arrays;
+
 public class AnimSequence {
 
     String name, nextName;
 
+    private Texture texture;
     private int[] frames, delays;
+    private boolean valid;
 
     public int[] getFrames() {
         return frames;
@@ -20,6 +24,8 @@ public class AnimSequence {
     }
 
     public int getCurrentFrame() {
+        if (texture.isAnimated())
+            checkCurrentFrameIsValid();
         return frames[currentFrame];
     }
 
@@ -28,37 +34,45 @@ public class AnimSequence {
     }
 
     public boolean isEnded() {
-        return currentFrame >= frameCount-1;
+        return !valid;
     }
 
     private int timer, currentFrame, frameCount;
 
     void update() {
+        if (!texture.isAnimated() || !valid)
+            return;
+
         timer++;
-
-        if (currentFrame >= frameCount) {
-            currentFrame = 0;
-            timer = 0;
-        }
-
-
+        //On timer
         if (timer >= delays[currentFrame]) {
             currentFrame++;
             timer = 0;
         }
+        checkCurrentFrameIsValid();
     }
 
-    public void reset()
-    {
+    private void checkCurrentFrameIsValid() {
+        //On last frame
+        if (currentFrame >= frameCount) {
+            currentFrame = frameCount-1;
+            valid = false;
+        }
+    }
+
+    public void reset() {
+        valid = true;
         timer = 0;
         currentFrame = 0;
     }
 
-    public AnimSequence(String name, String nextName, int[] frames, int[] delays, int frameCount) {
+    public AnimSequence(Texture txt, String name, String nextName, int[] frames, int[] delays, int frameCount) {
+        this.texture = txt;
         this.frameCount = frameCount;
         this.name = name;
         this.nextName = nextName;
         this.frames = frames;
         this.delays = delays;
+        this.valid = true;
     }
 }

@@ -4,6 +4,7 @@ import me.Barni.texture.Texture;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
 public class Intro {
 
@@ -14,45 +15,79 @@ public class Intro {
     }
 
     private boolean playingIntro;
-    private int timer, xPos, yPos;
+    private int timer, xPos, yPos, logoCount, foundLogos;
     Game game;
     private BufferedImage image;
+    private String pathPrefix;
 
-    public Intro(Game game, String imgPath, BufferedImage img) {
+    public Intro(Game game, BufferedImage img) {
+
+        pathPrefix = game.GAME_DIR + Texture.TEXTURE_BONUS_PATH + "logos\\logo";
+        File f;
+        int i = 0;
+        do {
+            i++;
+            f = new File(pathPrefix+i+".png");
+        } while(f.exists());
+        logoCount = 0;
+        foundLogos = i+1;
+
         image = img;
         this.game = game;
         t = new Texture();
-        t.loadTexture(game, imgPath, 794, 734, false);
-        xPos = game.WIDTH / 2 - t.getWidth() / 2;
-        yPos = game.HEIGHT / 2 - t.getHeight() / 2;
     }
 
     public void start() {
-
+        nextLogo();
         playingIntro = true;
         timer = 0;
-        Graphics g = image.getGraphics();
         game.blankAlpha = 255;
         game.screenFadingIn = true;
     }
 
+    private void nextLogo() {
+        t.loadTexture(game, ("\\logos\\logo"+logoCount), 750, 750, true);
+        xPos = game.WIDTH / 2 - t.getWidth() / 2;
+        yPos = game.HEIGHT / 2 - t.getHeight() / 2;
+        logoCount++;
+    }
+
+    public void skip() {
+        if (!playingIntro)
+            return;
+
+        game.screenFadingIn = true;
+        game.screenFadingOut = false;
+        game.blankAlpha = 255;
+
+        playingIntro = false;
+    }
     public void render() {
         if (!playingIntro) return;
 
         timer++;
 
+        //Fade out
         if (timer >= 150) {
             game.screenFadingOut = true;
         }
 
         Graphics g = image.getGraphics();
 
+        //OnFadedOut
         if (timer >= 150 && game.blankAlpha == 255) {
-            playingIntro = false;
+            nextLogo();
             game.screenFadingIn = true;
+            game.blankAlpha = 255;
+            timer = 0;
+
+            //End
+            if (logoCount >= foundLogos)
+                playingIntro = false;
         }
 
         if (game.blankAlpha != 255) {
+            g.clearRect(xPos,yPos, t.getWidth(), t.getHeight());
             g.drawImage(t.getTexture(), xPos, yPos, null);
         }
     }

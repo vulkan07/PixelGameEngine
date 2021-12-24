@@ -15,20 +15,24 @@ public class MouseHandler implements MouseListener {
     public final byte MB5 = 16;//(byte) 4;
 
     private byte pressed = 0;
-    private Vec2D pos;
+    private Vec2D pos, lastPos, delta;
     JFrame window;
     Game game;
 
     public MouseHandler(JFrame window, Game game) {
         this.game = game;
         this.window = window;
-        pos = new Vec2D(0, 0);
+        pos = new Vec2D();
+        delta = new Vec2D();
+        lastPos = new Vec2D();
     }
 
     public void update() {
         try {
             pos.x = window.getMousePosition().x;
             pos.y = window.getMousePosition().y;
+            delta = lastPos.copy().sub(pos);
+            lastPos = pos.copy();
         } catch (NullPointerException nex) {
         }
     }
@@ -48,6 +52,8 @@ public class MouseHandler implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
+        if (game.intro.isPlayingIntro())
+            game.intro.skip();
         pressed = (byte) (pressed | 1 << e.getButton() - 1);
         //System.out.println(isPressed(RMB));
     }

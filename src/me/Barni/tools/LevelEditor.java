@@ -35,6 +35,7 @@ public class LevelEditor {
     public final int MOUSE_GIZMO_PAINT = 2;
     public final int MOUSE_GIZMO_ADD_DEC = 3;
     public final int MOUSE_GIZMO_ADD_ENT = 4;
+    public final int MOUSE_GIZMO_MOVE = 5;
 
     public boolean showGrid;
 
@@ -43,12 +44,12 @@ public class LevelEditor {
     private boolean mouseBeenPressed;
     private boolean mouseGizmoUsed = true;
 
-    int[] selectedDecorativesID = new int[] {};
-    int[] selectedEntitiesID = new int[] {};
+    int[] selectedDecorativesID = new int[]{};
+    int[] selectedEntitiesID = new int[]{};
 
     public LevelEditor(Game game) {
         mouseGizmo.loadTexture(game, "mouse_gizmos", 16, 16, true);
-        setMouseGizmo(MOUSE_GIZMO_SELECT);
+        setMouseGizmo(MOUSE_GIZMO_MOVE);
         this.game = game;
         mouse = game.mouseHandler;
         reloadMap(game.map); //Init variables with map
@@ -108,7 +109,7 @@ public class LevelEditor {
 
     public Vec2D getMouseClickLocation() {
         if (mousePressObtained)
-            return  mouseClick;
+            return mouseClick;
         else
             return null;
     }
@@ -118,8 +119,7 @@ public class LevelEditor {
             return;
 
         if (waitingForMousePress)
-            if (mouse.isPressed(mouse.LMB))
-            {
+            if (mouse.isPressed(mouse.LMB)) {
                 mouseClick = mouse.getPosition().copy().add(cam.scroll);
                 setMouseGizmo(MOUSE_GIZMO_SELECT);
                 waitingForMousePress = false;

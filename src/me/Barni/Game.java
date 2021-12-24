@@ -189,7 +189,7 @@ public final class Game extends Canvas implements Runnable {
 
         decorativeEditor = new DecorativeEditor(this, map);
 
-        intro = new Intro(this, "logo", image);
+        intro = new Intro(this, image);
         intro.start();
 
 
@@ -432,6 +432,10 @@ public final class Game extends Canvas implements Runnable {
         if (screenFadingIn || screenFadingOut || blankAlpha == 1) {
             g2d.setColor(new Color(0, 0, 0, blankAlpha));
             g2d.fillRect(0, 0, WIDTH, HEIGHT);
+            /*int val = (int) Vec2D.remap(blankAlpha, 0, 255, 0, HEIGHT);
+            g2d.fillRect(0, -200, WIDTH, val-200);
+            g2d.fillRect(0, -100, WIDTH, val-100);
+            g2d.fillRect(0, 0, WIDTH, val);*/
         }
 
         g.dispose();

@@ -86,6 +86,10 @@ public class KeyboardHandler implements KeyListener {
             case ARROW_UP:
                 game.decorativeEditor.selectedField--;
                 break;
+            case SPACE:
+                if (game.intro.isPlayingIntro())
+                    game.intro.skip();
+                break;
         }
         /*
         if (e.getKeyCode() == F2) game.mapEditing = !game.mapEditing;

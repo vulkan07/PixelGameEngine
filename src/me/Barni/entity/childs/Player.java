@@ -34,6 +34,15 @@ public class Player extends Entity {
 
     private int respawnTimer, respawnTime, reducedRespawnTime = 1;
     private int blinkTimer = 100;
+
+    public int getRespawnTimer() {
+        return respawnTimer;
+    }
+
+    public int getRespawnTime() {
+        return respawnTime;
+    }
+
     //private int idleTimer;
     private int deaths;
 
