@@ -12,64 +12,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 
 public final class Game extends Canvas implements Runnable {
 
-    private final String[] titleMsgs = {
-            "ZeroPointerException",
-            "Erasing C:\\",
-            "Apple.",
-            "Random message",
-            "FLIP THE SAUSAGE!!",
-            "Roses are red, violets are blue, and you're the biggest assh*le",
-            "1 + 1 = 404 not found",
-            "RTX is just better ray CASTING",
-            "life = 42",
-            "WHY IS IT 3AM ALREADY???",
-            "I don't need sleep. I need answers.",
-            "F*cking JSON writer rearranged my files by alphabetic order",
-            "DO NOT EVEN THINK ABOUT IT",
-            "The cake is a lie.",
-            "HAHA U DED",
-            "Right behind you",
-            "Yeah 20% CPU for a hello world",
-            "\"Java works on every pc.\" Not even on my friends'",
-            "Pointers you idiot! Pointers!",
-            "C++ in a java window title will un-virgin your oil",
-            "If you know what JFrame is, i'll give you a new Thanks()",
-            "Passing by reference is good",
-            "OpenGL",
-            "DirectX",
-            "Vulkan",
-            "Ceremonia Matcha",
-            "Jon Hopkins - Circle",
-            "Vessel",
-            "Chemically unstable Fluros in the orchard",
-            "When life gives you lemons...",
-            "Yeah my phone is at -1%",
-            "I just wrote ONE LINE, now nothing's working...",
-            "500+ bytes used just for this title",
-            "yeah this has 45 FPS in fullscreen lol",
-            "Trigonometry",
-            "\"And that initializes the vertex buffers...\"",
-            "Excel is not a database!",
-            "DO NOT LEARN C++",
-            "#Programming memes in my titles",
-            ":wqa!",
-            "CTRL + ALT + SHIFT + S",
-            "for (int c = 0; c < 10; c++)",
-            "Hyper text transfer protocol (HTTP)",
-            "I know, this is bad graphics. Still better than pacman, huh?",
-            "I totally have a healthy lifestyle",
-            "That sniper is a spy!",
-            "Kick your bot",
-            "ALT + F4 = FREE DIAMONDS!",
-            "sus"
-    };
     private boolean running = false;    //Running
-
     Thread thread;                      //Game thread
 
     public JFrame window;               //Window
@@ -91,7 +42,7 @@ public final class Game extends Canvas implements Runnable {
     public final String GAME_DIR; //Root game directory, which all file readers will use
 
     //Screen fading variables
-    private boolean screenFadingIn, screenFadingOut;
+    private boolean isScreenFadingIn, isScreenFadingOut;
     private int blankAlpha = 255;
 
     private Intro intro;
@@ -105,6 +56,33 @@ public final class Game extends Canvas implements Runnable {
     //Constructor
     public Game(String wDir) {
         GAME_DIR = wDir;
+    }
+
+    //---------------------------------\\
+    //--->  Load Title Random Msg  <---\\
+    private String loadRandomTitleMsg() {
+        String msg = "";
+        String lines = "";
+
+        //Try read titles.txt
+        try {
+            File file = new File(GAME_DIR + "titles.txt");
+            FileInputStream fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+            lines = new String(data, StandardCharsets.UTF_8);
+        } catch (Exception ignored) {
+            logger.warn("Can't find titles.txt to get random title");
+        }
+
+        //If read successfully choose random line as title
+        if (!lines.equals("")) {
+            String[] msgs = lines.split("\n");
+            return msgs[r.nextInt(msgs.length)-1];
+        }
+
+        return msg;
     }
 
     //--------------------------------\\
@@ -125,7 +103,7 @@ public final class Game extends Canvas implements Runnable {
 
         //------------------------\\
         //--------WINDOW----------\\
-        defaultWindowTitle = title + "  -  " + titleMsgs[r.nextInt(titleMsgs.length - 1)];
+        defaultWindowTitle = title + "  -  " + loadRandomTitleMsg();
         window = new JFrame("Starting...");
 
         if (fullscreen) {
@@ -214,7 +192,7 @@ public final class Game extends Canvas implements Runnable {
         } catch (NullPointerException ignored) {
         }
 
-        screenFadingIn = true;          //Add screen fading effect
+        isScreenFadingIn = true;          //Add screen fading effect
     }
 
     //--------------------------------\\
@@ -324,25 +302,25 @@ public final class Game extends Canvas implements Runnable {
         //Screen fading mechanism
         {
             //None -> back
-            if (screenFadingOut) {
+            if (isScreenFadingOut) {
                 blankAlpha += 5;
 
                 if (blankAlpha > 255) {
                     blankAlpha = 255;
-                    screenFadingOut = false;
+                    isScreenFadingOut = false;
                 }
             }
             //Black -> none
-            if (screenFadingIn) {
+            if (isScreenFadingIn) {
                 blankAlpha -= 5;
 
                 if (blankAlpha < 0) {
                     blankAlpha = 0;
-                    screenFadingIn = false;
+                    isScreenFadingIn = false;
                 }
             }
 
-            if (screenFadingIn || screenFadingOut || blankAlpha == 1) {
+            if (isScreenFadingIn || isScreenFadingOut || blankAlpha == 1) {
                 g.setColor(new Color(0, 0, 0, blankAlpha));
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
@@ -353,29 +331,28 @@ public final class Game extends Canvas implements Runnable {
     }
 
     //Call to fade the screen FROM black
-    public void screenFadeIn(int alphaStart) {
-        if (alphaStart < 0 || alphaStart > 255 || screenFadingIn)
+    public void fadeInScreen(int alphaStart) {
+        if (alphaStart < 0 || alphaStart > 255 || isScreenFadingIn)
             return;
         blankAlpha = alphaStart;
-        screenFadingOut = false;
-        screenFadingIn = true;
+        isScreenFadingOut = false;
+        isScreenFadingIn = true;
         System.out.println("fadein");
     }
 
     //Call to fade the screen TO black
-    public void screenFadeOut(int alphaStart) {
-        if (alphaStart < 0 || alphaStart > 255 || screenFadingOut)
+    public void fadeOutScreen(int alphaStart) {
+        if (alphaStart < 0 || alphaStart > 255 || isScreenFadingOut)
             return;
         blankAlpha = alphaStart;
-        screenFadingOut = true;
-        screenFadingIn = false;
+        isScreenFadingOut = true;
+        isScreenFadingIn = false;
         System.out.println("fadeout");
     }
 
-    public void resetScreenFade(boolean isFadedOut)
-    {
-        screenFadingOut = false;
-        screenFadingIn = false;
+    public void resetScreenFade(boolean isFadedOut) {
+        isScreenFadingOut = false;
+        isScreenFadingIn = false;
         blankAlpha = isFadedOut ? 255 : 0;
     }
 

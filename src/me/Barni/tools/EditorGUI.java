@@ -278,7 +278,7 @@ public class EditorGUI {
             return;
         }
         pathResultLabel.setText("");
-        editor.game.screenFadeIn(180);
+        editor.game.fadeInScreen(180);
         editor.game.loadNewMap(pathField.getText());
     }
 

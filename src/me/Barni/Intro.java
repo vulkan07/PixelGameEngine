@@ -41,7 +41,7 @@ public class Intro {
         nextLogo();
         playingIntro = true;
         timer = 0;
-        game.screenFadeIn(255);
+        game.fadeInScreen(255);
     }
 
     private void nextLogo() {
@@ -56,7 +56,7 @@ public class Intro {
             return;
 
         game.resetScreenFade(true);
-        game.screenFadeIn(255);
+        game.fadeInScreen(255);
 
         playingIntro = false;
     }
@@ -67,7 +67,7 @@ public class Intro {
 
         //Fade out
         if (timer >= 150) {
-            game.screenFadeOut(0);
+            game.fadeOutScreen(0);
         }
 
         Graphics g = image.getGraphics();
@@ -75,7 +75,7 @@ public class Intro {
         //OnFadedOut
         if (timer >= 150 && game.getScreenFadeAlpha() == 255) {
             nextLogo();
-            game.screenFadeIn(255);
+            game.fadeInScreen(255);
             timer = 0;
 
             //End

@@ -132,7 +132,7 @@ public class Player extends Entity {
         game.getMap().cam.lerp = game.getMap().cam.DEFAULT_LERP;
         visible = true;
         alive = true;
-        game.screenFadeIn(255);
+        game.fadeInScreen(255);
     }
 
     @Override
