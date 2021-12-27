@@ -51,8 +51,8 @@ public class LevelEditor {
         mouseGizmo.loadTexture(game, "mouse_gizmos", 16, 16, true);
         setMouseGizmo(MOUSE_GIZMO_MOVE);
         this.game = game;
-        mouse = game.mouseHandler;
-        reloadMap(game.map); //Init variables with map
+        mouse = game.getMouseHandler();
+        reloadMap(game.getMap()); //Init variables with map
         initPWin();
     }
 
@@ -90,7 +90,7 @@ public class LevelEditor {
         this.editing = editing;
         pWin.setVisible(editing);
         if (editing) {
-            pWin.setTitle("Level editor: " + game.map.getFileName());
+            pWin.setTitle("Level editor: " + game.getMap().getFileName());
             game.window.requestFocus();
             eGUI.updateTxtPreviewImage();
         }
@@ -131,33 +131,33 @@ public class LevelEditor {
             map.cam.followEntity = null;
             map.cam.lookAt(pos);
 
-            if (game.keyboardHandler.getKeyState(KeyboardHandler.UP))
+            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.UP))
                 pos.y -= SPEED;
 
-            if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN))
+            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.DOWN))
                 pos.y += SPEED;
 
-            if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT))
+            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.LEFT))
                 pos.x -= SPEED;
 
-            if (game.keyboardHandler.getKeyState(KeyboardHandler.RIGHT))
+            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.RIGHT))
                 pos.x += SPEED;
         }
 
         if (paintingGrid) {
-            if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT))
+            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT))
                 eGUI.txtPreview.setText("Background");
             else
                 eGUI.txtPreview.setText("Foreground");
 
             Vec2D selectedTile = mouse.getPosition().copy();
-            selectedTile.add(game.map.cam.scroll);
+            selectedTile.add(game.getMap().cam.scroll);
             selectedTile.y -= 16;
             selectedTile.div(32);
 
             tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
             if (mouse.isPressed(mouse.LMB)) {
-                if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
+                if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT)) {
                     try {
                         map.setBackTile(tPos1, paintTileIndex);
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -172,7 +172,7 @@ public class LevelEditor {
                     }
                 }
             } else if (mouse.isPressed(mouse.RMB))
-                if (game.keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
+                if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT)) {
                     try {
                         map.setBackTile(tPos1, 0);
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -233,8 +233,8 @@ public class LevelEditor {
 
         if (showGrid) {
             g.setColor(gridColor);
-            for (int x = 0; x < game.map.width; x++) {
-                for (int y = 0; y < game.map.height; y++) {
+            for (int x = 0; x < game.getMap().width; x++) {
+                for (int y = 0; y < game.getMap().height; y++) {
                     g.drawRect(x * 32 - cam.scroll.xi(), y * 32 - cam.scroll.yi(), 32, 32);
                 }
             }
@@ -252,7 +252,7 @@ public class LevelEditor {
 
         if (paintingGrid) {
             Vec2D selectedTile = mouse.getPosition().copy();
-            selectedTile.add(game.map.cam.scroll);
+            selectedTile.add(game.getMap().cam.scroll);
             selectedTile.y -= 16;
             selectedTile.div(32);
             if (selectedTile.x > 0 && selectedTile.y > 0 && selectedTile.x < map.width && selectedTile.y < map.height)

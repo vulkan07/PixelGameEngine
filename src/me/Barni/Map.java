@@ -97,7 +97,7 @@ public class Map {
         game = g;
         atlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
 
-        game.logger.info("[MAP] Initialized new map, size: " + w + ", " + h);
+        game.getLogger().info("[MAP] Initialized new map, size: " + w + ", " + h);
 
         physics = new Physics(game, this);
 
@@ -109,7 +109,7 @@ public class Map {
     }
 
     public void dumpCurrentMapIntoFile(String path) {
-        game.logger.info("[MAP] Writing out current map");
+        game.getLogger().info("[MAP] Writing out current map");
 
 
         File file = new File(game.GAME_DIR + path + ".map");
@@ -167,7 +167,7 @@ public class Map {
             FileWriter writer = new FileWriter(file);
             writer.write(jobj.toString(4));
             writer.close();
-            game.logger.info("[MAP] Dumped map file into " + game.GAME_DIR + path + ".json");
+            game.getLogger().info("[MAP] Dumped map file into " + game.GAME_DIR + path + ".json");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -267,9 +267,9 @@ public class Map {
             int y = i / width; //Y
             if (
                     x * tileSize + tileSize < cam.scroll.x ||
-                            x * tileSize > cam.scroll.x + game.WIDTH ||
+                            x * tileSize > cam.scroll.x + game.getWIDTH() ||
                             y * tileSize + tileSize < cam.scroll.y ||
-                            y * tileSize > cam.scroll.y + game.WIDTH
+                            y * tileSize > cam.scroll.y + game.getHEIGHT()
             ) continue;
 
             //BG
@@ -299,14 +299,6 @@ public class Map {
                     null);
             //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
         }
-
-        if (game.mapEditing)
-            g.drawRect(
-                    -cam.scroll.xi(),
-                    -cam.scroll.yi(),
-                    width * tileSize,
-                    height * tileSize
-            );
     }
 
     public void renderEntities(BufferedImage img) {
@@ -347,7 +339,7 @@ public class Map {
 
     public int addDecorative(Decorative dec) {
         if (decCount >= decoratives.length) {
-            game.logger.err("Decoratives array is full!");
+            game.getLogger().err("Decoratives array is full!");
             return -1;
         }
         decoratives[decCount] = dec;
@@ -361,15 +353,15 @@ public class Map {
         for (int i = 0; i < entities.length; i++) {
             if (entities[i] == null) {
                 if (e.name == null || e.name.equals(""))
-                    game.logger.warn("[MAP] Entity added without name: " + e.getClass());
+                    game.getLogger().warn("[MAP] Entity added without name: " + e.getClass());
                 entities[i] = e;
                 e.setID(i);
                 physics.init();
-                game.logger.subInfo("[MAP] Added entity: " + e.getClass());
+                game.getLogger().subInfo("[MAP] Added entity: " + e.getClass());
                 return;
             }
         }
-        game.logger.err("[MAP] Entity array is full!!");
+        game.getLogger().err("[MAP] Entity array is full!!");
     }
 
     public void initPlayer(Player p) {

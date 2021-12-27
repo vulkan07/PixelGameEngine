@@ -27,7 +27,7 @@ public class MapLoader {
 
     public MapLoader(Game game) {
         this.game = game;
-        this.logger = game.logger;
+        this.logger = game.getLogger();
     }
 
 

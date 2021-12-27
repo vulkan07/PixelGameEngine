@@ -1,7 +1,5 @@
 package me.Barni.texture;
 
-import java.util.Arrays;
-
 public class AnimSequence {
 
     String name, nextName;

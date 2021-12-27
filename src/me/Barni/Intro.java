@@ -41,14 +41,13 @@ public class Intro {
         nextLogo();
         playingIntro = true;
         timer = 0;
-        game.blankAlpha = 255;
-        game.screenFadingIn = true;
+        game.screenFadeIn(255);
     }
 
     private void nextLogo() {
         t.loadTexture(game, ("\\logos\\logo"+logoCount), 750, 750, true);
-        xPos = game.WIDTH / 2 - t.getWidth() / 2;
-        yPos = game.HEIGHT / 2 - t.getHeight() / 2;
+        xPos = game.getWIDTH() / 2 - t.getWidth() / 2;
+        yPos = game.getHEIGHT() / 2 - t.getHeight() / 2;
         logoCount++;
     }
 
@@ -56,9 +55,8 @@ public class Intro {
         if (!playingIntro)
             return;
 
-        game.screenFadingIn = true;
-        game.screenFadingOut = false;
-        game.blankAlpha = 255;
+        game.resetScreenFade(true);
+        game.screenFadeIn(255);
 
         playingIntro = false;
     }
@@ -69,16 +67,15 @@ public class Intro {
 
         //Fade out
         if (timer >= 150) {
-            game.screenFadingOut = true;
+            game.screenFadeOut(0);
         }
 
         Graphics g = image.getGraphics();
 
         //OnFadedOut
-        if (timer >= 150 && game.blankAlpha == 255) {
+        if (timer >= 150 && game.getScreenFadeAlpha() == 255) {
             nextLogo();
-            game.screenFadingIn = true;
-            game.blankAlpha = 255;
+            game.screenFadeIn(255);
             timer = 0;
 
             //End
@@ -86,7 +83,7 @@ public class Intro {
                 playingIntro = false;
         }
 
-        if (game.blankAlpha != 255) {
+        if (game.getScreenFadeAlpha() != 255) {
             g.clearRect(xPos,yPos, t.getWidth(), t.getHeight());
             g.drawImage(t.getTexture(), xPos, yPos, null);
         }

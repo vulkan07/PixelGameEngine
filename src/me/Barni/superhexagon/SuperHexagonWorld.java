@@ -57,7 +57,7 @@ public class SuperHexagonWorld {
         currentPolyVertexBuffer = new int[2][4];           //Rectangle buffer
         bgDecorPolyBuffer = new int[2][4];                 //Rectangle buffer
 
-        origin = new Vec2D(game.WIDTH / 2, game.HEIGHT / 2);
+        origin = new Vec2D(game.getWIDTH() / 2, game.getHEIGHT() / 2);
 
     }
 
@@ -128,9 +128,9 @@ public class SuperHexagonWorld {
 
         //Handle inputs
         //Move player & render mode
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT))
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.LEFT))
             playerXpos += 10;
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.RIGHT))
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.RIGHT))
             playerXpos -= 10;
 
 
@@ -138,7 +138,7 @@ public class SuperHexagonWorld {
         willRenderModeChange = false;
 
 
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.ENTER)) {
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.ENTER)) {
             willRenderModeChange = true;
             if (!isRenderModeChanged) {
                 oldRenderMode = !oldRenderMode;
@@ -275,9 +275,9 @@ public class SuperHexagonWorld {
             for (PolygonLine polygonLine : pls) {
                 if (polygonLine.disabled) continue;
                 g.fillRect(
-                        game.WIDTH / polySideCount * sideCount - game.WIDTH / polySideCount,
-                        (int) Vec2D.remap(polygonLine.y, -800, 0, 0, game.HEIGHT - 30),
-                        game.WIDTH / polySideCount,
+                        game.getWIDTH() / polySideCount * sideCount - game.getWIDTH() / polySideCount,
+                        (int) Vec2D.remap(polygonLine.y, -800, 0, 0, game.getHEIGHT() - 30),
+                        game.getWIDTH() / polySideCount,
                         24);
             }
             sideCount++;
@@ -289,15 +289,15 @@ public class SuperHexagonWorld {
 
         //TRIANGLE
         //Left point
-        int playerRealX = (int) Vec2D.remap(playerXpos, 0, 360, 0, game.WIDTH);
+        int playerRealX = (int) Vec2D.remap(playerXpos, 0, 360, 0, game.getWIDTH());
         playerPosVertexBuffer[0][0] = playerRealX - playerHalfSize;
-        playerPosVertexBuffer[1][0] = game.HEIGHT - 64;
+        playerPosVertexBuffer[1][0] = game.getHEIGHT() - 64;
         //Right point
         playerPosVertexBuffer[0][1] = playerRealX + playerHalfSize;
-        playerPosVertexBuffer[1][1] = game.HEIGHT - 64;
+        playerPosVertexBuffer[1][1] = game.getHEIGHT() - 64;
         //Upper point
         playerPosVertexBuffer[0][2] = playerRealX;
-        playerPosVertexBuffer[1][2] = game.HEIGHT - 72 - playerHalfSize;
+        playerPosVertexBuffer[1][2] = game.getHEIGHT() - 72 - playerHalfSize;
 
         g.fillPolygon(playerPosVertexBuffer[0], playerPosVertexBuffer[1], 3);
         g.drawString(Integer.toString(playerPolyPos), origin.xi(), origin.yi());

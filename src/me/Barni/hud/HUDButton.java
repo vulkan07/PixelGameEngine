@@ -31,7 +31,7 @@ public class HUDButton extends HUDElement {
 
     @Override
     public void add(HUDElement elem) {
-        game.logger.err("Can't add child to a HUDButton!");
+        game.getLogger().err("Can't add child to a HUDButton!");
     }
 
     @Override
@@ -41,15 +41,15 @@ public class HUDButton extends HUDElement {
         this.pressed = false;
         if (pressable)
             if (
-                    game.mouseHandler.getPosition().x > x &&
-                            game.mouseHandler.getPosition().y > y + h &&
-                            game.mouseHandler.getPosition().x < x + w &&
-                            game.mouseHandler.getPosition().y < y + h * 2) {
+                    game.getMouseHandler().getPosition().x > x &&
+                            game.getMouseHandler().getPosition().y > y + h &&
+                            game.getMouseHandler().getPosition().x < x + w &&
+                            game.getMouseHandler().getPosition().y < y + h * 2) {
                 //Mouse within box
                 this.hovered = true;
 
                 //LMB is pressed
-                if (game.mouseHandler.isPressed(game.mouseHandler.LMB)) {
+                if (game.getMouseHandler().isPressed(game.getMouseHandler().LMB)) {
                     this.pressed = true;
                     if (myListener != null)
                         if (!pressed0)

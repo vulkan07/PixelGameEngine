@@ -46,49 +46,22 @@ public class KeyboardHandler implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (logPresses) game.logger.info("Pressed " + e.getKeyCode());
-        if (game.decorativeEditor.editing) game.decorativeEditor.onKeyPress(e.getKeyCode());
+        if (logPresses) game.getLogger().info("Pressed " + e.getKeyCode());
         handleCommonPresses(e.getKeyCode());
         pressed[e.getKeyCode()] = true;
     }
 
     private void handleCommonPresses(int id) {
         switch (id) {
-            case F1+1:
-                game.mapEditing = !game.mapEditing;
-                break;
             case F1+3:
-                game.levelEditor.setEditing(!game.levelEditor.isEditing());
-                break;
-            case F1 + 2:
-                game.decorativeEditor.editing = !game.decorativeEditor.editing;
-                break;
-            case MINUS:
-                game.decorativeEditor.selected--;
-                game.mapPaintID--;
-                break;
-            case PLUS:
-                game.mapPaintID++;
-                game.decorativeEditor.selected++;
-                break;
-            case Q:
-                game.screenFadingOut = true;
-                break;
-            case E:
-                game.screenFadingIn = true;
+                game.getLevelEditor().setEditing(!game.getLevelEditor().isEditing());
                 break;
             case R:
-                game.map.dumpCurrentMapIntoFile("CurrentMap");
-                break;
-            case ARROW_DOWN:
-                game.decorativeEditor.selectedField++;
-                break;
-            case ARROW_UP:
-                game.decorativeEditor.selectedField--;
+                game.getMap().dumpCurrentMapIntoFile("CurrentMap");
                 break;
             case SPACE:
-                if (game.intro.isPlayingIntro())
-                    game.intro.skip();
+                if (game.getIntro().isPlayingIntro())
+                    game.getIntro().skip();
                 break;
         }
         /*

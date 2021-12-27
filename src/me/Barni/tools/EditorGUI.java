@@ -8,11 +8,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.Arrays;
 
 public class EditorGUI {
     JPanel rootPanel;
@@ -94,19 +91,19 @@ public class EditorGUI {
                 editor.outlineDecs = outlDec.isSelected();
             });
             god.addActionListener(e -> {
-                editor.game.player.godMode = god.isSelected();
+                editor.game.getPlayer().godMode = god.isSelected();
             });
             freeCam.addActionListener(e -> {
                 if (freeCam.isSelected()) {
                     editor.freeCam = true;
-                    editor.pos = editor.game.player.position.copy();
+                    editor.pos = editor.game.getPlayer().position.copy();
                     editor.cam.lerp = .07f;
-                    editor.game.player.locked = true;
+                    editor.game.getPlayer().locked = true;
                 } else {
                     editor.freeCam = false;
-                    editor.cam.followEntity = editor.game.player;
+                    editor.cam.followEntity = editor.game.getPlayer();
                     editor.cam.lerp = editor.cam.DEFAULT_LERP;
-                    editor.game.player.locked = false;
+                    editor.game.getPlayer().locked = false;
                 }
             });
             reloadButton.addActionListener(e -> {
@@ -225,7 +222,7 @@ public class EditorGUI {
             z = Integer.parseInt(t.getValueAt(5, 1).toString());
             p = Float.parseFloat(t.getValueAt(6, 1).toString());
         } catch (NumberFormatException e) {
-            editor.game.logger.err("[EDITOR] Invalid values in property table! Can't parse!");
+            editor.game.getLogger().err("[EDITOR] Invalid values in property table! Can't parse!");
             applyButton.setForeground(Color.RED);
             return;
         }
@@ -281,8 +278,7 @@ public class EditorGUI {
             return;
         }
         pathResultLabel.setText("");
-        editor.game.blankAlpha = 180;
-        editor.game.screenFadingIn = true;
+        editor.game.screenFadeIn(180);
         editor.game.loadNewMap(pathField.getText());
     }
 
@@ -294,12 +290,12 @@ public class EditorGUI {
                 return;
         }
         String[] fPaths = pathField.getText().split("\\\\");
-        editor.game.map.dumpCurrentMapIntoFile(fPaths[fPaths.length - 1].split("\\.")[0]);
-        editor.game.logger.info("[EDITOR] Saving map to: " + pathField.getText());
+        editor.game.getMap().dumpCurrentMapIntoFile(fPaths[fPaths.length - 1].split("\\.")[0]);
+        editor.game.getLogger().info("[EDITOR] Saving map to: " + pathField.getText());
     }
 
     public void updateTxtPreviewImage() {
-        BufferedImage img = editor.game.map.atlas.getTexture(textureSelectBox.getSelectedIndex());
+        BufferedImage img = editor.game.getMap().atlas.getTexture(textureSelectBox.getSelectedIndex());
         BufferedImage resImg = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
         resImg.getGraphics().drawImage(img, 0, 0, 64, 64, null);
         ImageIcon icon = new ImageIcon(resImg);
@@ -312,14 +308,14 @@ public class EditorGUI {
         // 1 = entities
         switch (fType) {
             case 1:
-                String[][] entData = new String[editor.game.map.entities.length][3];
+                String[][] entData = new String[editor.game.getMap().entities.length][3];
                 for (int i = 0; i < entData.length; i++) {
-                    if (editor.game.map.entities[i] == null) {
+                    if (editor.game.getMap().entities[i] == null) {
                         entData[i][1] = "";
                         entData[i][2] = "";
                     } else {
-                        String[] className = editor.game.map.entities[i].getClass().toString().split("\\.");
-                        entData[i][2] = editor.game.map.entities[i].name;
+                        String[] className = editor.game.getMap().entities[i].getClass().toString().split("\\.");
+                        entData[i][2] = editor.game.getMap().entities[i].name;
                         entData[i][1] = className[className.length - 1];
                     }
                     entData[i][0] = String.valueOf(i);
@@ -329,12 +325,12 @@ public class EditorGUI {
                 break;
 
             case 0:
-                String[][] decData = new String[editor.game.map.decoratives.length][2];
+                String[][] decData = new String[editor.game.getMap().decoratives.length][2];
                 for (int i = 0; i < decData.length; i++) {
-                    if (editor.game.map.decoratives[i] == null)
+                    if (editor.game.getMap().decoratives[i] == null)
                         decData[i][1] = "";
                     else
-                        decData[i][1] = editor.game.map.decoratives[i].texture.getPath();
+                        decData[i][1] = editor.game.getMap().decoratives[i].texture.getPath();
                     decData[i][0] = String.valueOf(i);
                 }
                 selectTable.setModel(new DefaultTableModel(decData, new String[]{"ID", "Material"}));

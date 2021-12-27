@@ -38,7 +38,7 @@ public abstract class Entity {
 
     public void setID(int id) {
         if (mapID != -1) {
-            game.logger.err("[ENT] ID already set!");
+            game.getLogger().err("[ENT] ID already set!");
             return;
         }
         mapID = id;

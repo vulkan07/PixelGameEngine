@@ -93,7 +93,7 @@ public class Player extends Entity {
                 new Vec2D(64, 64),
                 pData,
                 new BloodParticleRenderer());
-        game.map.addEntity(pem);
+        game.getMap().addEntity(pem);
     }
 
     public void die(int respawnTimeTicks) {
@@ -107,7 +107,7 @@ public class Player extends Entity {
         if (godMode) //particles still spawn even if godmode is on
             return;
 
-        game.map.cam.lerp = 0.02f;
+        game.getMap().cam.lerp = 0.02f;
         faceIndex = 2;
         deaths++;
         alive = false;
@@ -129,10 +129,10 @@ public class Player extends Entity {
     }
 
     public void respawn() {
-        game.map.cam.lerp = game.map.cam.DEFAULT_LERP;
+        game.getMap().cam.lerp = game.getMap().cam.DEFAULT_LERP;
         visible = true;
         alive = true;
-        game.screenFadingIn = true;
+        game.screenFadeIn(255);
     }
 
     @Override
@@ -187,7 +187,7 @@ public class Player extends Entity {
 
         Vec2D moving = new Vec2D(0, 0);
         //CTRL slowdown
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.CTRL))
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.CTRL))
             speed = 0.31f;
         else
             speed = 0.5f;
@@ -195,11 +195,11 @@ public class Player extends Entity {
         //Jump mechanism
         jumped = wantToJump;
         wantToJump = false;
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.UP) ||
-                game.keyboardHandler.getKeyState(KeyboardHandler.SPACE)) {
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.UP) ||
+                game.getKeyboardHandler().getKeyState(KeyboardHandler.SPACE)) {
             wantToJump = true;
             //idleTimer = 0;
-            if (game.mapEditing || godMode) {
+            if (godMode) {
                 moving.y -= speed * 2;
             } else if (canJump && !jumped) {
                 moving.y -= 13;
@@ -207,16 +207,16 @@ public class Player extends Entity {
             }
         }
 
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.DOWN)) {
             moving.y += speed;
             //idleTimer = 0;
         }
 
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;
             //idleTimer = 0;
         }
-        if (game.keyboardHandler.getKeyState(KeyboardHandler.RIGHT)) {
+        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.RIGHT)) {
             moving.x += speed;
             //idleTimer = 0;
         }
@@ -234,7 +234,7 @@ public class Player extends Entity {
         Graphics g = img.getGraphics();
         if (!alive) {
             g.setColor(Color.BLUE);
-            g.fillRect(0, 0, (int) Vec2D.remap(respawnTimer, 0, respawnTime, 0, game.WIDTH), 16);
+            g.fillRect(0, 0, (int) Vec2D.remap(respawnTimer, 0, respawnTime, 0, game.getWIDTH()), 16);
         }
 
         if (!visible) return;

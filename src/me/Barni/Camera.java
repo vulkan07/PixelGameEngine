@@ -23,7 +23,7 @@ public class Camera {
         this.view = new Vec2D(0, 0);
         this.game = game;
         this.map = map;
-        visibleArea = new Hitbox(0,0, game.WIDTH, game.HEIGHT);
+        visibleArea = new Hitbox(0,0, game.getWIDTH(), game.getHEIGHT());
     }
 
     public void update() {
@@ -32,8 +32,8 @@ public class Camera {
                 lookAt(followEntity.position.copy().sub(followEntity.size.copy().div(2)));
         scroll = scroll.lerp(vecTarget, lerp); //lerp animation
         //scroll.lowLimit(0); //Crop view for top and left
-        view.x = scroll.x + game.WIDTH / 2;
-        view.y = scroll.y + game.HEIGHT / 2;
+        view.x = scroll.x + game.getWIDTH() / 2;
+        view.y = scroll.y + game.getHEIGHT() / 2;
         visibleArea.update(scroll);
     }
 
@@ -42,7 +42,7 @@ public class Camera {
     }
 
     public void lookAt(Vec2D target) {
-        this.vecTarget.x = target.x - game.WIDTH / 2;
-        this.vecTarget.y = target.y - game.HEIGHT / 2;
+        this.vecTarget.x = target.x - game.getWIDTH() / 2;
+        this.vecTarget.y = target.y - game.getHEIGHT() / 2;
     }
 }

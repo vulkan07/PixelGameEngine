@@ -52,8 +52,8 @@ public class MouseHandler implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (game.intro.isPlayingIntro())
-            game.intro.skip();
+        if (game.getIntro().isPlayingIntro())
+            game.getIntro().skip();
         pressed = (byte) (pressed | 1 << e.getButton() - 1);
         //System.out.println(isPressed(RMB));
     }

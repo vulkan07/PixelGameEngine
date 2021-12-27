@@ -21,7 +21,7 @@ public class Main {
         else
             game = new Game("C:\\Dev\\");
 
-        game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), 1, false, false, Logger.LOG_ALL);
+        game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), false, false, Logger.LOG_ALL);
         //game.start("Über Brutal Platformer 2077", 1920, 1080, 1, true, false, Logger.LOG_ALL);
     }
 }

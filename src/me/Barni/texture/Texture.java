@@ -18,7 +18,6 @@ public class Texture {
     private AnimSequence[] sequences;
     int currSequence, frameCount;
 
-
     public int getWidth() {
         return width;
     }
@@ -27,8 +26,6 @@ public class Texture {
         return height;
     }
 
-
-    public int[] delay;
     private String path;
     public static final String TEXTURE_BONUS_PATH = "textures\\";
 
@@ -52,7 +49,7 @@ public class Texture {
 
         File dFile = new File(game.GAME_DIR + TEXTURE_BONUS_PATH + dataPath);
         if (dFile.exists()) {
-            sequences = AnimSequenceLoader.loadSequences(game.logger, game.GAME_DIR + TEXTURE_BONUS_PATH + dataPath, this);
+            sequences = AnimSequenceLoader.loadSequences(game.getLogger(), game.GAME_DIR + TEXTURE_BONUS_PATH + dataPath, this);
             hasAnimation = true;
             animated = true;
         }
@@ -96,7 +93,7 @@ public class Texture {
     }
 
     private void errMsg(String msg) {
-        game.logger.err("[TEXTURE] " + msg + " \n" + game.logger.getIndentStr() + "\n    At: " + generalPathName);
+        game.getLogger().err("[TEXTURE] " + msg + " \n" + game.getLogger().getIndentStr() + "\n    At: " + generalPathName);
     }
 
     public void update() {
@@ -107,7 +104,7 @@ public class Texture {
                 if (setAnimationSequence(n))
                     return;
 
-                game.logger.err("[TEXTURE] Can't find sequence \"" + n + "\"!");
+                game.getLogger().err("[TEXTURE] Can't find sequence \"" + n + "\"!");
                 animated = false;
                 setCurrentFrame(0);
                 return;

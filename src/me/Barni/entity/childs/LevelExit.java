@@ -33,13 +33,13 @@ public class LevelExit extends Entity {
     public void onTouch(Entity ent) {
         if (!(ent instanceof Player)) return;
         triggered = true;
-        game.screenFadingOut = true;
+        game.screenFadeOut(0);
     }
 
     @Override
     public void tick()
     {
-        if (triggered && game.blankAlpha == 255)
+        if (triggered && game.getScreenFadeAlpha() == 255)
             game.loadNewMap(game.GAME_DIR +  nextMap + ".map");
     }
 }

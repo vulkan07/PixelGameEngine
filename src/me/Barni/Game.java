@@ -16,20 +16,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 public final class Game extends Canvas implements Runnable {
-    //public String title;               //Title
-    public int WIDTH, HEIGHT;           //Size
-    public int PX_SIZE;                 //For pixel art: 2 or 4, for normal: 1
-    private boolean running = false;    //Running
 
-    Thread thread;                      //Game thread
-
-    public JFrame window;               //Window
-    private BufferedImage image;        //Image
-    private int[] buffer;  //ImageBuffer
-    int bgColor = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
-    public DecorativeEditor decorativeEditor;
-
-    private final Random r = new Random();
     private final String[] titleMsgs = {
             "ZeroPointerException",
             "Erasing C:\\",
@@ -81,67 +68,71 @@ public final class Game extends Canvas implements Runnable {
             "ALT + F4 = FREE DIAMONDS!",
             "sus"
     };
+    private boolean running = false;    //Running
 
-    public HUD getHud() {
-        return hud;
-    }
+    Thread thread;                      //Game thread
 
-    HUD hud;
-    public MouseHandler mouseHandler;
-    public KeyboardHandler keyboardHandler;
-    public Logger logger;
-    public Map map;
-    public Player player;
+    public JFrame window;               //Window
+    private BufferedImage image;        //Image
+    private int[] buffer;               //Main Imageb buffer
+    int bgColor = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
 
-    public final String GAME_DIR;
+    private final Random r = new Random(); // Main random
 
-    public boolean mapEditing, screenFadingIn, screenFadingOut;
-    public int blankAlpha = 255;
+    private int WIDTH, HEIGHT;
 
-    JTextField textField;
-    Intro intro;
+    private HUD hud;
+    private MouseHandler mouseHandler;
+    private KeyboardHandler keyboardHandler;
+    private Logger logger;
+    private Map map;
+    private Player player;
 
-    public int mapPaintID;
-    Vec2D selectedTile = new Vec2D(0, 0);
-    boolean selectedTileVisible = true;
-    public LevelEditor levelEditor;
+    public final String GAME_DIR; //Root game directory, which all file readers will use
+
+    //Screen fading variables
+    private boolean screenFadingIn, screenFadingOut;
+    private int blankAlpha = 255;
+
+    private Intro intro;
+    private LevelEditor levelEditor;
+
     public String defaultWindowTitle;
-    Font defaultFont = new Font("Verdana", Font.PLAIN, 20);
+
+    Font defaultFont = new Font("Verdana", Font.PLAIN, 20); // Default font
 
 
+    //Constructor
     public Game(String wDir) {
         GAME_DIR = wDir;
     }
 
-    public Font getDefaultFont() {
-        return defaultFont;
-    }
+    //--------------------------------\\
+    //----------->  Start  <----------\\
+    public synchronized void start(String title, int w, int h, boolean fullscreen, boolean resizeable, byte logLevel) {
 
-    public synchronized void start(String title, int w, int h, int px_size, boolean fullscreen, boolean resizeable, byte logLevel) {
-
+        //this function only can be called once
         if (running) {
-            logger.err("Tried to start game, while it's running!");
+            getLogger().err("Tried to start game, while it's running!");
             return;
         }
 
-
-        this.setBackground(Color.BLACK);
-
-        //IMAGE DATA
-        this.WIDTH = w;
-        this.HEIGHT = h;
-        this.PX_SIZE = px_size;
-        image = new BufferedImage(WIDTH / PX_SIZE, HEIGHT / PX_SIZE, BufferedImage.TYPE_INT_ARGB);
+        //Create main buffer image & get raster
+        WIDTH = w;
+        HEIGHT = h;
+        image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
         buffer = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
 
-        //WINDOW\\
+        //------------------------\\
+        //--------WINDOW----------\\
         defaultWindowTitle = title + "  -  " + titleMsgs[r.nextInt(titleMsgs.length - 1)];
         window = new JFrame("Starting...");
-        //Fullscreen
+
         if (fullscreen) {
             window.setUndecorated(true);
             window.setExtendedState(JFrame.MAXIMIZED_BOTH);
         }
+
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setSize(WIDTH, HEIGHT);
         window.setPreferredSize(new Dimension(WIDTH, HEIGHT));
@@ -150,26 +141,58 @@ public final class Game extends Canvas implements Runnable {
         window.setResizable(resizeable);
         window.setVisible(true);
         this.requestFocus();
-        //window.setIconImage(); do this
+        //--------WINDOW----------\\
+        //------------------------\\
 
-
-        //BufferStrategy
+        //Set canvas's bg
+        this.setBackground(Color.BLACK);
+        //create canvas' BufferStrategy
         createBufferStrategy(2);
 
-
-        //Utility
+        //Logger
         this.logger = new Logger(logLevel);
 
+        //Mouse
         mouseHandler = new MouseHandler(window, this);
-        this.addMouseListener(mouseHandler);
-
+        this.addMouseListener(getMouseHandler());
+        //Keyboard
         keyboardHandler = new KeyboardHandler(this, false);
-        this.addKeyListener(keyboardHandler);
-
+        this.addKeyListener(getKeyboardHandler());
 
         //Map
+        loadNewMap(GAME_DIR + "01.map");
+
+        //Level editor
+        levelEditor = new LevelEditor(this);
+
+        //Intro
+        intro = new Intro(this, image);
+        intro.start();
+
+        //Hud
+        hud = new HUD(this);
+
+        //Add PlayerNotification
+        getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "<initial>", 16, 30));
+
+        //Add button & set colors
+        getHud().getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
+        ((HUDButton) getHud().getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
+        ((HUDButton) getHud().getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
+
+
+        //Start unique game thread
+        running = true;
+        thread = new Thread(this);
+        thread.start();
+    }
+
+    public void loadNewMap(String path) {
+
         MapLoader ml = new MapLoader(this);
-        map = ml.loadMap(GAME_DIR + "01.map");
+
+
+        map = ml.loadMap(path); //Load map via ml
 
         //If map doesn't load, a hardcoded map loads
         if (map == null) {
@@ -178,60 +201,26 @@ public final class Game extends Canvas implements Runnable {
             map.setTileArray(defaultmap);
         }
 
-        map.loadTextures();
+        map.loadTextures(); //Load map textures
 
-        //PLAYER
-        player = new Player(this, "player", new Vec2D(48, 0));
-        player.loadTexture("player_1");
-        map.addEntity(player);
-        map.cam.followEntity = player;
+        player = new Player(this, "player", new Vec2D(48, 0)); //Remake player
+        player.loadTexture("player_1"); //Load player texture
 
+        map.addEntity(player);          //Add player
+        map.cam.followEntity = player;  //Make camera follow player
 
-        decorativeEditor = new DecorativeEditor(this, map);
+        try {
+            levelEditor.reloadMap(map);     //Refresh level editor
+        } catch (NullPointerException ignored) {
+        }
 
-        intro = new Intro(this, image);
-        intro.start();
-
-
-        textField = new JTextField();
-        window.add(textField);
-
-        hud = new HUD(this);
-        hud.getRoot().add(new HUDNotification(this, "PlayerNotification", "You died.", 16, 30));
-
-        hud.getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
-        ((HUDButton) hud.getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
-        ((HUDButton) hud.getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
-
-        levelEditor = new LevelEditor(this);
-
-        //shWorld = new SuperHexagonWorld(this);
-
-        //Actual start
-        running = true;
-        thread = new Thread(this);
-        thread.start();
+        screenFadingIn = true;          //Add screen fading effect
     }
 
-    //SuperHexagonWorld shWorld;
-
-    public void loadNewMap(String path) {
-
-        MapLoader ml = new MapLoader(this);
-        map = ml.loadMap(path);
-        map.loadTextures();
-        player = new Player(this, "player", new Vec2D(48, 0));
-        player.loadTexture("player_1");
-        map.addEntity(player);
-        map.cam.followEntity = player;
-        levelEditor.reloadMap(map);
-        screenFadingIn = true;
-    }
-
+    //--------------------------------\\
+    //----------->   Run   <----------\\
     @Override
     public void run() {
-
-
         //IMPORTANT! Frames and ticks are bounded together
         int fps = 60;
         float framePerTick = 1000000000 / fps;
@@ -240,8 +229,8 @@ public final class Game extends Canvas implements Runnable {
         int frames = 0;
 
         last = System.nanoTime();
-        logger.info("[GAME] Preferred FPS: " + fps);
-        logger.info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
+        getLogger().info("[GAME] Preferred FPS: " + fps);
+        getLogger().info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
 
         while (running) {
 
@@ -252,27 +241,21 @@ public final class Game extends Canvas implements Runnable {
 
 
             if (delta >= 1) {
-                //=TICK=\\
 
+                //=TICK=\\
                 tick();
-                //shWorld.tick();
 
                 //=RENDER=\\
                 render();
 
                 frames++;
-
-
                 delta--;
             }
-            /*try {
-                Thread.sleep((long)(delta));
-            } catch (InterruptedException e) {
-            }*/
+
+            //Primitive FPS timer
             if (timer >= 1000000000) {
 
                 window.setTitle(defaultWindowTitle + "   |   " + frames + " FPS");
-                //System.out.println("FPS: " + frames);
                 frames = 0;
                 timer = 40;
             }
@@ -280,165 +263,171 @@ public final class Game extends Canvas implements Runnable {
         stop();
     }
 
-
-    int tPos1, tPos2;
-
+    //---------------------------------\\
+    //----------->   Stop   <----------\\
     public synchronized void stop() {
-        logger.info("Game loop stopped");
+        getLogger().info("Game loop stopped");
         try {
             thread.join();
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
         }
     }
 
-    public void tick() {
-        if (intro.isPlayingIntro()) return;
+    //---------------------------------\\
+    //----------->   Tick   <----------\\
+    private void tick() {
+        if (intro.isPlayingIntro()) return; //Return if playing intro
 
-        hud.update();
+        getHud().update();
 
-        if (textField.getText().contains(" ")) {
-            decorativeEditor.fieldListening = false;
-            setFocusable(true);
-            requestFocus();
-        }
-        mouseHandler.update();
-        map.tick();
-        decorativeEditor.tick();
-        levelEditor.update();
+        getMouseHandler().update();
 
-        //Tile editor
-        selectedTile = mouseHandler.getPosition().copy();
-        selectedTile.add(map.cam.scroll);
-        selectedTile.div(32);
+        getMap().tick();
 
-
-        mapPaintID = mapPaintID < 1 ? 1 : (Math.min(mapPaintID, Material.MAT_COUNT - 1));
-
-        if (mapEditing) {
-            tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
-            if (mouseHandler.isPressed(mouseHandler.LMB)) {
-                if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
-                    try {
-                        map.setBackTile(tPos1, mapPaintID);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                    }
-                } else {
-
-                    if (tPos1 != tPos2) {
-                        tPos2 = tPos1;
-                        try {
-                            map.setTile(tPos1, mapPaintID);
-                        } catch (ArrayIndexOutOfBoundsException e) {
-                        }
-                    }
-                }
-            } else if (mouseHandler.isPressed(mouseHandler.RMB))
-                if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
-                    try {
-                        map.setBackTile(tPos1, 0);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                    }
-                } else {
-                    try {
-                        map.setTile(tPos1, 0);
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                    }
-                }
-        }
+        getLevelEditor().update();
     }
 
+    //---------------------------------\\
+    //----------->  Render  <----------\\
+    private void render() {
 
-    public void render() {
-        //=CLEAR CANVAS=\\
-
-        //Clear buffer
+        //Clear buffer image
         if (blankAlpha != 255 && !intro.isPlayingIntro())
             Arrays.fill(buffer, bgColor);
 
+        //Get image's graphics
         Graphics g = getBufferStrategy().getDrawGraphics();
 
-        /*if (blankAlpha != 255 && !intro.isPlayingIntro()) {
-            Graphics gg = image.getGraphics();
-            gg.setColor(new Color(255,255,255,80));
-            gg.fillRect(0,0, WIDTH, HEIGHT);
-        }*/
-        //shWorld.render(image);
-        //g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-
-        Graphics2D g2d = (Graphics2D) g;
-
+        //Render intro
         intro.render();
-        g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+        //Draw image to canvas's graphics
+        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
 
         if (blankAlpha != 255 && !intro.isPlayingIntro()) {
 
-            //Map
-            map.renderDecoratives(image, -1); //Behind map layer
-            map.renderTiles(image);
+            //Render in primitive layer orders
+            //TODO make render layers abstract
+            getMap().renderDecoratives(image, -1); //Behind map layer
+            getMap().renderTiles(image);
 
-            map.renderDecoratives(image, 0); //Before map
-            map.renderEntities(image);
+            getMap().renderDecoratives(image, 0); //Before map
+            getMap().renderEntities(image);
 
-            map.renderDecoratives(image, 1); //Before entities
+            getMap().renderDecoratives(image, 1); //Before entities
+
+            getHud().render(image);
+            g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
+            getLevelEditor().overlayRender(g);
+        }
 
 
-            decorativeEditor.render(image, map.cam);
+        //Screen fading mechanism
+        {
+            //None -> back
+            if (screenFadingOut) {
+                blankAlpha += 5;
 
-            hud.render(image);
-            g2d.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-            levelEditor.overlayRender(g);
-
-            //Selected tile type
-            if (mapEditing) {
-
-                g.setColor(Color.WHITE);
-                g.setFont(defaultFont);
-                g.drawString("Editing", 8, 24);
-                try {
-                    g.drawImage(map.atlas.getTexture(mapPaintID - 1), 8, 32, 64, 64, null);
-                    if (keyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
-
-                        g.drawString("Back", 12, 88);
-                        g.setColor(new Color(0, 0, 20, 100));
-                        g.fillRect(8,
-                                32,
-                                64,
-                                64);
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
+                if (blankAlpha > 255) {
+                    blankAlpha = 255;
+                    screenFadingOut = false;
                 }
-
             }
-        }
-        //None -> back
-        if (screenFadingOut) {
-            blankAlpha += 5;
+            //Black -> none
+            if (screenFadingIn) {
+                blankAlpha -= 5;
 
-            if (blankAlpha > 255) {
-                blankAlpha = 255;
-                screenFadingOut = false;
+                if (blankAlpha < 0) {
+                    blankAlpha = 0;
+                    screenFadingIn = false;
+                }
             }
-        }
-        //Black -> none
-        if (screenFadingIn) {
-            blankAlpha -= 5;
 
-            if (blankAlpha < 0) {
-                blankAlpha = 0;
-                screenFadingIn = false;
+            if (screenFadingIn || screenFadingOut || blankAlpha == 1) {
+                g.setColor(new Color(0, 0, 0, blankAlpha));
+                g.fillRect(0, 0, getWidth(), getHeight());
             }
-        }
-
-        if (screenFadingIn || screenFadingOut || blankAlpha == 1) {
-            g2d.setColor(new Color(0, 0, 0, blankAlpha));
-            g2d.fillRect(0, 0, WIDTH, HEIGHT);
-            /*int val = (int) Vec2D.remap(blankAlpha, 0, 255, 0, HEIGHT);
-            g2d.fillRect(0, -200, WIDTH, val-200);
-            g2d.fillRect(0, -100, WIDTH, val-100);
-            g2d.fillRect(0, 0, WIDTH, val);*/
         }
 
         g.dispose();
         getBufferStrategy().show();
+    }
+
+    //Call to fade the screen FROM black
+    public void screenFadeIn(int alphaStart) {
+        if (alphaStart < 0 || alphaStart > 255 || screenFadingIn)
+            return;
+        blankAlpha = alphaStart;
+        screenFadingOut = false;
+        screenFadingIn = true;
+        System.out.println("fadein");
+    }
+
+    //Call to fade the screen TO black
+    public void screenFadeOut(int alphaStart) {
+        if (alphaStart < 0 || alphaStart > 255 || screenFadingOut)
+            return;
+        blankAlpha = alphaStart;
+        screenFadingOut = true;
+        screenFadingIn = false;
+        System.out.println("fadeout");
+    }
+
+    public void resetScreenFade(boolean isFadedOut)
+    {
+        screenFadingOut = false;
+        screenFadingIn = false;
+        blankAlpha = isFadedOut ? 255 : 0;
+    }
+
+
+    //----------------------------------\\
+    //------------ GETTERS -------------\\
+    //----------------------------------\\
+    public MouseHandler getMouseHandler() {
+        return mouseHandler;
+    }
+
+    public KeyboardHandler getKeyboardHandler() {
+        return keyboardHandler;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public Map getMap() {
+        return map;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public LevelEditor getLevelEditor() {
+        return levelEditor;
+    }
+
+    public HUD getHud() {
+        return hud;
+    }
+
+    public Font getDefaultFont() {
+        return defaultFont;
+    }
+
+    public int getScreenFadeAlpha() {
+        return blankAlpha;
+    }
+
+    public Intro getIntro() {
+        return intro;
+    }
+
+    public int getWIDTH() {
+        return WIDTH;
+    }
+
+    public int getHEIGHT() {
+        return HEIGHT;
     }
 }

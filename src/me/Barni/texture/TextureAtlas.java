@@ -14,7 +14,7 @@ public class TextureAtlas {
         //TEXTURE_SIZE = texture_size;
         atlas = new Texture[ATLAS_SIZE];
         game = g;
-        game.logger.info("[ATLAS] Initialized texture atlas");
+        game.getLogger().info("[ATLAS] Initialized texture atlas");
     }
 
     public BufferedImage getTexture(int i) {
@@ -37,7 +37,7 @@ public class TextureAtlas {
                 atlas[i] = t;
                 return i;
             }
-        game.logger.err("[ATLAS] Texture atlas is full! Can't add more");
+        game.getLogger().err("[ATLAS] Texture atlas is full! Can't add more");
         return -1;
     }
 

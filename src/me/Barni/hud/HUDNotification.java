@@ -19,7 +19,7 @@ public class HUDNotification extends HUDElement {
         this.indent = indent;
 
         if (indent < 0) {
-            game.logger.err("[HUDNotification] - \"" + name + "\" - negative indent value: " + indent + "! Defaulting to 16.");
+            game.getLogger().err("[HUDNotification] - \"" + name + "\" - negative indent value: " + indent + "! Defaulting to 16.");
             this.indent = 16;
         }
 
@@ -29,7 +29,7 @@ public class HUDNotification extends HUDElement {
         this.message = text;
         if (text == null & text.isEmpty()) {
 
-            game.logger.warn("[HUDNotification] - \"" + name + "\" - Empty message!");
+            game.getLogger().warn("[HUDNotification] - \"" + name + "\" - Empty message!");
         }
 
         this.msgColor = Color.WHITE;
