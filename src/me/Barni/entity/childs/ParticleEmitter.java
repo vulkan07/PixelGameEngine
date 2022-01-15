@@ -1,6 +1,5 @@
 package me.Barni.entity.childs;
 
-import com.sun.istack.internal.NotNull;
 import me.Barni.Camera;
 import me.Barni.Game;
 import me.Barni.entity.Entity;
@@ -22,8 +21,8 @@ public class ParticleEmitter extends Entity {
             Game game,
             String name,
             Vec2D pos,
-            @NotNull ParticleData pData,
-            @NotNull ParticleRenderer renderer) {
+            ParticleData pData,
+            ParticleRenderer renderer) {
 
         super(game, name, pos);
         this.pData = pData;

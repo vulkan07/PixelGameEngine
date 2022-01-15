@@ -174,7 +174,7 @@ public class SuperHexagonWorld {
         g.setColor(color2);
 
         //===DRAW MAP BACKGROUND DECOR LINES===
-        for (int i = oddEven ? 1 : 0; i <= polySideCount-1; i += 2) {
+        for (int i = oddEven ? 1 : 0; i <= polySideCount - 1; i += 2) {
             Vec2D polyRotVector = new Vec2D(360 / polySideCount * i + overallRotation).mult(-48);
             Vec2D nextPolyRotVector = new Vec2D(360 / polySideCount * (i + 1) + overallRotation).mult(-48);
 
@@ -251,18 +251,18 @@ public class SuperHexagonWorld {
 
         //===DRAW CENTER HECAGON===
         //Calculate hexagon points
-            for (int i = 0; i < polySideCount; i++) {
-                Vec2D point = origin.copy();
-                Vec2D offset = new Vec2D(360 / polySideCount * i + overallRotation);
-                point.add(offset.mult(48));
-                hexagonVertexBuffer[0][i] = point.xi();
-                hexagonVertexBuffer[1][i] = point.yi();
-            }
-            g.drawPolygon(hexagonVertexBuffer[0], hexagonVertexBuffer[1], polySideCount);
-            g.setFont(game.getDefaultFont());
+        for (int i = 0; i < polySideCount; i++) {
+            Vec2D point = origin.copy();
+            Vec2D offset = new Vec2D(360 / polySideCount * i + overallRotation);
+            point.add(offset.mult(48));
+            hexagonVertexBuffer[0][i] = point.xi();
+            hexagonVertexBuffer[1][i] = point.yi();
+        }
+        g.drawPolygon(hexagonVertexBuffer[0], hexagonVertexBuffer[1], polySideCount);
+        g.setFont(game.getDefaultFont());
         //========================
 
-        g.drawString(Integer.toString(secondsTimer), origin.xi()-8, origin.yi());
+        g.drawString(Integer.toString(secondsTimer), origin.xi() - 8, origin.yi());
     }
 
     private void classicRender(BufferedImage img) {

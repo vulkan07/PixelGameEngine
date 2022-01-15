@@ -1,6 +1,7 @@
 package me.Barni;
 
 import javax.sound.sampled.*;
+import java.awt.*;
 import java.io.File;
 
 public class Main {
@@ -21,8 +22,9 @@ public class Main {
         else
             game = new Game("C:\\Dev\\");
 
-        game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), false, false, Logger.LOG_ALL);
-        //game.start("Über Brutal Platformer 2077", 1920, 1080, 1, true, false, Logger.LOG_ALL);
+        //game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), false, false, Logger.LOG_ALL);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        game.start("Über Brutal Platformer 2077", screenSize.width, screenSize.height, true, false, Logger.LOG_ALL);
     }
 }
 

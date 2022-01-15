@@ -79,7 +79,7 @@ public final class Game extends Canvas implements Runnable {
         //If read successfully choose random line as title
         if (!lines.equals("")) {
             String[] msgs = lines.split("\n");
-            return msgs[r.nextInt(msgs.length)-1];
+            return msgs[r.nextInt(msgs.length-1)];
         }
 
         return msg;
@@ -94,6 +94,9 @@ public final class Game extends Canvas implements Runnable {
             getLogger().err("Tried to start game, while it's running!");
             return;
         }
+
+        //Logger
+        this.logger = new Logger(logLevel);
 
         //Create main buffer image & get raster
         WIDTH = w;
@@ -127,8 +130,6 @@ public final class Game extends Canvas implements Runnable {
         //create canvas' BufferStrategy
         createBufferStrategy(2);
 
-        //Logger
-        this.logger = new Logger(logLevel);
 
         //Mouse
         mouseHandler = new MouseHandler(window, this);
@@ -337,7 +338,6 @@ public final class Game extends Canvas implements Runnable {
         blankAlpha = alphaStart;
         isScreenFadingOut = false;
         isScreenFadingIn = true;
-        System.out.println("fadein");
     }
 
     //Call to fade the screen TO black
@@ -347,7 +347,6 @@ public final class Game extends Canvas implements Runnable {
         blankAlpha = alphaStart;
         isScreenFadingOut = true;
         isScreenFadingIn = false;
-        System.out.println("fadeout");
     }
 
     public void resetScreenFade(boolean isFadedOut) {
