@@ -4,9 +4,11 @@ import me.Barni.*;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
+import org.json.JSONObject;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 public abstract class Entity {
 
@@ -173,6 +175,34 @@ public abstract class Entity {
             g.drawRect(position.xi() - cam.scroll.xi() - 2, position.yi() - cam.scroll.yi() - 2, size.xi() + 4, size.yi() + 4);
         }
         g.drawString(("<" + className[className.length - 1] + "> " + name), position.xi() - cam.scroll.xi(), position.yi() - cam.scroll.yi() - 10);
+    }
+
+    public JSONObject serialize()
+    {
+        JSONObject jobj = new JSONObject();
+
+        String[] className = getClass().toString().split("\\.");
+        jobj.put("class", className[className.length - 1]);
+        jobj.put("name", name);
+        jobj.put("x", position.xi());
+        jobj.put("y", position.yi());
+        jobj.put("w", size.xi());
+        jobj.put("h", size.yi());
+        jobj.put("texture", texture.getPath());
+
+        jobj.put("visible", visible);
+        jobj.put("active", active);
+        jobj.put("solid", solid);
+        jobj.put("locked", locked);
+        jobj.put("collidesWithMap", collidesWithMap);
+        jobj.put("alive", alive);
+
+        return jobj;
+    }
+
+    public void deserialize(JSONObject jobj)
+    {
+
     }
 
 }

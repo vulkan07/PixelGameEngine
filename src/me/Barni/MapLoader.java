@@ -133,9 +133,9 @@ public class MapLoader {
             //*Entity-unique load*//
             switch (entObj.getString("class")) {
                 case "LevelExit":
-                    LevelExit l = new LevelExit(game, null, new Vec2D(), null);
-                    l.loadFromEntityData(generalEntityLoader(entObj));
-                    l.setNextMap(entObj.getString("nextLevel"));
+                    LevelExit l = new LevelExit(game, null, new Vec2D(), null); //Entity
+                    l.loadFromEntityData(generalEntityLoader(entObj)); //Set common data
+                    l.deserialize(entObj); //class-unique data
                     map.addEntity(l);
                     break;
 

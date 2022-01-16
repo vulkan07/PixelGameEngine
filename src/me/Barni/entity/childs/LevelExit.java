@@ -4,6 +4,7 @@ import me.Barni.Game;
 import me.Barni.entity.Entity;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
+import org.json.JSONObject;
 
 public class LevelExit extends Entity {
 
@@ -37,9 +38,20 @@ public class LevelExit extends Entity {
     }
 
     @Override
-    public void tick()
-    {
+    public void tick() {
         if (triggered && game.getScreenFadeAlpha() == 255)
-            game.loadNewMap(game.GAME_DIR +  nextMap + ".map");
+            game.loadNewMap(game.GAME_DIR + nextMap + ".map");
+    }
+
+    @Override
+    public JSONObject serialize() {
+        JSONObject jobj = super.serialize();
+        jobj.put("nextLevel", nextMap);
+        return jobj;
+    }
+    @Override
+    public void deserialize(JSONObject jobj)
+    {
+        nextMap = jobj.getString("nextLevel");
     }
 }

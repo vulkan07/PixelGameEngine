@@ -7,8 +7,7 @@ import me.Barni.physics.Vec2D;
 
 public class Checkpoint extends Entity {
 
-    private boolean reached = false;
-
+    private boolean reached;
     public Checkpoint(Game g, String name, Vec2D pos) {
         super(g, name, pos, new Vec2D(32, 64));
         colliderHitbox.x = position.xi();

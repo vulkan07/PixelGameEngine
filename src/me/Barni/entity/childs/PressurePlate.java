@@ -5,6 +5,7 @@ import me.Barni.entity.Entity;
 import me.Barni.physics.Hitbox;
 import me.Barni.texture.Texture;
 import me.Barni.physics.Vec2D;
+import org.json.JSONObject;
 
 public class PressurePlate extends Entity {
 
@@ -52,5 +53,20 @@ public class PressurePlate extends Entity {
         }
     }
 
+    @Override
+    public JSONObject serialize() {
+        JSONObject jobj = super.serialize();
+        jobj.put("force", force);
+        jobj.put("recharge", recharge);
+        jobj.put("strictTrigger", strictTrigger);
+        return jobj;
+    }
 
+    @Override
+    public void deserialize(JSONObject jobj)
+    {
+        force = jobj.getFloat("force");
+        recharge = jobj.getInt("recharge");
+        strictTrigger = jobj.getBoolean("strictTrigger");
+    }
 }

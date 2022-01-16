@@ -201,44 +201,16 @@ public class Map {
 
     private JSONArray entsToJSON() {
         JSONArray array = new JSONArray();
-        JSONObject entObj;
+        //JSONObject entObj;
 
         int place = -1;
         for (int i = 0; i < entities.length; i++) {
             Entity e = entities[i];
 
             if (e == null) continue;
-            if (e.name.equals("player") || e.name.equals("playerDieParticle")) continue;
-
-            entObj = new JSONObject();
 
             place++;
-            String[] className = e.getClass().toString().split("\\.");
-            entObj.put("class", className[className.length - 1]);
-            entObj.put("name", e.name);
-            entObj.put("x", e.position.xi());
-            entObj.put("y", e.position.yi());
-            entObj.put("w", e.size.xi());
-            entObj.put("h", e.size.yi());
-            entObj.put("texture", e.texture.getPath());
-
-            entObj.put("visible", e.visible);
-            entObj.put("active", e.active);
-            entObj.put("solid", e.solid);
-            entObj.put("locked", e.locked);
-            entObj.put("collidesWithMap", e.collidesWithMap);
-            entObj.put("alive", e.alive);
-
-            if (e instanceof PressurePlate) {
-                entObj.put("force", ((PressurePlate) e).force);
-                entObj.put("recharge", ((PressurePlate) e).recharge);
-                entObj.put("strictTrigger", ((PressurePlate) e).strictTrigger);
-            }
-            if (e instanceof LevelExit) {
-                entObj.put("nextLevel", ((LevelExit) e).getNextMap());
-            }
-
-            array.put(place, entObj);
+            array.put(place, e.serialize());
         }
 
         return array;
