@@ -84,15 +84,9 @@ public class EditorGUI {
                 editor.paintTileIndex = textureSelectBox.getSelectedIndex() + 1;
                 updateTxtPreviewImage();
             });
-            outlEnt.addActionListener(e -> {
-                editor.outlineEnts = outlEnt.isSelected();
-            });
-            outlDec.addActionListener(e -> {
-                editor.outlineDecs = outlDec.isSelected();
-            });
-            god.addActionListener(e -> {
-                editor.game.getPlayer().godMode = god.isSelected();
-            });
+            outlEnt.addActionListener(e -> editor.outlineEnts = outlEnt.isSelected());
+            outlDec.addActionListener(e -> editor.outlineDecs = outlDec.isSelected());
+            god.addActionListener(e -> editor.game.getPlayer().godMode = god.isSelected());
             freeCam.addActionListener(e -> {
                 if (freeCam.isSelected()) {
                     editor.freeCam = true;
@@ -131,8 +125,6 @@ public class EditorGUI {
             });
             sm = selectTable.getSelectionModel();
             sm.addListSelectionListener(e -> {
-                //sm.addSelectionInterval(0,4);
-                //sm.setLeadSelectionIndex(8);
 
                 String[][] decTableData = gatherDecorativeProperties();
                 propertiesTable.setModel(new DefaultTableModel(decTableData, new String[]{"Key", "Value"}));

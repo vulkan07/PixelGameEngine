@@ -1,9 +1,7 @@
 package me.Barni;
 
 import me.Barni.entity.Entity;
-import me.Barni.entity.childs.LevelExit;
 import me.Barni.entity.childs.Player;
-import me.Barni.entity.childs.PressurePlate;
 import me.Barni.physics.Physics;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
