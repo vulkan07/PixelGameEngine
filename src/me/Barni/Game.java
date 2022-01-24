@@ -188,10 +188,10 @@ public final class Game extends Canvas implements Runnable {
         GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 
         //Start unique game thread
+        window.setVisible(false);
         running = true;
         thread = new Thread(this);
         thread.start();
-        window.setVisible(false);
     }
 
     public void loadNewMap(String path) {
@@ -262,14 +262,14 @@ public final class Game extends Canvas implements Runnable {
     //----------->   Stop   <----------\\
     public synchronized void stop() {
         getLogger().info("Game loop stopped");
-        try {
-            thread.join();
-        } catch (InterruptedException ignored) {
-        }
         GLFW.glfwDestroyWindow(window2.getWindow());
 
         GLFW.glfwTerminate();
         GLFW.glfwSetErrorCallback(null);
+        try {
+            thread.join();
+        } catch (InterruptedException ignored) {
+        }
 
     }
 
@@ -295,19 +295,15 @@ public final class Game extends Canvas implements Runnable {
         if (NMouseHandler.getButton(0)) {
             camera2.target.x -= NMouseHandler.getDeltaX() * camera2.zoom;
             camera2.target.y -= NMouseHandler.getDeltaY() * camera2.zoom;
-        }/*
-        camera2.target.x += 0.6;
-        if (camera2.target.x > 3)
-            camera2.target.x = -1;*/
+        }
+
         camera2.update();
         NMouseHandler.update();
 
-
-        //------------------\\
-
+        //-----------------\\
         map.render(camera2);
+        //-----------------\\
 
-        //------------------\\
         GLFW.glfwSwapBuffers(window2.getWindow());
     }
 

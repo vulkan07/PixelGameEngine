@@ -61,7 +61,6 @@ public class NMouseHandler {
         prevY = y;
         scrollX = 0;
         scrollY = 0;
-        prevY = y;
     }
 
     public static void mouseButtonCallback(long window, int button, int action, int mods) {

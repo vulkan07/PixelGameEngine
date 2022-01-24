@@ -58,7 +58,7 @@ public class Window {
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
-        //GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
+        GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 4);
 
@@ -94,9 +94,5 @@ public class Window {
     public void clear()
     {
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
-    }
-    public void pollEvents()
-    {
-        GLFW.glfwPollEvents();
     }
 }

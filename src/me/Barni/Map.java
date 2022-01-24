@@ -299,21 +299,21 @@ public class Map {
             vao.setVertexData(vArray);
 
             if (front) {
-                if (normAtlas.getImage(tiles[i]+1) != null) {
+                if (normAtlas.getImage(tiles[i]-1) != null) {
                     currentShader.selectTextureSlot("uNorSampler", 1);
-                    normAtlas.getTexture(tiles[i]+1).bind();
+                    normAtlas.getTexture(tiles[i]-1).bind();
                 }
                 currentShader.selectTextureSlot("uTexSampler", 0);
-                atlas.getTexture(tiles[i]+1).bind();
+                atlas.getTexture(tiles[i]-1).bind();
             } else {
-                if (normAtlas.getImage(backTiles[i]+1) != null) {
+                if (normAtlas.getImage(backTiles[i]-1) != null) {
                     currentShader.selectTextureSlot("uTexSampler", 0);
-                    atlas.getTexture(backTiles[i]+1).bind();
+                    atlas.getTexture(backTiles[i]-1).bind();
                 }
 
-                GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
 
             }
+                GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
             currentShader.unBind();
         }
     }
