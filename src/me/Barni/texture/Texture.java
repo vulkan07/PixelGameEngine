@@ -1,10 +1,14 @@
 package me.Barni.texture;
 
 import me.Barni.Game;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL30;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
 
 public class Texture {
 
@@ -18,6 +22,17 @@ public class Texture {
     private AnimSequence[] sequences;
     int currSequence, frameCount;
 
+    //new
+    private int id;
+    //new
+
+    private String path;
+    public static final String TEXTURE_BONUS_PATH = "textures\\";
+
+    private void errMsg(String msg) {
+        game.getLogger().err("[TEXTURE] " + msg + " \n" + game.getLogger().getIndentStr() + "\n    At: " + generalPathName);
+    }
+
     public int getWidth() {
         return width;
     }
@@ -26,12 +41,58 @@ public class Texture {
         return height;
     }
 
-    private String path;
-    public static final String TEXTURE_BONUS_PATH = "textures\\";
-
     public String getPath() {
         return path;
     }
+
+    public void setCurrentFrame(int frame) {
+        if (sequences == null) {
+            errMsg("No sequences loaded!");
+            return;
+        }
+        sequences[currSequence].setCurrentFrame(frame);
+    }
+
+    public boolean setAnimationSequence(String seqName) {
+
+        for (int i = 0; i < sequences.length; i++) {
+            if (sequences[i].name.equals(seqName)) {
+                currSequence = i;
+                sequences[i].reset();
+                return true;
+            }
+        }
+        errMsg("There's no animation sequence: " + seqName);
+        return false;
+    }
+
+    public AnimSequence getAnimationSequence(String seqName) {
+        for (int i = 0; i < sequences.length; i++) {
+            if (sequences[i].name.equals(seqName)) {
+                currSequence = i;
+                return sequences[i];
+            }
+        }
+        errMsg("There's no animation sequence: " + seqName);
+        return null;
+    }
+
+    public void setAnimated(boolean animated) {
+        if (hasAnimation)
+            this.animated = animated;
+    }
+
+    public boolean isAnimated() {
+        return this.animated;
+    }
+
+    public BufferedImage getTexture() {
+        if (hasAnimation) {
+            return textures[sequences[currSequence].getCurrentFrame()];
+        } else
+            return textures[0];
+    }
+
 
     public void loadTexture(Game g, String relativePath, int w, int h, boolean isAnimated) {
         game = g;
@@ -64,7 +125,7 @@ public class Texture {
         try {
             fullImg = ImageIO.read(new File(game.GAME_DIR + TEXTURE_BONUS_PATH + imgPath));
         } catch (IOException e) {
-            errMsg("Can't read file!");
+            errMsg("Can't read file! " + game.GAME_DIR + TEXTURE_BONUS_PATH + imgPath);
         }
 
         //CHOP TEXTURES
@@ -92,8 +153,79 @@ public class Texture {
         }
     }
 
-    private void errMsg(String msg) {
-        game.getLogger().err("[TEXTURE] " + msg + " \n" + game.getLogger().getIndentStr() + "\n    At: " + generalPathName);
+    public int getID() {
+        return id;
+    }
+
+    public void generate() {
+        if (id != 0)
+            throw new IllegalStateException("Texture already exists!");
+
+
+        id = GL30.glGenTextures();
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
+
+        //Set texture default flags
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MIN_FILTER, GL30.GL_NEAREST); //Scale down
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MAG_FILTER, GL30.GL_NEAREST); //Scale up
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_S, GL30.GL_REPEAT);      //Wrap x
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_T, GL30.GL_REPEAT);      //Wrap y
+    }
+    // S,T = U,V = X,Y
+
+    public void setGLTexParameter(int param, int value) {
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, param, value); //Scale down
+    }
+
+    public void bind() {
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
+    }
+
+    public void unBind() {
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, 0);
+    }
+
+    private static byte[] intARGBtoByteRGBA(int[] argb) {
+        byte[] rgba = new byte[argb.length * 4];
+
+        for (int i = 0; i < argb.length; i++) {
+            rgba[4 * i] = (byte) ((argb[i] >> 16) & 0xff); // R
+            rgba[4 * i + 1] = (byte) ((argb[i] >> 8) & 0xff); // G
+            rgba[4 * i + 2] = (byte) ((argb[i]) & 0xff); // B
+            rgba[4 * i + 3] = (byte) ((argb[i] >> 24) & 0xff); // A
+        }
+
+        return rgba;
+    }
+
+    public void uploadImageToGPU(boolean keepImageInMemory) {
+
+        generate();
+
+        //TODO
+        BufferedImage img = textures[0];
+
+        ByteBuffer buffer = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * 4); //4 -> RGBA
+        buffer.put(
+                intARGBtoByteRGBA(
+                        img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth())
+                )
+        ).flip();
+
+        GL30.glTexImage2D(
+                GL30.GL_TEXTURE_2D,         //Type
+                0,                     //Level
+                GL30.GL_RGBA8,               //Color Format (internal)
+                img.getWidth(),             //Width
+                img.getHeight(),            //Height
+                0,                    //Border
+                GL30.GL_RGBA,                //Color format
+                GL11.GL_UNSIGNED_BYTE,       //Buffer type
+                buffer);                    //Data
+
+        if (!keepImageInMemory)
+            img = null;
     }
 
     public void update() {
@@ -113,53 +245,5 @@ public class Texture {
         }
     }
 
-
-    public boolean setAnimationSequence(String seqName) {
-
-        for (int i = 0; i < sequences.length; i++) {
-            if (sequences[i].name.equals(seqName)) {
-                currSequence = i;
-                sequences[i].reset();
-                return true;
-            }
-        }
-        errMsg("There's no animation sequence: " + seqName);
-        return false;
-    }
-
-    public void setCurrentFrame(int frame) {
-        if (sequences == null) {
-            errMsg("No sequences loaded!");
-            return;
-        }
-        sequences[currSequence].setCurrentFrame(frame);
-    }
-
-    public AnimSequence getAnimationSequence(String seqName) {
-        for (int i = 0; i < sequences.length; i++) {
-            if (sequences[i].name.equals(seqName)) {
-                currSequence = i;
-                return sequences[i];
-            }
-        }
-        errMsg("There's no animation sequence: " + seqName);
-        return null;
-    }
-
-    public void setAnimated(boolean animated) {
-        if (hasAnimation)
-            this.animated = animated;
-    }
-
-    public boolean isAnimated() {
-        return this.animated;
-    }
-
-    public BufferedImage getTexture() {
-        if (hasAnimation) {
-            return textures[sequences[currSequence].getCurrentFrame()];
-        } else
-            return textures[0];
-    }
 
 }

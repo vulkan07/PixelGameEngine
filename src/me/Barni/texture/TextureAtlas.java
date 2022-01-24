@@ -17,9 +17,13 @@ public class TextureAtlas {
         game.getLogger().info("[ATLAS] Initialized texture atlas");
     }
 
-    public BufferedImage getTexture(int i) {
+    public BufferedImage getImage(int i) {
         if (atlas[i] == null) return null;
         return atlas[i].getTexture();
+    }
+    public Texture getTexture(int i) {
+        if (atlas[i] == null) return null;
+        return atlas[i];
     }
 
 

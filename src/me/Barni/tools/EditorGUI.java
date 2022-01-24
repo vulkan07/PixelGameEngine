@@ -287,7 +287,7 @@ public class EditorGUI {
     }
 
     public void updateTxtPreviewImage() {
-        BufferedImage img = editor.game.getMap().atlas.getTexture(textureSelectBox.getSelectedIndex());
+        BufferedImage img = editor.game.getMap().atlas.getImage(textureSelectBox.getSelectedIndex());
         BufferedImage resImg = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
         resImg.getGraphics().drawImage(img, 0, 0, 64, 64, null);
         ImageIcon icon = new ImageIcon(resImg);

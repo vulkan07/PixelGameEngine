@@ -2,11 +2,19 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
+import me.Barni.graphics.Camera2;
+import me.Barni.graphics.NMouseHandler;
+import me.Barni.graphics.Window;
 import me.Barni.hud.HUD;
 import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
 import me.Barni.physics.Vec2D;
 import me.Barni.tools.LevelEditor;
+import org.joml.Vector2f;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.system.MemoryUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,6 +30,12 @@ public final class Game extends Canvas implements Runnable {
 
     private boolean running = false;    //Running
     Thread thread;                      //Game thread
+
+    //------NEW----------
+    public Window window2;               //Window
+    public Camera2 camera2;
+    //------NEW----------
+
 
     public JFrame window;               //Window
     private BufferedImage image;        //Image
@@ -40,6 +54,7 @@ public final class Game extends Canvas implements Runnable {
     private Player player;
 
     public final String GAME_DIR; //Root game directory, which all file readers will use
+    public String SHADER_DIR; //Root game directory, which all file readers will use
 
     //Screen fading variables
     private boolean isScreenFadingIn, isScreenFadingOut;
@@ -79,7 +94,7 @@ public final class Game extends Canvas implements Runnable {
         //If read successfully choose random line as title
         if (!lines.equals("")) {
             String[] msgs = lines.split("\n");
-            return msgs[r.nextInt(msgs.length-1)];
+            return msgs[r.nextInt(msgs.length - 1)];
         }
 
         return msg;
@@ -95,12 +110,24 @@ public final class Game extends Canvas implements Runnable {
             return;
         }
 
+        SHADER_DIR = GAME_DIR + "textures\\shaders\\";
+
         //Logger
         this.logger = new Logger(logLevel);
 
         //Create main buffer image & get raster
         WIDTH = w;
         HEIGHT = h;
+
+
+        //------NEW----------
+        window2 = new Window(title + "  -  " + loadRandomTitleMsg(), w, h);
+        //window2.init();
+
+        camera2 = new Camera2(new Vector2f());
+        //------NEW----------
+
+
         image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
         buffer = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
 
@@ -139,10 +166,9 @@ public final class Game extends Canvas implements Runnable {
         this.addKeyListener(getKeyboardHandler());
 
         //Map
-        loadNewMap(GAME_DIR + "01.map");
 
         //Level editor
-        levelEditor = new LevelEditor(this);
+        //levelEditor = new LevelEditor(this);
 
         //Intro
         intro = new Intro(this, image);
@@ -159,11 +185,13 @@ public final class Game extends Canvas implements Runnable {
         ((HUDButton) getHud().getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
         ((HUDButton) getHud().getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
 
+        GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 
         //Start unique game thread
         running = true;
         thread = new Thread(this);
         thread.start();
+        window.setVisible(false);
     }
 
     public void loadNewMap(String path) {
@@ -200,43 +228,31 @@ public final class Game extends Canvas implements Runnable {
     //----------->   Run   <----------\\
     @Override
     public void run() {
+
+        //GLFW.glfwMakeContextCurrent(window2.getWindow());
+        //GL.createCapabilities();
+        //GL30.glViewport(0, 0, 1920,1080);
+        window2.init();
+        loadNewMap(GAME_DIR + "01.map");
+        map.createShaderPrograms();
+
         //IMPORTANT! Frames and ticks are bounded together
         int fps = 60;
         float framePerTick = 1000000000 / fps;
         float delta = 0;
-        long now, last, timer = 0;
-        int frames = 0;
-
+        long now, last;
         last = System.nanoTime();
-        getLogger().info("[GAME] Preferred FPS: " + fps);
-        getLogger().info("[GAME] Game loop ready to start\n"); // \n to separate loop logs
 
-        while (running) {
-
+        while (!GLFW.glfwWindowShouldClose(window2.getWindow())) {
+            GLFW.glfwPollEvents();
             now = System.nanoTime();
             delta += (now - last) / framePerTick;
-            timer += (now - last);
             last = now;
 
-
             if (delta >= 1) {
-
-                //=TICK=\\
                 tick();
-
-                //=RENDER=\\
                 render();
-
-                frames++;
                 delta--;
-            }
-
-            //Primitive FPS timer
-            if (timer >= 1000000000) {
-
-                window.setTitle(defaultWindowTitle + "   |   " + frames + " FPS");
-                frames = 0;
-                timer = 40;
             }
         }
         stop();
@@ -250,6 +266,11 @@ public final class Game extends Canvas implements Runnable {
             thread.join();
         } catch (InterruptedException ignored) {
         }
+        GLFW.glfwDestroyWindow(window2.getWindow());
+
+        GLFW.glfwTerminate();
+        GLFW.glfwSetErrorCallback(null);
+
     }
 
     //---------------------------------\\
@@ -269,66 +290,25 @@ public final class Game extends Canvas implements Runnable {
     //---------------------------------\\
     //----------->  Render  <----------\\
     private void render() {
+        window2.clear();
 
-        //Clear buffer image
-        if (blankAlpha != 255 && !intro.isPlayingIntro())
-            Arrays.fill(buffer, bgColor);
-
-        //Get image's graphics
-        Graphics g = getBufferStrategy().getDrawGraphics();
-
-        //Render intro
-        intro.render();
-        //Draw image to canvas's graphics
-        g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-
-        if (blankAlpha != 255 && !intro.isPlayingIntro()) {
-
-            //Render in primitive layer orders
-            //TODO make render layers abstract
-            getMap().renderDecoratives(image, -1); //Behind map layer
-            getMap().renderTiles(image);
-
-            getMap().renderDecoratives(image, 0); //Before map
-            getMap().renderEntities(image);
-
-            getMap().renderDecoratives(image, 1); //Before entities
-
-            getHud().render(image);
-            g.drawImage(image, 0, 0, WIDTH, HEIGHT, null);
-            getLevelEditor().overlayRender(g);
-        }
+        if (NMouseHandler.getButton(0)) {
+            camera2.target.x -= NMouseHandler.getDeltaX() * camera2.zoom;
+            camera2.target.y -= NMouseHandler.getDeltaY() * camera2.zoom;
+        }/*
+        camera2.target.x += 0.6;
+        if (camera2.target.x > 3)
+            camera2.target.x = -1;*/
+        camera2.update();
+        NMouseHandler.update();
 
 
-        //Screen fading mechanism
-        {
-            //None -> back
-            if (isScreenFadingOut) {
-                blankAlpha += 5;
+        //------------------\\
 
-                if (blankAlpha > 255) {
-                    blankAlpha = 255;
-                    isScreenFadingOut = false;
-                }
-            }
-            //Black -> none
-            if (isScreenFadingIn) {
-                blankAlpha -= 5;
+        map.render(camera2);
 
-                if (blankAlpha < 0) {
-                    blankAlpha = 0;
-                    isScreenFadingIn = false;
-                }
-            }
-
-            if (isScreenFadingIn || isScreenFadingOut || blankAlpha == 1) {
-                g.setColor(new Color(0, 0, 0, blankAlpha));
-                g.fillRect(0, 0, getWidth(), getHeight());
-            }
-        }
-
-        g.dispose();
-        getBufferStrategy().show();
+        //------------------\\
+        GLFW.glfwSwapBuffers(window2.getWindow());
     }
 
     //Call to fade the screen FROM black

@@ -2,12 +2,18 @@ package me.Barni;
 
 import me.Barni.entity.Entity;
 import me.Barni.entity.childs.Player;
+import me.Barni.graphics.Camera2;
+import me.Barni.graphics.ShaderProgram;
+import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Physics;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
 import me.Barni.texture.TextureAtlas;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.lwjgl.opengl.GL30;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -17,7 +23,6 @@ import java.util.Arrays;
 public class Map {
     Game game;
     public Physics physics;
-    public TextureAtlas atlas;
 
     public int width, height, tileSize;
     private byte[] tiles;
@@ -25,21 +30,27 @@ public class Map {
     public Entity[] entities = new Entity[16];
     public Decorative[] decoratives = new Decorative[32];
 
-    public int getDecCount() {
-        return decCount;
-    }
-
     private int decCount = 0;
 
     private String title, fileName;
-    private Color bgColor;
     public Vec2D playerStartPos = new Vec2D(), playerStartVel = new Vec2D();
 
 
     public Camera cam;
     BufferedImage txt;
 
+    //new
+    ShaderProgram frontShader, backShader;
+    VertexArrayObject vao;
+    public TextureAtlas atlas, normAtlas;
+    Camera2 cam2;
 
+    public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
+    //new
+
+
+    //----------------------------
+    //-- Getters & Setters -------
     public String getTitle() {
         return title;
     }
@@ -84,6 +95,11 @@ public class Map {
         tiles = newTiles;
     }
 
+    public int getDecCount() {
+        return decCount;
+    }
+    //-- Getters & Setters -------
+    //----------------------------
 
     public Map(Game g, int w, int h, int tSize, String fName) {
         fileName = fName;
@@ -94,16 +110,34 @@ public class Map {
         backTiles = new byte[width * height];
         game = g;
         atlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
+        normAtlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
 
         game.getLogger().info("[MAP] Initialized new map, size: " + w + ", " + h);
 
         physics = new Physics(game, this);
 
         cam = new Camera(game, this);
+        cam2 = new Camera2(new Vector2f());
+    }
+
+    public void createShaderPrograms()
+    {
+        frontShader = new ShaderProgram(game);
+        frontShader.create("mapTile");
+        frontShader.link();
+
+        backShader = new ShaderProgram(game);
+        backShader.create("backgroundTile");
+        backShader.link();
+        backShader.uploadVec4("uBackColor", new Vector4f(.2f, .2f, .2f, 0));
 
 
-        //TEST
-        Arrays.fill(backTiles, (byte) 0);
+        vao = new VertexArrayObject();
+        float[] vArray = new float[8];
+        vao.setVertexData(vArray);
+        vao.setElementData(ELEMENT_ARRAY);
+        vao.addAttributePointer(2); //Position (x,y)
+        vao.addAttributePointer(2); //TX coords (u,v)
     }
 
     public void dumpCurrentMapIntoFile(String path) {
@@ -122,11 +156,11 @@ public class Map {
         mapObj.put("version", MapLoader.VALID_MAP_FILE_VERSION);
         mapObj.put("sizeX", width);
         mapObj.put("sizeY", height);
-        if (bgColor != null)
+        /*if (bgColor != null)
             if (bgColor.getRGB() != game.bgColor) {
                 String cData = bgColor.getRed() + "," + bgColor.getGreen() + "," + bgColor.getBlue();
                 mapObj.put("backGround", cData);
-            }
+            }*/
 
         mapObj.put("spawnPos", playerStartPos.xi() + "," + playerStartPos.yi());
         mapObj.put("spawnVel", playerStartVel.xi() + "," + playerStartVel.yi());
@@ -219,56 +253,98 @@ public class Map {
         for (int i = 1; i < Material.materialPath.length; i++) {
             Texture t = new Texture();
             t.loadTexture(game, Material.materialPath[i], 32, 32, true);
+            t.uploadImageToGPU(true);
             atlas.addTexture(t);
+
+            //Normal texture
+            Texture normalT = new Texture();
+            normalT.loadTexture(game, Material.materialPath[i] + "_nor", 32, 32, true);
+            normalT.uploadImageToGPU(true);
+            normAtlas.addTexture(normalT);
         }
     }
 
+    public void render(Camera2 cam) {
+        vao.bind(false);
 
-    public void renderTiles(BufferedImage img) {
+        renderTiles(false, cam);
+        renderTiles(true, cam);
 
-        Graphics g = img.getGraphics();
-        g.setColor(new Color(0, 0, 20, 100));
+        vao.unBind();
+    }
 
+    private void renderTiles(boolean front, Camera2 camera) {
+        ShaderProgram currentShader;
+        if (front)
+            currentShader = frontShader;
+        else
+            currentShader = backShader;
 
-        for (int i = 0; i < tiles.length; i++) {
+        currentShader.bind();
 
+        currentShader.uploadMat4("uProjMat", camera.getProjMat());
+        currentShader.uploadMat4("uViewMat", camera.getViewMat());
+        currentShader.uploadFloat("uAlpha", 0);
 
-            int x = i % width; //x
-            int y = i / width; //Y
-            if (
-                    x * tileSize + tileSize < cam.scroll.x ||
-                            x * tileSize > cam.scroll.x + game.getWIDTH() ||
-                            y * tileSize + tileSize < cam.scroll.y ||
-                            y * tileSize > cam.scroll.y + game.getHEIGHT()
-            ) continue;
+        for (int i = 0; i < width * height; i++) {
 
-            //BG
-            if (backTiles[i] != 0) {
-                txt = atlas.getTexture(backTiles[i] - 1);
-                if (backTiles[i] != 0) {
-                    g.drawImage(txt,
-                            x * tileSize - cam.scroll.xi(),
-                            y * tileSize - cam.scroll.yi(),
-                            null);
-                    if (!Material.translucent[backTiles[i]])
-                        g.fillRect(x * tileSize - cam.scroll.xi(),
-                                y * tileSize - cam.scroll.yi(),
-                                tileSize,
-                                tileSize);
+            if (front) {
+                if (tiles[i] == 0)
+                    continue;
+            } else if (backTiles[i] == 0)
+                continue;
+
+            float[] vArray = generateVertexArray(i % width * 32,
+                    i / width * 32, 32, 32);
+            vao.setVertexData(vArray);
+
+            if (front) {
+                if (normAtlas.getImage(tiles[i]+1) != null) {
+                    currentShader.selectTextureSlot("uNorSampler", 1);
+                    normAtlas.getTexture(tiles[i]+1).bind();
                 }
+                currentShader.selectTextureSlot("uTexSampler", 0);
+                atlas.getTexture(tiles[i]+1).bind();
+            } else {
+                if (normAtlas.getImage(backTiles[i]+1) != null) {
+                    currentShader.selectTextureSlot("uTexSampler", 0);
+                    atlas.getTexture(backTiles[i]+1).bind();
+                }
+
+                GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+
             }
-
-            //FG
-            if (tiles[i] == 0) continue;
-
-            txt = atlas.getTexture(tiles[i] - 1);
-
-            g.drawImage(txt,
-                    x * tileSize - cam.scroll.xi(),
-                    y * tileSize - cam.scroll.yi(),
-                    null);
-            //img.getGraphics().drawRect(x*tileSize,y*tileSize,tileSize,tileSize);
+            currentShader.unBind();
         }
+    }
+
+    public static float[] generateVertexArray(float x, float y, float w, float h) {
+        float[] va = new float[16];
+        va[0] = x;    //TL x
+        va[1] = y;    //TL y
+
+        va[2] = 0f;   //U
+        va[3] = 0f;   //V
+
+        va[4] = x + w;  //BR x
+        va[5] = y + h;  //BR y
+
+        va[6] = 1f;   //U
+        va[7] = 1f;   //V
+
+        va[8] = x + w;  //TR x
+        va[9] = y;    //TR y
+
+        va[10] = 1f;   //U
+        va[11] = 0f;   //V
+
+        va[12] = x;    //BL x
+        va[13] = y + h;  //BL y
+
+        va[14] = 0f;   //U
+        va[15] = 1f;   //V
+
+        return va;
     }
 
     public void renderEntities(BufferedImage img) {
@@ -314,7 +390,7 @@ public class Map {
         }
         decoratives[decCount] = dec;
         decCount++;
-        return decCount-1;
+        return decCount - 1;
     }
 
     public void addEntity(Entity e) {
