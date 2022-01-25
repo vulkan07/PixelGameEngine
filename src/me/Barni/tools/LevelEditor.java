@@ -14,7 +14,6 @@ public class LevelEditor {
     Game game;
     public Camera cam;
     public Map map;
-    MouseHandler mouse;
 
     JFrame pWin = new JFrame();
     EditorGUI eGUI = new EditorGUI(this);
@@ -51,7 +50,6 @@ public class LevelEditor {
         mouseGizmo.loadTexture(game, "mouse_gizmos", 16, 16, true);
         setMouseGizmo(MOUSE_GIZMO_MOVE);
         this.game = game;
-        mouse = game.getMouseHandler();
         reloadMap(game.getMap()); //Init variables with map
         initPWin();
     }
@@ -119,8 +117,8 @@ public class LevelEditor {
             return;
 
         if (waitingForMousePress)
-            if (mouse.isPressed(mouse.LMB)) {
-                mouseClick = mouse.getPosition().copy().add(cam.scroll);
+            if (MouseHandler.isPressed(MouseHandler.LMB)) {
+                mouseClick = MouseHandler.getPosition().copy().add(cam.scroll);
                 setMouseGizmo(MOUSE_GIZMO_SELECT);
                 waitingForMousePress = false;
                 mousePressObtained = true;
@@ -150,13 +148,13 @@ public class LevelEditor {
             else
                 eGUI.txtPreview.setText("Foreground");
 
-            Vec2D selectedTile = mouse.getPosition().copy();
+            Vec2D selectedTile = MouseHandler.getPosition();
             selectedTile.add(game.getMap().cam.scroll);
             selectedTile.y -= 16;
             selectedTile.div(32);
 
             tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
-            if (mouse.isPressed(mouse.LMB)) {
+            if (MouseHandler.isPressed(MouseHandler.LMB)) {
                 if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT)) {
                     try {
                         map.setBackTile(tPos1, paintTileIndex);
@@ -171,7 +169,7 @@ public class LevelEditor {
                         }
                     }
                 }
-            } else if (mouse.isPressed(mouse.RMB))
+            } else if (MouseHandler.isPressed(MouseHandler.RMB))
                 if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT)) {
                     try {
                         map.setBackTile(tPos1, 0);
@@ -187,14 +185,14 @@ public class LevelEditor {
             //
             //Rectangle selection tool
             //
-            if (!mouseBeenPressed && mouse.isPressed(mouse.LMB)) {
-                selectionAnchor = mouse.getPosition().copy().add(cam.scroll);
+            if (!mouseBeenPressed && MouseHandler.isPressed(MouseHandler.LMB)) {
+                selectionAnchor = MouseHandler.getPosition().copy().add(cam.scroll);
             }
-            if (mouse.isPressed(mouse.LMB)) {
-                selectionDimension = mouse.getPosition().copy().add(cam.scroll);
+            if (MouseHandler.isPressed(MouseHandler.LMB)) {
+                selectionDimension = MouseHandler.getPosition().copy().add(cam.scroll);
                 selectionDimension.y -= 32;
             }
-            mouseBeenPressed = mouse.isPressed(mouse.LMB);
+            mouseBeenPressed = MouseHandler.isPressed(MouseHandler.LMB);
 
             if (selectionAnchor.x > selectionDimension.x) {
                 selection.x = selectionDimension.xi();
@@ -229,7 +227,7 @@ public class LevelEditor {
             return;
 
         if (mouseGizmoUsed)
-            g.drawImage(mouseGizmo.getTexture(), mouse.getPosition().xi() - 16, mouse.getPosition().yi() - 32, null);
+            g.drawImage(mouseGizmo.getTexture(), MouseHandler.getPosition().xi() - 16, MouseHandler.getPosition().yi() - 32, null);
 
         if (showGrid) {
             g.setColor(gridColor);
@@ -240,7 +238,7 @@ public class LevelEditor {
             }
         }
 
-        if (mouse.isPressed(mouse.LMB) && !paintingGrid) {
+        if (MouseHandler.isPressed(MouseHandler.LMB) && !paintingGrid) {
             //game.setCursor(new Cursor(Cursor.WAIT_CURSOR));
             g.setColor(Color.ORANGE);
             g.drawRect(selection.x - cam.scroll.xi(),
@@ -251,7 +249,7 @@ public class LevelEditor {
         }
 
         if (paintingGrid) {
-            Vec2D selectedTile = mouse.getPosition().copy();
+            Vec2D selectedTile = MouseHandler.getPosition();
             selectedTile.add(game.getMap().cam.scroll);
             selectedTile.y -= 16;
             selectedTile.div(32);

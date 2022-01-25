@@ -1,6 +1,7 @@
 package me.Barni.hud;
 
 import me.Barni.Game;
+import me.Barni.MouseHandler;
 import me.Barni.hud.events.ButtonEventListener;
 
 import java.awt.*;
@@ -41,15 +42,15 @@ public class HUDButton extends HUDElement {
         this.pressed = false;
         if (pressable)
             if (
-                    game.getMouseHandler().getPosition().x > x &&
-                            game.getMouseHandler().getPosition().y > y + h &&
-                            game.getMouseHandler().getPosition().x < x + w &&
-                            game.getMouseHandler().getPosition().y < y + h * 2) {
+                    MouseHandler.getPosition().x > x &&
+                            MouseHandler.getPosition().y > y + h &&
+                            MouseHandler.getPosition().x < x + w &&
+                            MouseHandler.getPosition().y < y + h * 2) {
                 //Mouse within box
                 this.hovered = true;
 
                 //LMB is pressed
-                if (game.getMouseHandler().isPressed(game.getMouseHandler().LMB)) {
+                if (MouseHandler.isPressed(MouseHandler.LMB)) {
                     this.pressed = true;
                     if (myListener != null)
                         if (!pressed0)

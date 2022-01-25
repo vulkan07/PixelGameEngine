@@ -1,5 +1,6 @@
 package me.Barni.graphics;
 
+import me.Barni.MouseHandler;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -52,7 +53,7 @@ public class Camera2 {
 
     public void update() {
         pos = pos.lerp(target,.12f);
-        targZoom -= NMouseHandler.getScrollY()/20;
+        targZoom -= MouseHandler.getScrollY()/20;
 
 
         zoom = lerp(zoom, targZoom, .1f);

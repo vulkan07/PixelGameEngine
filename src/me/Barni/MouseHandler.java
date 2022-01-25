@@ -1,74 +1,77 @@
 package me.Barni;
 
 import me.Barni.physics.Vec2D;
+import org.lwjgl.glfw.GLFW;
 
-import javax.swing.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+public class MouseHandler {
 
-public class MouseHandler implements MouseListener {
+    public static final int LMB = 1;
+    public static final int RMB = 4;
+    public static final int WHEEL = 2;
+    public static final int MB4 = 8;
+    public static final int MB5 = 16;
 
-    public final byte LMB = 1;//(byte) 1;
-    public final byte RMB = 4;//(byte) 3;
-    public final byte WHEEL = 2;//(byte)  2;
-    public final byte MB4 = 8;//(byte) 5;
-    public final byte MB5 = 16;//(byte) 4;
+    private static float x;
+    private static float y;
 
-    private byte pressed = 0;
-    private Vec2D pos, lastPos, delta;
-    JFrame window;
-    Game game;
+    private static float scrollX;
+    private static float scrollY;
 
-    public MouseHandler(JFrame window, Game game) {
-        this.game = game;
-        this.window = window;
-        pos = new Vec2D();
-        delta = new Vec2D();
-        lastPos = new Vec2D();
+    private static float prevX;
+    private static float prevY;
+
+    private static boolean buttons[] = new boolean[5];
+
+    public MouseHandler() {
+        x = 0;
+        y = 0;
     }
 
-    public void update() {
-        try {
-            pos.x = window.getMousePosition().x;
-            pos.y = window.getMousePosition().y;
-            delta = lastPos.copy().sub(pos);
-            lastPos = pos.copy();
-        } catch (NullPointerException nex) {
-        }
+    public static float getDeltaX() {
+        return x - prevX;
     }
 
-    public boolean isPressed(int button) {
-        return (pressed & button) != 0;
-        //return (pressed & 1 << button - 1) != 0;
+    public static float getDeltaY() {
+        return y - prevY;
     }
 
-    public Vec2D getPosition() {
-        return pos;
+    public static float getScrollX() {
+        return scrollX;
     }
 
-    @Override
-    public void mouseClicked(MouseEvent e) {
+    public static float getScrollY() {
+        return scrollY;
     }
 
-    @Override
-    public void mousePressed(MouseEvent e) {
-        if (game.getIntro().isPlayingIntro())
-            game.getIntro().skip();
-        pressed = (byte) (pressed | 1 << e.getButton() - 1);
-        //System.out.println(isPressed(RMB));
+    public static Vec2D getPosition() {
+        return new Vec2D(x, y);
     }
 
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        pressed = (byte) (pressed & 0xFFFFF0 << e.getButton() - 1);
-        //System.out.println(isPressed(RMB));
+    public static boolean isPressed(int b) {
+        return buttons[b];
     }
 
-    @Override
-    public void mouseEntered(MouseEvent e) {
+    public static void mousePosCallback(long window, double xpos, double ypos) {
+        prevX = x;
+        prevY = y;
+        x = (float) xpos;
+        y = (float) ypos;
     }
 
-    @Override
-    public void mouseExited(MouseEvent e) {
+    public static void update() {
+        prevX = x;
+        prevY = y;
+        scrollX = 0;
+        scrollY = 0;
+    }
+
+    public static void mouseButtonCallback(long window, int button, int action, int mods) {
+        if (button < buttons.length)
+            buttons[button] = action == GLFW.GLFW_PRESS;
+    }
+
+    public static void mouseScrollCallback(long window, double xoffset, double yoffset) {
+        scrollX = (float) xoffset;
+        scrollY = (float) yoffset;
     }
 }

@@ -3,7 +3,6 @@ package me.Barni;
 
 import me.Barni.entity.childs.Player;
 import me.Barni.graphics.Camera2;
-import me.Barni.graphics.NMouseHandler;
 import me.Barni.graphics.Window;
 import me.Barni.hud.HUD;
 import me.Barni.hud.HUDButton;
@@ -12,8 +11,6 @@ import me.Barni.physics.Vec2D;
 import me.Barni.tools.LevelEditor;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
 
 import javax.swing.*;
@@ -23,7 +20,6 @@ import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Random;
 
 public final class Game extends Canvas implements Runnable {
@@ -47,7 +43,6 @@ public final class Game extends Canvas implements Runnable {
     private int WIDTH, HEIGHT;
 
     private HUD hud;
-    private MouseHandler mouseHandler;
     private KeyboardHandler keyboardHandler;
     private Logger logger;
     private Map map;
@@ -158,9 +153,6 @@ public final class Game extends Canvas implements Runnable {
         createBufferStrategy(2);
 
 
-        //Mouse
-        mouseHandler = new MouseHandler(window, this);
-        this.addMouseListener(getMouseHandler());
         //Keyboard
         keyboardHandler = new KeyboardHandler(this, false);
         this.addKeyListener(getKeyboardHandler());
@@ -262,15 +254,12 @@ public final class Game extends Canvas implements Runnable {
     //----------->   Stop   <----------\\
     public synchronized void stop() {
         getLogger().info("Game loop stopped");
-        GLFW.glfwDestroyWindow(window2.getWindow());
 
+        GLFW.glfwDestroyWindow(window2.getWindow());
         GLFW.glfwTerminate();
         GLFW.glfwSetErrorCallback(null);
-        try {
-            thread.join();
-        } catch (InterruptedException ignored) {
-        }
 
+        System.exit(0);
     }
 
     //---------------------------------\\
@@ -278,13 +267,13 @@ public final class Game extends Canvas implements Runnable {
     private void tick() {
         if (intro.isPlayingIntro()) return; //Return if playing intro
 
-        getHud().update();
+        hud.update();
 
-        getMouseHandler().update();
+        MouseHandler.update();
 
-        getMap().tick();
+        map.tick();
 
-        getLevelEditor().update();
+        levelEditor.update();
     }
 
     //---------------------------------\\
@@ -292,13 +281,13 @@ public final class Game extends Canvas implements Runnable {
     private void render() {
         window2.clear();
 
-        if (NMouseHandler.getButton(0)) {
-            camera2.target.x -= NMouseHandler.getDeltaX() * camera2.zoom;
-            camera2.target.y -= NMouseHandler.getDeltaY() * camera2.zoom;
+        if (MouseHandler.isPressed(0)) {
+            camera2.target.x -= MouseHandler.getDeltaX() * camera2.zoom;
+            camera2.target.y -= MouseHandler.getDeltaY() * camera2.zoom;
         }
 
         camera2.update();
-        NMouseHandler.update();
+        MouseHandler.update();
 
         //-----------------\\
         map.render(camera2);
@@ -335,9 +324,6 @@ public final class Game extends Canvas implements Runnable {
     //----------------------------------\\
     //------------ GETTERS -------------\\
     //----------------------------------\\
-    public MouseHandler getMouseHandler() {
-        return mouseHandler;
-    }
 
     public KeyboardHandler getKeyboardHandler() {
         return keyboardHandler;
