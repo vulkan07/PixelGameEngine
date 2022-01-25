@@ -32,10 +32,13 @@ public class Decorative {
     }
 
     public void render(BufferedImage img, Camera cam) {
+        /*
         Graphics g = img.getGraphics();
-        g.drawImage(texture.getTexture(), (int)(x - cam.scroll.xi()*parallax), (int)(y - cam.scroll.yi()*parallax), w, h, null);
+        g.drawImage(texture.getTexture(), (int)(x - cam..xi()*parallax), (int)(y - cam.scroll.yi()*parallax), w, h, null);
+    */
     }
-    public void renderDebug(Graphics g, Camera cam, boolean selected) {
+
+    public void renderDebug(Graphics g, Camera cam, boolean selected) {/*
         g.setColor(Color.GREEN);
         g.drawRect(x - cam.scroll.xi(), y - cam.scroll.yi(), w, h);
         if (selected) {
@@ -43,5 +46,5 @@ public class Decorative {
             g.drawRect(x - cam.scroll.xi() - 2, y - cam.scroll.yi() - 2, w + 4, h + 4);
         }
         g.drawString((texture.getPath() + "(#" + id + ")"), x - cam.scroll.xi(), y - cam.scroll.yi() - 10);
-    }
+    */}
 }

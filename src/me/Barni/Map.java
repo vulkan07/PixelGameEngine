@@ -2,14 +2,13 @@ package me.Barni;
 
 import me.Barni.entity.Entity;
 import me.Barni.entity.childs.Player;
-import me.Barni.graphics.Camera2;
 import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Physics;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
 import me.Barni.texture.TextureAtlas;
-import org.joml.Vector2f;
+
 import org.joml.Vector4f;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,15 +17,17 @@ import org.lwjgl.opengl.GL30;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.Arrays;
 
 public class Map {
+
     Game game;
     public Physics physics;
 
     public int width, height, tileSize;
+
     private byte[] tiles;
     private byte[] backTiles;
+
     public Entity[] entities = new Entity[16];
     public Decorative[] decoratives = new Decorative[32];
 
@@ -37,16 +38,11 @@ public class Map {
 
 
     public Camera cam;
-    BufferedImage txt;
 
-    //new
     ShaderProgram frontShader, backShader;
     VertexArrayObject vao;
     public TextureAtlas atlas, normAtlas;
-    Camera2 cam2;
-
     public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
-    //new
 
 
     //----------------------------
@@ -116,12 +112,10 @@ public class Map {
 
         physics = new Physics(game, this);
 
-        cam = new Camera(game, this);
-        cam2 = new Camera2(new Vector2f());
+        cam = new Camera(g.getWIDTH(), g.getHEIGHT());
     }
 
-    public void createShaderPrograms()
-    {
+    public void createShaderPrograms() {
         frontShader = new ShaderProgram(game);
         frontShader.create("mapTile");
         frontShader.link();
@@ -156,16 +150,10 @@ public class Map {
         mapObj.put("version", MapLoader.VALID_MAP_FILE_VERSION);
         mapObj.put("sizeX", width);
         mapObj.put("sizeY", height);
-        /*if (bgColor != null)
-            if (bgColor.getRGB() != game.bgColor) {
-                String cData = bgColor.getRed() + "," + bgColor.getGreen() + "," + bgColor.getBlue();
-                mapObj.put("backGround", cData);
-            }*/
-
         mapObj.put("spawnPos", playerStartPos.xi() + "," + playerStartPos.yi());
         mapObj.put("spawnVel", playerStartVel.xi() + "," + playerStartVel.yi());
 
-        String data = "";
+        String data;
         JSONArray grid = new JSONArray();
         for (int y = 0; y < height; y++) {
             data = "";
@@ -264,7 +252,7 @@ public class Map {
         }
     }
 
-    public void render(Camera2 cam) {
+    public void render(Camera cam) {
         vao.bind(false);
 
         renderTiles(false, cam);
@@ -273,7 +261,7 @@ public class Map {
         vao.unBind();
     }
 
-    private void renderTiles(boolean front, Camera2 camera) {
+    private void renderTiles(boolean front, Camera camera) {
         ShaderProgram currentShader;
         if (front)
             currentShader = frontShader;
@@ -299,21 +287,21 @@ public class Map {
             vao.setVertexData(vArray);
 
             if (front) {
-                if (normAtlas.getImage(tiles[i]-1) != null) {
+                if (normAtlas.getImage(tiles[i] - 1) != null) {
                     currentShader.selectTextureSlot("uNorSampler", 1);
-                    normAtlas.getTexture(tiles[i]-1).bind();
+                    normAtlas.getTexture(tiles[i] - 1).bind();
                 }
                 currentShader.selectTextureSlot("uTexSampler", 0);
-                atlas.getTexture(tiles[i]-1).bind();
+                atlas.getTexture(tiles[i] - 1).bind();
             } else {
-                if (normAtlas.getImage(backTiles[i]-1) != null) {
+                if (normAtlas.getImage(backTiles[i] - 1) != null) {
                     currentShader.selectTextureSlot("uTexSampler", 0);
-                    atlas.getTexture(backTiles[i]-1).bind();
+                    atlas.getTexture(backTiles[i] - 1).bind();
                 }
 
 
             }
-                GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+            GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
             currentShader.unBind();
         }
     }
@@ -420,7 +408,7 @@ public class Map {
     public Entity getEntity(String name) {
         for (Entity e : entities)
             if (e == null) continue;
-            else if (e.name == name) return e;
+            else if (e.name.equals(name)) return e;
         return null;
     }
 
@@ -428,7 +416,7 @@ public class Map {
         physics.init();
         for (int i = 0; i < entities.length; i++)
             if (entities[i] != null)
-                if (entities[i].name == name) entities[i] = null;
+                if (entities[i].name.equals(name)) entities[i] = null;
     }
 
     /**

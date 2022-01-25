@@ -239,14 +239,14 @@ public class Player extends Entity {
 
         if (!visible) return;
         super.render(img, cam);
-
+/*
         if (face != null)
             g.drawImage(face.getTexture(),
                     position.xi() - cam.scroll.xi(),
                     position.yi() - cam.scroll.yi(),
                     size.xi(),
                     size.yi(),
-                    null);
+                    null);*/
     }
 
 }

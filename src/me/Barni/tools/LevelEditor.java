@@ -118,7 +118,7 @@ public class LevelEditor {
 
         if (waitingForMousePress)
             if (MouseHandler.isPressed(MouseHandler.LMB)) {
-                mouseClick = MouseHandler.getPosition().copy().add(cam.scroll);
+                mouseClick = MouseHandler.getPosition().copy().add(cam.getScroll());
                 setMouseGizmo(MOUSE_GIZMO_SELECT);
                 waitingForMousePress = false;
                 mousePressObtained = true;
@@ -149,7 +149,7 @@ public class LevelEditor {
                 eGUI.txtPreview.setText("Foreground");
 
             Vec2D selectedTile = MouseHandler.getPosition();
-            selectedTile.add(game.getMap().cam.scroll);
+            selectedTile.add(game.getMap().cam.getScroll());
             selectedTile.y -= 16;
             selectedTile.div(32);
 
@@ -186,10 +186,10 @@ public class LevelEditor {
             //Rectangle selection tool
             //
             if (!mouseBeenPressed && MouseHandler.isPressed(MouseHandler.LMB)) {
-                selectionAnchor = MouseHandler.getPosition().copy().add(cam.scroll);
+                selectionAnchor = MouseHandler.getPosition().copy().add(cam.getScroll());
             }
             if (MouseHandler.isPressed(MouseHandler.LMB)) {
-                selectionDimension = MouseHandler.getPosition().copy().add(cam.scroll);
+                selectionDimension = MouseHandler.getPosition().copy().add(cam.getScroll());
                 selectionDimension.y -= 32;
             }
             mouseBeenPressed = MouseHandler.isPressed(MouseHandler.LMB);
@@ -230,31 +230,34 @@ public class LevelEditor {
             g.drawImage(mouseGizmo.getTexture(), MouseHandler.getPosition().xi() - 16, MouseHandler.getPosition().yi() - 32, null);
 
         if (showGrid) {
+            /*
             g.setColor(gridColor);
             for (int x = 0; x < game.getMap().width; x++) {
                 for (int y = 0; y < game.getMap().height; y++) {
-                    g.drawRect(x * 32 - cam.scroll.xi(), y * 32 - cam.scroll.yi(), 32, 32);
+                    g.drawRect(x * 32 - cam.scroll.xi(), y * 32 - cam.getScrollX().yi(), 32, 32);
                 }
-            }
+            }*/
         }
 
         if (MouseHandler.isPressed(MouseHandler.LMB) && !paintingGrid) {
             //game.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+            /*
             g.setColor(Color.ORANGE);
             g.drawRect(selection.x - cam.scroll.xi(),
                     selection.y - cam.scroll.yi(),
                     selection.w,
                     selection.h
-            );
+            );*/
         }
 
         if (paintingGrid) {
             Vec2D selectedTile = MouseHandler.getPosition();
-            selectedTile.add(game.getMap().cam.scroll);
+            selectedTile.add(game.getMap().cam.getScroll());
             selectedTile.y -= 16;
-            selectedTile.div(32);
+            selectedTile.div(32);/*
             if (selectedTile.x > 0 && selectedTile.y > 0 && selectedTile.x < map.width && selectedTile.y < map.height)
                 g.drawRect(selectedTile.xi() * 32 - cam.scroll.xi(), selectedTile.yi() * 32 - cam.scroll.yi(), 32, 32);
+        */
         }
 
         g.setFont(game.getDefaultFont());

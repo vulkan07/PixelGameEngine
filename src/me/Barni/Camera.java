@@ -1,48 +1,130 @@
 package me.Barni;
 
 import me.Barni.entity.Entity;
-import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
+import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 public class Camera {
 
-    public Vec2D scroll, view;
-    private Hitbox visibleArea;
-    private Vec2D vecTarget;
-    private Game game;
-    Map map;
-    public float lerp = .05f;
-    public final float DEFAULT_LERP = .05f;
-    private float zoom = 1f; //TODO
     public Entity followEntity;
     public int followDistTreshold = 50;
 
-    public Camera(Game game, Map map) {
-        this.scroll = new Vec2D(0, 0);
-        this.vecTarget = new Vec2D(0, 0);
-        this.view = new Vec2D(0, 0);
-        this.game = game;
-        this.map = map;
-        visibleArea = new Hitbox(0,0, game.getWIDTH(), game.getHEIGHT());
+    private int width, height;
+
+
+    public float lerp = .05f;
+    public final float DEFAULT_LERP = .05f;
+
+    public Vector2f pos, target, center;
+    private Matrix4f projMat, viewMat;
+
+    public float zoom = 1, targZoom = 1;
+
+    public Camera(int w, int h) {
+
+        //Initialize vectors
+        center = new Vector2f();
+        pos = new Vector2f();
+        target = new Vector2f();
+
+        //Set dimensions
+        setViewSize(w, h);
+
+        //Initialize matrices
+        projMat = new Matrix4f();
+        viewMat = new Matrix4f();
+        adjutProjection();
+    }
+
+    public void setViewSize(int w, int h) {
+        width = w;
+        height = h;
     }
 
     public void update() {
+        //Follow target entity
         if (followEntity != null)
-            if (followEntity.position.dist(view) >= followDistTreshold)
+            if (followEntity.position.dist(new Vec2D(center)) >= followDistTreshold)
                 lookAt(followEntity.position.copy().sub(followEntity.size.copy().div(2)));
-        scroll = scroll.lerp(vecTarget, lerp); //lerp animation
-        //scroll.lowLimit(0); //Crop view for top and left
-        view.x = scroll.x + game.getWIDTH() / 2;
-        view.y = scroll.y + game.getHEIGHT() / 2;
-        visibleArea.update(scroll);
+
+        //Lerp pos to target
+        pos = pos.lerp(target, .12f);
+        targZoom -= MouseHandler.getScrollY() / 20;
+
+        //Lerp zoom to target value
+        zoom = lerp(zoom, targZoom, .1f);
+        setZoom(zoom);
+
+        //Update center pos
+        center.x = pos.x + (float) width / 2;
+        center.y = pos.y + (float) height / 2;
+    }
+
+    public float getScrollX() {
+        return pos.x;
+    }
+
+    public float getScrollY() {
+        return pos.y;
+    }
+
+    public Vec2D getScroll() {
+        return new Vec2D(pos.x, pos.y);
+    }
+
+    public Vector2f getScrollV2f() {
+        return pos;
     }
 
     public void move(Vec2D move) {
-        scroll.add(move);
+        pos.add(move.toV2f());
     }
 
     public void lookAt(Vec2D target) {
-        this.vecTarget.x = target.x - game.getWIDTH() / 2;
-        this.vecTarget.y = target.y - game.getHEIGHT() / 2;
+        this.target.x = target.x - (float) width / 2;
+        this.target.y = target.y - (float) height / 2;
+    }
+
+    public void setZoom(float v) {
+        projMat.identity();
+        projMat.ortho(0f, 1920f * v, 1080f * v, 0f, 0f, 100f);
+    }
+
+    public void adjutProjection() {
+        projMat.identity();
+        projMat.ortho(0f, 1920f, 1080f, 0f, 0f, 100f);
+    }
+
+    public Matrix4f getViewMat() {
+        Vector3f camFront = new Vector3f(0f, 0f, -1f);
+        Vector3f camUp = new Vector3f(0f, 1f, 0f);
+
+        viewMat.identity();
+
+        //Generates viewmatrix
+        viewMat.lookAt(
+                new Vector3f(pos.x*zoom, pos.y*zoom, 10),  // Position
+                camFront.add(pos.x*zoom, pos.y*zoom, 0f),  // Looking at
+                camUp                                               // Where's up
+        );
+
+        return viewMat;
+    }
+
+    public Matrix4f getProjMat() {
+        return projMat;
+    }
+
+
+    Vector2f lerp(Vector2f v1, float t) {
+        return new Vector2f(
+                (1 - t) * pos.x + t * v1.x,
+                (1 - t) * pos.y + t * v1.y);
+    }
+
+    float lerp(float v0, float v1, float t) {
+        return (1 - t) * v0 + t * v1;
     }
 }

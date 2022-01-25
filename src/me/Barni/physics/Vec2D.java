@@ -1,5 +1,7 @@
 package me.Barni.physics;
 
+import org.joml.Vector2f;
+
 public class Vec2D {
 
 
@@ -19,6 +21,17 @@ public class Vec2D {
     *
     *
     * */
+
+    public Vector2f toV2f()
+    {
+        return new Vector2f(x,y);
+    }
+
+    public Vec2D(Vector2f other)
+    {
+        x = other.x;
+        y = other.y;
+    }
 
 
     /*--------------------*/

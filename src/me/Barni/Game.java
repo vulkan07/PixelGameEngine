@@ -2,14 +2,12 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
-import me.Barni.graphics.Camera2;
 import me.Barni.graphics.Window;
 import me.Barni.hud.HUD;
 import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
 import me.Barni.physics.Vec2D;
 import me.Barni.tools.LevelEditor;
-import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryUtil;
 
@@ -29,7 +27,6 @@ public final class Game extends Canvas implements Runnable {
 
     //------NEW----------
     public Window window2;               //Window
-    public Camera2 camera2;
     //------NEW----------
 
 
@@ -115,12 +112,7 @@ public final class Game extends Canvas implements Runnable {
         HEIGHT = h;
 
 
-        //------NEW----------
         window2 = new Window(title + "  -  " + loadRandomTitleMsg(), w, h);
-        //window2.init();
-
-        camera2 = new Camera2(new Vector2f());
-        //------NEW----------
 
 
         image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
@@ -281,16 +273,17 @@ public final class Game extends Canvas implements Runnable {
     private void render() {
         window2.clear();
 
+        Camera cam = map.cam;
         if (MouseHandler.isPressed(0)) {
-            camera2.target.x -= MouseHandler.getDeltaX() * camera2.zoom;
-            camera2.target.y -= MouseHandler.getDeltaY() * camera2.zoom;
+            cam.target.x -= MouseHandler.getDeltaX() * cam.zoom;
+            cam.target.y -= MouseHandler.getDeltaY() * cam.zoom;
         }
 
-        camera2.update();
+        cam.update();
         MouseHandler.update();
 
         //-----------------\\
-        map.render(camera2);
+        map.render(cam);
         //-----------------\\
 
         GLFW.glfwSwapBuffers(window2.getWindow());

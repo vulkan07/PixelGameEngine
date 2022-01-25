@@ -153,6 +153,7 @@ public abstract class Entity {
     }
 
     public void render(BufferedImage img, Camera cam) {
+        /*
         if (!visible) return;
 
         Graphics g = img.getGraphics();
@@ -163,10 +164,11 @@ public abstract class Entity {
                     size.xi(),
                     size.yi(),
                     null);
-
+*/
     }
 
     public void renderDebug(Graphics g, Camera cam, boolean selected) {
+        /*
         g.setColor(Color.RED);
         g.drawRect(position.xi() - cam.scroll.xi(), position.yi() - cam.scroll.yi(), size.xi(), size.yi());
         String[] className = getClass().toString().split("\\.");
@@ -175,10 +177,10 @@ public abstract class Entity {
             g.drawRect(position.xi() - cam.scroll.xi() - 2, position.yi() - cam.scroll.yi() - 2, size.xi() + 4, size.yi() + 4);
         }
         g.drawString(("<" + className[className.length - 1] + "> " + name), position.xi() - cam.scroll.xi(), position.yi() - cam.scroll.yi() - 10);
+   */
     }
 
-    public JSONObject serialize()
-    {
+    public JSONObject serialize() {
         JSONObject jobj = new JSONObject();
 
         String[] className = getClass().toString().split("\\.");
@@ -200,8 +202,7 @@ public abstract class Entity {
         return jobj;
     }
 
-    public void deserialize(JSONObject jobj)
-    {
+    public void deserialize(JSONObject jobj) {
 
     }
 

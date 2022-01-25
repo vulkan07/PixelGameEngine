@@ -21,13 +21,14 @@ public class BloodParticleRenderer implements ParticleRenderer {
 
     @Override
     public void renderParticles(BufferedImage img, Camera cam, Particle[] particles) {
+        /*
         for (Particle pt : particles) {
             if (pt == null) continue;
             Graphics g = img.getGraphics();
             g.setColor(new Color(255, 0, 0, 100));
             int pSize = (int) Vec2D.remap(pt.lifetime / 2, 0, pem.pData.lifespanMax, 1, 16);
             g.fillOval(pt.pos.xi() - cam.scroll.xi(), pt.pos.yi() - cam.scroll.yi(), pSize, pSize);
-        }
+        }*/
     }
 
 }
