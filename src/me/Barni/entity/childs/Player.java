@@ -229,6 +229,7 @@ public class Player extends Entity {
     }
 
 
+    /*
     @Override
     public void render(BufferedImage img, Camera cam) {
         Graphics g = img.getGraphics();
@@ -239,14 +240,14 @@ public class Player extends Entity {
 
         if (!visible) return;
         super.render(img, cam);
-/*
+
         if (face != null)
             g.drawImage(face.getTexture(),
                     position.xi() - cam.scroll.xi(),
                     position.yi() - cam.scroll.yi(),
                     size.xi(),
                     size.yi(),
-                    null);*/
+                    null);
     }
-
+*/
 }

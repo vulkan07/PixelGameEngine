@@ -39,7 +39,7 @@ public class Map {
 
     public Camera cam;
 
-    ShaderProgram frontShader, backShader;
+    ShaderProgram frontShader, backShader, entShader;
     VertexArrayObject vao;
     public TextureAtlas atlas, normAtlas;
     public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
@@ -126,6 +126,10 @@ public class Map {
         backShader.link();
         backShader.uploadVec4("uBackColor", new Vector4f(.2f, .2f, .2f, 0));
 
+        entShader = new ShaderProgram(game);
+        entShader.create("entityDefault");
+        entShader.link();
+
 
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
@@ -200,9 +204,7 @@ public class Map {
         JSONObject decObj;
 
         int place = -1;
-        for (int i = 0; i < decoratives.length; i++) {
-            Decorative d = decoratives[i];
-
+        for (Decorative d : decoratives) {
             if (d == null) continue;
             decObj = new JSONObject();
 
@@ -225,9 +227,7 @@ public class Map {
         //JSONObject entObj;
 
         int place = -1;
-        for (int i = 0; i < entities.length; i++) {
-            Entity e = entities[i];
-
+        for (Entity e : entities) {
             if (e == null) continue;
 
             place++;
@@ -242,13 +242,13 @@ public class Map {
         for (int i = 1; i < Material.materialPath.length; i++) {
             Texture t = new Texture();
             t.loadTexture(game, Material.materialPath[i], 32, 32, true);
-            t.uploadImageToGPU(true);
+            t.uploadImageToGPU(true, 0);
             atlas.addTexture(t);
 
             //Normal texture
             Texture normalT = new Texture();
             normalT.loadTexture(game, Material.materialPath[i] + "_nor", 32, 32, true);
-            normalT.uploadImageToGPU(true);
+            normalT.uploadImageToGPU(true, 0);
             normAtlas.addTexture(normalT);
         }
     }
@@ -258,6 +258,7 @@ public class Map {
 
         renderTiles(false, cam);
         renderTiles(true, cam);
+        renderEntities();
 
         vao.unBind();
     }
@@ -303,8 +304,8 @@ public class Map {
 
             }
             GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
-            currentShader.unBind();
         }
+        currentShader.unBind();
     }
 
     public static float[] generateVertexArray(float x, float y, float w, float h) {
@@ -336,12 +337,18 @@ public class Map {
         return va;
     }
 
-    public void renderEntities(BufferedImage img) {
+    public void renderEntities() {
+        entShader.bind();
+
+        entShader.uploadMat4("uProjMat", cam.getProjMat());
+        entShader.uploadMat4("uViewMat", cam.getViewMat());
+        entShader.uploadFloat("uAlpha", 0);
+
         for (Entity e : entities) {
             if (e != null)
-                e.render(img, cam);
+                e.render(vao, entShader);
         }
-
+        entShader.unBind();
     }
 
     public void renderDecoratives(BufferedImage img, int zPlane) {

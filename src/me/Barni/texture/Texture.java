@@ -18,6 +18,7 @@ public class Texture {
     public BufferedImage[] textures;
     private int width;
     private int height;
+    private boolean amIValid;
     private String generalPathName;
     private AnimSequence[] sequences;
     int currSequence, frameCount;
@@ -95,6 +96,7 @@ public class Texture {
 
 
     public void loadTexture(Game g, String relativePath, int w, int h, boolean isAnimated) {
+        amIValid = true;
         game = g;
         width = w;
         height = h;
@@ -126,6 +128,7 @@ public class Texture {
             fullImg = ImageIO.read(new File(game.GAME_DIR + TEXTURE_BONUS_PATH + imgPath));
         } catch (IOException e) {
             errMsg("Can't read file! " + game.GAME_DIR + TEXTURE_BONUS_PATH + imgPath);
+            amIValid = false;
         }
 
         //CHOP TEXTURES
@@ -150,6 +153,7 @@ public class Texture {
             frameCount = 1;
             animated = false;
             errMsg("Can't chop texture frames!");
+            amIValid = false;
         }
     }
 
@@ -157,9 +161,9 @@ public class Texture {
         return id;
     }
 
-    public void generate() {
+    private void generate() {
         if (id != 0)
-            throw new IllegalStateException("Texture already exists!");
+            return;
 
 
         id = GL30.glGenTextures();
@@ -174,15 +178,18 @@ public class Texture {
     // S,T = U,V = X,Y
 
     public void setGLTexParameter(int param, int value) {
+        if (!amIValid) return;
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, param, value); //Scale down
     }
 
     public void bind() {
+        if (!amIValid) return;
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
     }
 
     public void unBind() {
+        if (!amIValid) return;
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, 0);
     }
 
@@ -199,12 +206,12 @@ public class Texture {
         return rgba;
     }
 
-    public void uploadImageToGPU(boolean keepImageInMemory) {
-
+    public void uploadImageToGPU(boolean keepImageInMemory, int frameIndex) {
+        if (!amIValid) return;
         generate();
 
-        //TODO
-        BufferedImage img = textures[0];
+        BufferedImage img;
+        img = textures[frameIndex];
 
         ByteBuffer buffer = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * 4); //4 -> RGBA
         buffer.put(

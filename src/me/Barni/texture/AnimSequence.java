@@ -44,6 +44,7 @@ public class AnimSequence {
         timer++;
         //On timer
         if (timer >= delays[currentFrame]) {
+            texture.uploadImageToGPU(true, currentFrame);
             currentFrame++;
             timer = 0;
         }

@@ -1,10 +1,13 @@
 package me.Barni.entity;
 
 import me.Barni.*;
+import me.Barni.graphics.ShaderProgram;
+import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
 import org.json.JSONObject;
+import org.lwjgl.opengl.GL30;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -94,6 +97,7 @@ public abstract class Entity {
 
     public void loadTexture(String path) {
         texture.loadTexture(game, path, (int) size.x, (int) size.y, true);
+        texture.uploadImageToGPU(true, 0);
     }
 
     /**
@@ -152,19 +156,19 @@ public abstract class Entity {
         return true;
     }
 
-    public void render(BufferedImage img, Camera cam) {
-        /*
+    public void render(VertexArrayObject vao, ShaderProgram shader) {
         if (!visible) return;
 
-        Graphics g = img.getGraphics();
-        if (texture != null)
-            g.drawImage(texture.getTexture(),
-                    position.xi() - cam.scroll.xi(),
-                    position.yi() - cam.scroll.yi(),
-                    size.xi(),
-                    size.yi(),
-                    null);
-*/
+        float[] vArray = Map.generateVertexArray(position.x,
+                position.y, size.x, size.y);
+
+        vao.setVertexData(vArray);
+
+
+        shader.selectTextureSlot("uTexSampler", 0);
+        texture.bind();
+        GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+        texture.unBind();
     }
 
     public void renderDebug(Graphics g, Camera cam, boolean selected) {
