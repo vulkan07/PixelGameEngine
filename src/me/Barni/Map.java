@@ -113,6 +113,7 @@ public class Map {
         physics = new Physics(game, this);
 
         cam = new Camera(g.getWIDTH(), g.getHEIGHT());
+
     }
 
     public void createShaderPrograms() {

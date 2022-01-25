@@ -5,6 +5,8 @@ import me.Barni.entity.Entity;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
+import window.KeyboardHandler;
+import window.MouseHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -129,21 +131,21 @@ public class LevelEditor {
             map.cam.followEntity = null;
             map.cam.lookAt(pos);
 
-            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.UP))
+            if (KeyboardHandler.getKeyState(KeyboardHandler.UP))
                 pos.y -= SPEED;
 
-            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.DOWN))
+            if (KeyboardHandler.getKeyState(KeyboardHandler.DOWN))
                 pos.y += SPEED;
 
-            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.LEFT))
+            if (KeyboardHandler.getKeyState(KeyboardHandler.LEFT))
                 pos.x -= SPEED;
 
-            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.RIGHT))
+            if (KeyboardHandler.getKeyState(KeyboardHandler.RIGHT))
                 pos.x += SPEED;
         }
 
         if (paintingGrid) {
-            if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT))
+            if (KeyboardHandler.getKeyState(KeyboardHandler.SHIFT))
                 eGUI.txtPreview.setText("Background");
             else
                 eGUI.txtPreview.setText("Foreground");
@@ -155,7 +157,7 @@ public class LevelEditor {
 
             tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
             if (MouseHandler.isPressed(MouseHandler.LMB)) {
-                if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT)) {
+                if (KeyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
                     try {
                         map.setBackTile(tPos1, paintTileIndex);
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -170,7 +172,7 @@ public class LevelEditor {
                     }
                 }
             } else if (MouseHandler.isPressed(MouseHandler.RMB))
-                if (game.getKeyboardHandler().getKeyState(KeyboardHandler.SHIFT)) {
+                if (KeyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
                     try {
                         map.setBackTile(tPos1, 0);
                     } catch (ArrayIndexOutOfBoundsException e) {

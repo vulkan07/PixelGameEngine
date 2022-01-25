@@ -2,7 +2,7 @@ package me.Barni.entity.childs;
 
 import me.Barni.Camera;
 import me.Barni.Game;
-import me.Barni.KeyboardHandler;
+import window.KeyboardHandler;
 import me.Barni.entity.Entity;
 import me.Barni.particle.ParticleData;
 import me.Barni.hud.HUDNotification;
@@ -187,7 +187,7 @@ public class Player extends Entity {
 
         Vec2D moving = new Vec2D(0, 0);
         //CTRL slowdown
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.CTRL))
+        if (KeyboardHandler.getKeyState(KeyboardHandler.CTRL))
             speed = 0.31f;
         else
             speed = 0.5f;
@@ -195,8 +195,8 @@ public class Player extends Entity {
         //Jump mechanism
         jumped = wantToJump;
         wantToJump = false;
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.UP) ||
-                game.getKeyboardHandler().getKeyState(KeyboardHandler.SPACE)) {
+        if (KeyboardHandler.getKeyState(KeyboardHandler.UP) ||
+                KeyboardHandler.getKeyState(KeyboardHandler.SPACE)) {
             wantToJump = true;
             //idleTimer = 0;
             if (godMode) {
@@ -207,16 +207,16 @@ public class Player extends Entity {
             }
         }
 
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.DOWN)) {
+        if (KeyboardHandler.getKeyState(KeyboardHandler.DOWN)) {
             moving.y += speed;
             //idleTimer = 0;
         }
 
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.LEFT)) {
+        if (KeyboardHandler.getKeyState(KeyboardHandler.LEFT)) {
             moving.x -= speed;
             //idleTimer = 0;
         }
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.RIGHT)) {
+        if (KeyboardHandler.getKeyState(KeyboardHandler.RIGHT)) {
             moving.x += speed;
             //idleTimer = 0;
         }

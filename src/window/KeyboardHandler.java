@@ -1,9 +1,13 @@
-package me.Barni;
+package window;
+
+import me.Barni.Game;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.system.CallbackI;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class KeyboardHandler implements KeyListener {
+public class KeyboardHandler {
     Game game;
 
     public static final int UP = 87;
@@ -25,8 +29,10 @@ public class KeyboardHandler implements KeyListener {
     public static final int DELETE = 127;
     public static final int ENTER = 10;
 
+    public static final int MAX_KEYS = 525;
+
     public boolean logPresses;
-    private boolean[] pressed = new boolean[525];
+    private static boolean[] pressed = new boolean[MAX_KEYS];
 
 
     public KeyboardHandler(Game g, boolean logPress) {
@@ -34,26 +40,25 @@ public class KeyboardHandler implements KeyListener {
         this.logPresses = logPress;
     }
 
-    public boolean getKeyState(int key) {
+    public static boolean getKeyState(int key) {
         return pressed[key];
     }
 
+    public static void keyCallback(long window, int key, int scancode, int action, int mods) {
+        if (key > MAX_KEYS)
+            return;
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (logPresses) game.getLogger().info("Pressed " + e.getKeyCode());
-        handleCommonPresses(e.getKeyCode());
-        pressed[e.getKeyCode()] = true;
+        if (action == GLFW.GLFW_PRESS) {
+            pressed[key] = true;
+        }
+        if (action == GLFW.GLFW_RELEASE) {
+            pressed[key] = false;
+        }
     }
 
     private void handleCommonPresses(int id) {
         switch (id) {
-            case F1+3:
+            case F1 + 3:
                 game.getLevelEditor().setEditing(!game.getLevelEditor().isEditing());
                 break;
             case R:
@@ -64,17 +69,6 @@ public class KeyboardHandler implements KeyListener {
                     game.getIntro().skip();
                 break;
         }
-        /*
-        if (e.getKeyCode() == F2) game.mapEditing = !game.mapEditing;
-        if (e.getKeyCode() == MINUS)
-            game.mapPaintID--;
-        if (e.getKeyCode() == PLUS)
-            game.mapPaintID++;
-        */
     }
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-        pressed[e.getKeyCode()] = false;
-    }
 }

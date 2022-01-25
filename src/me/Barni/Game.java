@@ -2,7 +2,9 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
-import me.Barni.graphics.Window;
+import window.KeyboardHandler;
+import window.MouseHandler;
+import window.Window;
 import me.Barni.hud.HUD;
 import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
@@ -40,7 +42,6 @@ public final class Game extends Canvas implements Runnable {
     private int WIDTH, HEIGHT;
 
     private HUD hud;
-    private KeyboardHandler keyboardHandler;
     private Logger logger;
     private Map map;
     private Player player;
@@ -143,13 +144,6 @@ public final class Game extends Canvas implements Runnable {
         this.setBackground(Color.BLACK);
         //create canvas' BufferStrategy
         createBufferStrategy(2);
-
-
-        //Keyboard
-        keyboardHandler = new KeyboardHandler(this, false);
-        this.addKeyListener(getKeyboardHandler());
-
-        //Map
 
         //Level editor
         //levelEditor = new LevelEditor(this);
@@ -257,7 +251,7 @@ public final class Game extends Canvas implements Runnable {
     //---------------------------------\\
     //----------->   Tick   <----------\\
     private void tick() {
-        if (intro.isPlayingIntro()) return; //Return if playing intro
+        //if (intro.isPlayingIntro()) return; //Return if playing intro
 
         hud.update();
 
@@ -265,7 +259,7 @@ public final class Game extends Canvas implements Runnable {
 
         map.tick();
 
-        levelEditor.update();
+        //levelEditor.update();
     }
 
     //---------------------------------\\
@@ -273,17 +267,11 @@ public final class Game extends Canvas implements Runnable {
     private void render() {
         window2.clear();
 
-        Camera cam = map.cam;
-        if (MouseHandler.isPressed(0)) {
-            cam.target.x -= MouseHandler.getDeltaX() * cam.zoom;
-            cam.target.y -= MouseHandler.getDeltaY() * cam.zoom;
-        }
 
-        cam.update();
         MouseHandler.update();
 
         //-----------------\\
-        map.render(cam);
+        map.render(map.cam);
         //-----------------\\
 
         GLFW.glfwSwapBuffers(window2.getWindow());
@@ -317,10 +305,6 @@ public final class Game extends Canvas implements Runnable {
     //----------------------------------\\
     //------------ GETTERS -------------\\
     //----------------------------------\\
-
-    public KeyboardHandler getKeyboardHandler() {
-        return keyboardHandler;
-    }
 
     public Logger getLogger() {
         return logger;

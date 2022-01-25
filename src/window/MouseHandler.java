@@ -1,4 +1,4 @@
-package me.Barni;
+package window;
 
 import me.Barni.physics.Vec2D;
 import org.lwjgl.glfw.GLFW;

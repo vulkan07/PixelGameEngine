@@ -1,6 +1,5 @@
-package me.Barni.graphics;
+package window;
 
-import me.Barni.MouseHandler;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -69,9 +68,13 @@ public class Window {
             throw new IllegalStateException("Unable to create GLFW window!");
         }
 
+        //Set mouse callbacks
         GLFW.glfwSetCursorPosCallback(pWindow, MouseHandler::mousePosCallback);
         GLFW.glfwSetMouseButtonCallback(pWindow, MouseHandler::mouseButtonCallback);
         GLFW.glfwSetScrollCallback(pWindow, MouseHandler::mouseScrollCallback);
+
+        //Set Keyboard callbacks
+        GLFW.glfwSetKeyCallback(pWindow, KeyboardHandler::keyCallback);
 
         //Make OpenGL context current
         GLFW.glfwMakeContextCurrent(pWindow);

@@ -2,7 +2,7 @@ package me.Barni.superhexagon;
 
 
 import me.Barni.Game;
-import me.Barni.KeyboardHandler;
+import window.KeyboardHandler;
 import me.Barni.physics.Vec2D;
 
 import java.awt.*;
@@ -128,9 +128,9 @@ public class SuperHexagonWorld {
 
         //Handle inputs
         //Move player & render mode
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.LEFT))
+        if (KeyboardHandler.getKeyState(KeyboardHandler.LEFT))
             playerXpos += 10;
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.RIGHT))
+        if (KeyboardHandler.getKeyState(KeyboardHandler.RIGHT))
             playerXpos -= 10;
 
 
@@ -138,7 +138,7 @@ public class SuperHexagonWorld {
         willRenderModeChange = false;
 
 
-        if (game.getKeyboardHandler().getKeyState(KeyboardHandler.ENTER)) {
+        if (KeyboardHandler.getKeyState(KeyboardHandler.ENTER)) {
             willRenderModeChange = true;
             if (!isRenderModeChanged) {
                 oldRenderMode = !oldRenderMode;

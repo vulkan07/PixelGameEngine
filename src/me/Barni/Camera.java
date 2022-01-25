@@ -5,6 +5,7 @@ import me.Barni.physics.Vec2D;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import window.MouseHandler;
 
 public class Camera {
 
@@ -50,7 +51,7 @@ public class Camera {
                 lookAt(followEntity.position.copy().sub(followEntity.size.copy().div(2)));
 
         //Lerp pos to target
-        pos = pos.lerp(target, .12f);
+        pos = pos.lerp(target, lerp);
         targZoom -= MouseHandler.getScrollY() / 20;
 
         //Lerp zoom to target value
