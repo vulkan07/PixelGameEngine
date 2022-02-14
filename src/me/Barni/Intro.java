@@ -20,7 +20,7 @@ public class Intro {
     private BufferedImage image;
     private String pathPrefix;
 
-    public Intro(Game game, BufferedImage img) {
+    public Intro(Game game) {
 
         pathPrefix = game.GAME_DIR + Texture.TEXTURE_BONUS_PATH + "logos\\logo";
         File f;
@@ -32,7 +32,7 @@ public class Intro {
         logoCount = 0;
         foundLogos = i+1;
 
-        image = img;
+        image = null; //TODO THIS
         this.game = game;
         t = new Texture();
     }

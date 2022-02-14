@@ -97,7 +97,7 @@ public abstract class Entity {
 
     public void loadTexture(String path) {
         texture.loadTexture(game, path, (int) size.x, (int) size.y, true);
-        texture.uploadImageToGPU(true, 0);
+        texture.uploadImageToGPU(0);
     }
 
     /**

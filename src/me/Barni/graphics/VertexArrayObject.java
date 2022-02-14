@@ -17,7 +17,6 @@ public class VertexArrayObject {
         vbo = new VertexBufferObject();
         ebo = new ElementBufferObject();
         attribSizes = new ArrayList<>();
-        System.out.println("New VBO generated");
     }
 
     public void setVertexData(float[] vArray) {
@@ -55,7 +54,6 @@ public class VertexArrayObject {
         stride *= FLOAT;
 
         for (int i = 0; i < attribSizes.size(); i++) {
-            System.out.println("Attribute pointer set at " + i + " (" + attribSizes.get(i) + " bytes, shift: " + offset + ")");
             //Set pointer
             GL30.glVertexAttribPointer(i, attribSizes.get(i), GL30.GL_FLOAT, false, stride, offset);
             //Enable? pointer

@@ -20,7 +20,7 @@ public class Shader {
     }
 
     public void compile() {
-        System.out.println("Compiling type " + type + " shader...");
+        //System.out.println("Compiling type " + type + " shader...");
         if (type == TYPE_VERTEX)
             id = GL30.glCreateShader(GL30.GL_VERTEX_SHADER);
         if (type == TYPE_FRAGMENT)

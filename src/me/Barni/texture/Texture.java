@@ -206,7 +206,7 @@ public class Texture {
         return rgba;
     }
 
-    public void uploadImageToGPU(boolean keepImageInMemory, int frameIndex) {
+    public void uploadImageToGPU(int frameIndex) {
         if (!amIValid) return;
         generate();
 
@@ -230,9 +230,12 @@ public class Texture {
                 GL30.GL_RGBA,                //Color format
                 GL11.GL_UNSIGNED_BYTE,       //Buffer type
                 buffer);                    //Data
+    }
 
-        if (!keepImageInMemory)
-            img = null;
+    public void destroy()
+    {
+        GL30.glDeleteTextures(id);
+        amIValid = false;
     }
 
     public void update() {

@@ -55,10 +55,6 @@ public class Map {
         return fileName;
     }
 
-    public void setBackGroundColor(Color c) {
-        game.bgColor = c.getRGB();
-    }
-
     public byte getBackTile(int i) {
         return backTiles[i];
     }
@@ -108,7 +104,7 @@ public class Map {
         atlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
         normAtlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
 
-        game.getLogger().info("[MAP] Initialized new map, size: " + w + ", " + h);
+        game.getLogger().info("[MAP] Initialized new map [" + w + "x" + h + "]");
 
         physics = new Physics(game, this);
 
@@ -242,15 +238,30 @@ public class Map {
         for (int i = 1; i < Material.materialPath.length; i++) {
             Texture t = new Texture();
             t.loadTexture(game, Material.materialPath[i], 32, 32, true);
-            t.uploadImageToGPU(true, 0);
+            t.uploadImageToGPU(0);
             atlas.addTexture(t);
 
             //Normal texture
             Texture normalT = new Texture();
             normalT.loadTexture(game, Material.materialPath[i] + "_nor", 32, 32, true);
-            normalT.uploadImageToGPU(true, 0);
+            normalT.uploadImageToGPU(0);
             normAtlas.addTexture(normalT);
         }
+    }
+
+    private void destroyTextures() {
+        for (int i = 1; i < Material.materialPath.length; i++) {
+            if (atlas.getTexture(i) != null)
+                atlas.getTexture(i).destroy();
+
+            if (normAtlas.getTexture(i) != null)
+                normAtlas.getTexture(i).destroy();
+        }
+        game.getLogger().info("[MAP] Deleted textures from GPU");
+    }
+
+    public void destroy() {
+        destroyTextures();
     }
 
     public void render(Camera cam) {

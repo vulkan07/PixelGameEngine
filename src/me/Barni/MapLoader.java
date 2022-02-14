@@ -85,17 +85,6 @@ public class MapLoader {
             logger.decreaseIndention("ENTITIES");
 
 
-            if (mapObj.has("backGround")) {
-                String[] cData = mapObj.getString("backGround").split(",");
-                map.setBackGroundColor(new Color(
-                        Integer.parseInt(cData[0]),
-                        Integer.parseInt(cData[1]),
-                        Integer.parseInt(cData[2]))
-                );
-            } else {
-                map.setBackGroundColor(new Color(game.bgColor));
-            }
-
             logger.info("[MAP+] Loaded map: " + fullPath);
             logger.decreaseIndention("MAP LOADER");
             return map;

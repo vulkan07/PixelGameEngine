@@ -91,7 +91,7 @@ public class LevelEditor {
         pWin.setVisible(editing);
         if (editing) {
             pWin.setTitle("Level editor: " + game.getMap().getFileName());
-            game.window.requestFocus();
+            //game.window.requestFocus();
             eGUI.updateTxtPreviewImage();
         }
     }
@@ -104,7 +104,7 @@ public class LevelEditor {
         setMouseGizmo(MOUSE_GIZMO_ADD_DEC + eGUI.selectionBox.getSelectedIndex());
         waitingForMousePress = true;
         mousePressObtained = false;
-        game.window.requestFocus();
+        //game.window.requestFocus();
     }
 
     public Vec2D getMouseClickLocation() {

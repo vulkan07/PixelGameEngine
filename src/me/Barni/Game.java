@@ -2,7 +2,6 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
-import window.KeyboardHandler;
 import window.MouseHandler;
 import window.Window;
 import me.Barni.hud.HUD;
@@ -13,29 +12,19 @@ import me.Barni.tools.LevelEditor;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryUtil;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
-public final class Game extends Canvas implements Runnable {
+public final class Game implements Runnable {
 
     private boolean running = false;    //Running
     Thread thread;                      //Game thread
 
-    //------NEW----------
-    public Window window2;               //Window
-    //------NEW----------
+    public Window window;               //Window
 
-
-    public JFrame window;               //Window
-    private BufferedImage image;        //Image
-    private int[] buffer;               //Main Imageb buffer
-    int bgColor = new Color(137, 176, 205).getRGB();   //Color value for canvas clear
 
     private final Random r = new Random(); // Main random
 
@@ -113,43 +102,13 @@ public final class Game extends Canvas implements Runnable {
         HEIGHT = h;
 
 
-        window2 = new Window(title + "  -  " + loadRandomTitleMsg(), w, h);
-
-
-        image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
-        buffer = ((DataBufferInt) (image.getRaster().getDataBuffer())).getData();
-
-        //------------------------\\
-        //--------WINDOW----------\\
-        defaultWindowTitle = title + "  -  " + loadRandomTitleMsg();
-        window = new JFrame("Starting...");
-
-        if (fullscreen) {
-            window.setUndecorated(true);
-            window.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        }
-
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setSize(WIDTH, HEIGHT);
-        window.setPreferredSize(new Dimension(WIDTH, HEIGHT));
-        window.setLocationRelativeTo(null);
-        window.add(this);
-        window.setResizable(resizeable);
-        window.setVisible(true);
-        this.requestFocus();
-        //--------WINDOW----------\\
-        //------------------------\\
-
-        //Set canvas's bg
-        this.setBackground(Color.BLACK);
-        //create canvas' BufferStrategy
-        createBufferStrategy(2);
+        window = new Window(title + "  -  " + loadRandomTitleMsg(), w, h);
 
         //Level editor
         //levelEditor = new LevelEditor(this);
 
         //Intro
-        intro = new Intro(this, image);
+        intro = new Intro(this);
         intro.start();
 
         //Hud
@@ -166,13 +125,15 @@ public final class Game extends Canvas implements Runnable {
         GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 
         //Start unique game thread
-        window.setVisible(false);
         running = true;
         thread = new Thread(this);
         thread.start();
     }
 
     public void loadNewMap(String path) {
+
+        if (map != null)
+            map.destroy(); //Old map
 
         MapLoader ml = new MapLoader(this);
 
@@ -187,6 +148,7 @@ public final class Game extends Canvas implements Runnable {
         }
 
         map.loadTextures(); //Load map textures
+        map.createShaderPrograms();
 
         player = new Player(this, "player", new Vec2D(48, 0)); //Remake player
         player.loadTexture("player_1"); //Load player texture
@@ -199,7 +161,9 @@ public final class Game extends Canvas implements Runnable {
         } catch (NullPointerException ignored) {
         }
 
-        isScreenFadingIn = true;          //Add screen fading effect
+        player.godMode = true;
+
+        fadeInScreen(0);//Add screen fading effect
     }
 
     //--------------------------------\\
@@ -207,10 +171,7 @@ public final class Game extends Canvas implements Runnable {
     @Override
     public void run() {
 
-        //GLFW.glfwMakeContextCurrent(window2.getWindow());
-        //GL.createCapabilities();
-        //GL30.glViewport(0, 0, 1920,1080);
-        window2.init();
+        window.init();
         loadNewMap(GAME_DIR + "01.map");
         map.createShaderPrograms();
 
@@ -221,7 +182,7 @@ public final class Game extends Canvas implements Runnable {
         long now, last;
         last = System.nanoTime();
 
-        while (!GLFW.glfwWindowShouldClose(window2.getWindow())) {
+        while (!GLFW.glfwWindowShouldClose(window.getWindow())) {
             GLFW.glfwPollEvents();
             now = System.nanoTime();
             delta += (now - last) / framePerTick;
@@ -241,7 +202,7 @@ public final class Game extends Canvas implements Runnable {
     public synchronized void stop() {
         getLogger().info("Game loop stopped");
 
-        GLFW.glfwDestroyWindow(window2.getWindow());
+        GLFW.glfwDestroyWindow(window.getWindow());
         GLFW.glfwTerminate();
         GLFW.glfwSetErrorCallback(null);
 
@@ -265,7 +226,7 @@ public final class Game extends Canvas implements Runnable {
     //---------------------------------\\
     //----------->  Render  <----------\\
     private void render() {
-        window2.clear();
+        window.clear();
 
 
         MouseHandler.update();
@@ -274,7 +235,30 @@ public final class Game extends Canvas implements Runnable {
         map.render(map.cam);
         //-----------------\\
 
-        GLFW.glfwSwapBuffers(window2.getWindow());
+        updateScreenFade();
+
+        GLFW.glfwSwapBuffers(window.getWindow());
+    }
+
+    private void updateScreenFade() {
+        //None -> back
+        if (isScreenFadingOut) {
+            blankAlpha += 5;
+
+            if (blankAlpha > 255) {
+                blankAlpha = 255;
+                isScreenFadingOut = false;
+            }
+        }
+        //Black -> none
+        if (isScreenFadingIn) {
+            blankAlpha -= 5;
+
+            if (blankAlpha < 0) {
+                blankAlpha = 0;
+                isScreenFadingIn = false;
+            }
+        }
     }
 
     //Call to fade the screen FROM black
