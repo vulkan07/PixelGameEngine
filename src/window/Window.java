@@ -1,10 +1,15 @@
 package window;
 
+import me.Barni.Game;
+import me.Barni.texture.Texture;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
+
+import java.util.Arrays;
 
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -88,11 +93,12 @@ public class Window {
         //Critical stuff - Don't remove!!!
         GL.createCapabilities();
 
-        GL30.glClearColor(.53f,.7f,.8f, 1f);
-        //GL30.glClearColor(0f, 0f, 0f, 1f);
+        //GL30.glClearColor(.53f,.7f,.8f, 1f);
+        GL30.glClearColor(0f, 0f, 0f, 1f);
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glEnable(GL30.GL_MULTISAMPLE);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
+        GLFW.glfwFocusWindow(pWindow);
     }
 
     public void clear()

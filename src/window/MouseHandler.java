@@ -1,15 +1,16 @@
 package window;
 
+import me.Barni.Game;
 import me.Barni.physics.Vec2D;
 import org.lwjgl.glfw.GLFW;
 
 public class MouseHandler {
 
-    public static final int LMB = 1;
-    public static final int RMB = 4;
+    public static final int LMB = 0;
+    public static final int RMB = 1;
     public static final int WHEEL = 2;
-    public static final int MB4 = 8;
-    public static final int MB5 = 16;
+    public static final int MB4 = 3;
+    public static final int MB5 = 4;
 
     private static float x;
     private static float y;
@@ -58,11 +59,15 @@ public class MouseHandler {
         y = (float) ypos;
     }
 
-    public static void update() {
+    public static void update(Game game) {
         prevX = x;
         prevY = y;
         scrollX = 0;
         scrollY = 0;
+
+        if (isPressed(LMB))
+            if (game.getIntro().isPlayingIntro())
+                game.getIntro().end();
     }
 
     public static void mouseButtonCallback(long window, int button, int action, int mods) {

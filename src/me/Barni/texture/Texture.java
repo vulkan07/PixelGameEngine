@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class Texture {
 
@@ -220,6 +221,7 @@ public class Texture {
                 )
         ).flip();
 
+        bind();
         GL30.glTexImage2D(
                 GL30.GL_TEXTURE_2D,         //Type
                 0,                     //Level
@@ -230,10 +232,10 @@ public class Texture {
                 GL30.GL_RGBA,                //Color format
                 GL11.GL_UNSIGNED_BYTE,       //Buffer type
                 buffer);                    //Data
+        unBind();
     }
 
-    public void destroy()
-    {
+    public void destroy() {
         GL30.glDeleteTextures(id);
         amIValid = false;
     }

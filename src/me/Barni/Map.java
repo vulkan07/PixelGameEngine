@@ -109,7 +109,7 @@ public class Map {
         physics = new Physics(game, this);
 
         cam = new Camera(g.getWIDTH(), g.getHEIGHT());
-
+        //cam.setZoom(1.3f, false);
     }
 
     public void createShaderPrograms() {
@@ -262,9 +262,13 @@ public class Map {
 
     public void destroy() {
         destroyTextures();
+        vao.unBind();
+        GL30.glUseProgram(0); //Unbind shader
     }
 
     public void render(Camera cam) {
+
+        cam.update();
         vao.bind(false);
 
         renderTiles(false, cam);
@@ -285,7 +289,7 @@ public class Map {
 
         currentShader.uploadMat4("uProjMat", camera.getProjMat());
         currentShader.uploadMat4("uViewMat", camera.getViewMat());
-        currentShader.uploadFloat("uAlpha", 0);
+        currentShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
 
         for (int i = 0; i < width * height; i++) {
 
@@ -353,7 +357,7 @@ public class Map {
 
         entShader.uploadMat4("uProjMat", cam.getProjMat());
         entShader.uploadMat4("uViewMat", cam.getViewMat());
-        entShader.uploadFloat("uAlpha", 0);
+        entShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
 
         for (Entity e : entities) {
             if (e != null)

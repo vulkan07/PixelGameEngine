@@ -2,10 +2,6 @@ package window;
 
 import me.Barni.Game;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.system.CallbackI;
-
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 public class KeyboardHandler {
     Game game;
@@ -18,8 +14,8 @@ public class KeyboardHandler {
     public static final int E = 69;
     public static final int Q = 81;
     public static final int R = 82;
-    public static final int SHIFT = 16;
-    public static final int CTRL = 17;
+    public static final int SHIFT = 340;
+    public static final int CTRL = 341;
     public static final int ESC = 27;
     public static final int F1 = 112;
     public static final int PLUS = 107;
@@ -56,19 +52,17 @@ public class KeyboardHandler {
         }
     }
 
-    private void handleCommonPresses(int id) {
-        switch (id) {
-            case F1 + 3:
-                game.getLevelEditor().setEditing(!game.getLevelEditor().isEditing());
-                break;
-            case R:
-                game.getMap().dumpCurrentMapIntoFile("CurrentMap");
-                break;
-            case SPACE:
-                if (game.getIntro().isPlayingIntro())
-                    game.getIntro().skip();
-                break;
-        }
+    public static void update(Game game) {
+        if (pressed[F1 + 4])
+            game.getLevelEditor().setEditing(!game.getLevelEditor().isEditing());
+
+        if (pressed[R])
+            game.getMap().dumpCurrentMapIntoFile("CurrentMap");
+
+        if (pressed[SPACE])
+            if (game.getIntro().isPlayingIntro())
+                game.getIntro().end();
+
     }
 
 }

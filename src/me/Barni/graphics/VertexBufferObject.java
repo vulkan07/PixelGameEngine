@@ -7,14 +7,17 @@ import java.nio.FloatBuffer;
 
 public class VertexBufferObject {
     private int id, vSize;
-    //private float[] data;
+    FloatBuffer vBuffer;
 
     public void setData(float[] data) {
-        //this.data = data;
+
+        //Only recreate buffer if size changes
+        if (vSize != data.length)
+            vBuffer = BufferUtils.createFloatBuffer(data.length);
+
         this.vSize = data.length;
 
-        //Generate float buffer
-        FloatBuffer vBuffer = BufferUtils.createFloatBuffer(data.length);
+        //Put data in float buffer
         vBuffer.put(data).flip();
 
         //Upload data to GPU

@@ -55,8 +55,8 @@ public class Camera {
         targZoom -= MouseHandler.getScrollY() / 20;
 
         //Lerp zoom to target value
-        zoom = lerp(zoom, targZoom, .1f);
-        setZoom(zoom);
+        zoom = lerp(zoom, targZoom, 0.03f);
+        adjustMatricesToZoom();
 
         //Update center pos
         center.x = pos.x + (float) width / 2;
@@ -88,9 +88,17 @@ public class Camera {
         this.target.y = target.y - (float) height / 2;
     }
 
-    public void setZoom(float v) {
+    public void setZoom(float v, boolean noLerp) {
+        if (noLerp)
+            zoom = v;
+        else
+            targZoom = v;
+    }
+
+    private void adjustMatricesToZoom() {
         projMat.identity();
-        projMat.ortho(0f, 1920f * v, 1080f * v, 0f, 0f, 100f);
+        projMat.ortho(0f, 1920f, 1080f, 0f, 0f, 100f);
+        projMat.scale(zoom);
     }
 
     public void adjutProjection() {
@@ -106,8 +114,8 @@ public class Camera {
 
         //Generates viewmatrix
         viewMat.lookAt(
-                new Vector3f(pos.x*zoom, pos.y*zoom, 10),  // Position
-                camFront.add(pos.x*zoom, pos.y*zoom, 0f),  // Looking at
+                new Vector3f(pos.x, pos.y * zoom, 10f),  // Position
+                camFront.add(pos.x, pos.y * zoom, 0f),  // Looking at
                 camUp                                               // Where's up
         );
 

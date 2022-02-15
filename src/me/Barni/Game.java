@@ -2,6 +2,9 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
+import me.Barni.texture.Texture;
+import org.lwjgl.glfw.GLFWImage;
+import window.KeyboardHandler;
 import window.MouseHandler;
 import window.Window;
 import me.Barni.hud.HUD;
@@ -40,7 +43,7 @@ public final class Game implements Runnable {
 
     //Screen fading variables
     private boolean isScreenFadingIn, isScreenFadingOut;
-    private int blankAlpha = 255;
+    private float blankAlpha = 255;
 
     private Intro intro;
     private LevelEditor levelEditor;
@@ -97,7 +100,6 @@ public final class Game implements Runnable {
         //Logger
         this.logger = new Logger(logLevel);
 
-        //Create main buffer image & get raster
         WIDTH = w;
         HEIGHT = h;
 
@@ -109,7 +111,6 @@ public final class Game implements Runnable {
 
         //Intro
         intro = new Intro(this);
-        intro.start();
 
         //Hud
         hud = new HUD(this);
@@ -147,8 +148,8 @@ public final class Game implements Runnable {
             map.setTileArray(defaultmap);
         }
 
-        map.loadTextures(); //Load map textures
         map.createShaderPrograms();
+        map.loadTextures(); //Load map textures
 
         player = new Player(this, "player", new Vec2D(48, 0)); //Remake player
         player.loadTexture("player_1"); //Load player texture
@@ -161,9 +162,8 @@ public final class Game implements Runnable {
         } catch (NullPointerException ignored) {
         }
 
-        player.godMode = true;
-
-        fadeInScreen(0);//Add screen fading effect
+        resetScreenFade(true);
+        fadeInScreen(255);//Add screen fading effect
     }
 
     //--------------------------------\\
@@ -172,26 +172,60 @@ public final class Game implements Runnable {
     public void run() {
 
         window.init();
+
         loadNewMap(GAME_DIR + "01.map");
         map.createShaderPrograms();
+        intro.start();
 
-        //IMPORTANT! Frames and ticks are bounded together
-        int fps = 60;
-        float framePerTick = 1000000000 / fps;
-        float delta = 0;
-        long now, last;
-        last = System.nanoTime();
+
+        final int desiredUPS = 60;
+        final int desiredFPS = 60;
+
+        final long updateThreshold = 1000000000 / desiredUPS;
+        final long drawThreshold = 1000000000 / desiredFPS;
+
+        long lastFPS = 0, lastUPS = 0, lastFPSUPSOutput = 0;
+
+        int fps = 0, ups = 0;
 
         while (!GLFW.glfwWindowShouldClose(window.getWindow())) {
-            GLFW.glfwPollEvents();
-            now = System.nanoTime();
-            delta += (now - last) / framePerTick;
-            last = now;
+            if ((System.nanoTime() - lastFPSUPSOutput) > 1000000000) {
+                System.out.println("FPS: " + (double) fps);
+                System.out.println("UPS: " + (double) ups);
 
-            if (delta >= 1) {
+                fps = 0;
+                ups = 0;
+
+                lastFPSUPSOutput = System.nanoTime();
+            }
+
+            if ((System.nanoTime() - lastUPS) > updateThreshold) {
+                lastUPS = System.nanoTime();
                 tick();
+                GLFW.glfwPollEvents();
+                ups++;
+            }
+
+            if ((System.nanoTime() - lastFPS) > drawThreshold) {
+                lastFPS = System.nanoTime();
                 render();
-                delta--;
+                fps++;
+            }
+
+            // Calculate next frame, or skip if we are running behind
+            if (!((System.nanoTime() - lastUPS) > updateThreshold || (System.nanoTime() - lastFPS) > drawThreshold)) {
+                long nextScheduledUP = lastUPS + updateThreshold;
+                long nextScheduledDraw = lastFPS + drawThreshold;
+
+                long minScheduled = Math.min(nextScheduledUP, nextScheduledDraw);
+
+                long nanosToWait = minScheduled - System.nanoTime();
+
+                try {
+                    Thread.sleep((int) (nanosToWait / 1000000 / 1.7f));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         stop();
@@ -201,6 +235,8 @@ public final class Game implements Runnable {
     //----------->   Stop   <----------\\
     public synchronized void stop() {
         getLogger().info("Game loop stopped");
+
+        map.destroy();
 
         GLFW.glfwDestroyWindow(window.getWindow());
         GLFW.glfwTerminate();
@@ -216,7 +252,8 @@ public final class Game implements Runnable {
 
         hud.update();
 
-        MouseHandler.update();
+        MouseHandler.update(this);
+        KeyboardHandler.update(this);
 
         map.tick();
 
@@ -228,11 +265,11 @@ public final class Game implements Runnable {
     private void render() {
         window.clear();
 
-
-        MouseHandler.update();
-
         //-----------------\\
-        map.render(map.cam);
+        if (intro.isPlayingIntro())
+            intro.render();
+        else
+            map.render(map.cam);
         //-----------------\\
 
         updateScreenFade();
@@ -243,7 +280,8 @@ public final class Game implements Runnable {
     private void updateScreenFade() {
         //None -> back
         if (isScreenFadingOut) {
-            blankAlpha += 5;
+            blankAlpha += .1f;
+            blankAlpha *= 1.05f;
 
             if (blankAlpha > 255) {
                 blankAlpha = 255;
@@ -252,7 +290,8 @@ public final class Game implements Runnable {
         }
         //Black -> none
         if (isScreenFadingIn) {
-            blankAlpha -= 5;
+            blankAlpha -= .1f;
+            blankAlpha /= 1.05f;
 
             if (blankAlpha < 0) {
                 blankAlpha = 0;
@@ -314,8 +353,12 @@ public final class Game implements Runnable {
         return defaultFont;
     }
 
-    public int getScreenFadeAlpha() {
+    public float getScreenFadeAlpha() {
         return blankAlpha;
+    }
+
+    public float getScreenFadeAlphaNormalized() {
+        return Vec2D.remap(blankAlpha, 0, 255, 0, 1);
     }
 
     public Intro getIntro() {

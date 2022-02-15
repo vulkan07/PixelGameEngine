@@ -32,6 +32,7 @@ public class LevelExit extends Entity {
 
     @Override
     public void onTouch(Entity ent) {
+        if (triggered) return;
         if (!(ent instanceof Player)) return;
         triggered = true;
         game.fadeOutScreen(0);
