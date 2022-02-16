@@ -2,7 +2,7 @@ package me.Barni.superhexagon;
 
 
 import me.Barni.Game;
-import window.KeyboardHandler;
+import me.Barni.window.KeyboardHandler;
 import me.Barni.physics.Vec2D;
 
 import java.awt.*;

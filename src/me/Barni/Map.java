@@ -323,7 +323,7 @@ public class Map {
         currentShader.unBind();
     }
 
-    public static float[] generateVertexArray(float x, float y, float w, float h) {
+    public float[] generateVertexArray(float x, float y, float w, float h) {
         float[] va = new float[16];
         va[0] = x;    //TL x
         va[1] = y;    //TL y

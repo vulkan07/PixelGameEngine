@@ -162,6 +162,10 @@ public class Texture {
         return id;
     }
 
+    public boolean isValid() {
+        return amIValid;
+    }
+
     private void generate() {
         if (id != 0)
             return;

@@ -5,7 +5,7 @@ import me.Barni.physics.Vec2D;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import window.MouseHandler;
+import me.Barni.window.MouseHandler;
 
 public class Camera {
 
@@ -21,7 +21,11 @@ public class Camera {
     public Vector2f pos, target, center;
     private Matrix4f projMat, viewMat;
 
-    public float zoom = 1, targZoom = 1;
+    private float zoom = 1, targZoom = 1;
+
+    public float getZoom() {
+        return zoom;
+    }
 
     public Camera(int w, int h) {
 
@@ -52,7 +56,7 @@ public class Camera {
 
         //Lerp pos to target
         pos = pos.lerp(target, lerp);
-        targZoom -= MouseHandler.getScrollY() / 20;
+        targZoom += MouseHandler.getScrollY() / 20;
 
         //Lerp zoom to target value
         zoom = lerp(zoom, targZoom, 0.03f);
@@ -114,8 +118,8 @@ public class Camera {
 
         //Generates viewmatrix
         viewMat.lookAt(
-                new Vector3f(pos.x, pos.y * zoom, 10f),  // Position
-                camFront.add(pos.x, pos.y * zoom, 0f),  // Looking at
+                new Vector3f(pos.x, pos.y, 10f),  // Position
+                camFront.add(pos.x, pos.y, 0f),  // Looking at
                 camUp                                               // Where's up
         );
 

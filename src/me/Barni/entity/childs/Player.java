@@ -1,8 +1,7 @@
 package me.Barni.entity.childs;
 
-import me.Barni.Camera;
 import me.Barni.Game;
-import window.KeyboardHandler;
+import me.Barni.window.KeyboardHandler;
 import me.Barni.entity.Entity;
 import me.Barni.particle.ParticleData;
 import me.Barni.hud.HUDNotification;
@@ -10,9 +9,6 @@ import me.Barni.particle.render.BloodParticleRenderer;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class Player extends Entity {
 

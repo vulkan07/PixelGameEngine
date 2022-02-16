@@ -157,9 +157,9 @@ public abstract class Entity {
     }
 
     public void render(VertexArrayObject vao, ShaderProgram shader) {
-        if (!visible) return;
+        if (!visible || !texture.isValid()) return;
 
-        float[] vArray = Map.generateVertexArray(position.x,
+        float[] vArray = game.getMap().generateVertexArray(position.x,
                 position.y, size.x, size.y);
 
         vao.setVertexData(vArray);
@@ -171,18 +171,6 @@ public abstract class Entity {
         texture.unBind();
     }
 
-    public void renderDebug(Graphics g, Camera cam, boolean selected) {
-        /*
-        g.setColor(Color.RED);
-        g.drawRect(position.xi() - cam.scroll.xi(), position.yi() - cam.scroll.yi(), size.xi(), size.yi());
-        String[] className = getClass().toString().split("\\.");
-        if (selected) {
-            g.setColor(Color.ORANGE);
-            g.drawRect(position.xi() - cam.scroll.xi() - 2, position.yi() - cam.scroll.yi() - 2, size.xi() + 4, size.yi() + 4);
-        }
-        g.drawString(("<" + className[className.length - 1] + "> " + name), position.xi() - cam.scroll.xi(), position.yi() - cam.scroll.yi() - 10);
-   */
-    }
 
     public JSONObject serialize() {
         JSONObject jobj = new JSONObject();

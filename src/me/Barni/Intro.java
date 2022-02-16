@@ -3,27 +3,35 @@ package me.Barni;
 import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.texture.Texture;
+import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
+import org.joml.Vector2f;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
 
 import java.io.File;
 
 public class Intro {
 
-    Texture t;
+    Texture logoTexture, wheelTexture;
 
     public boolean isPlayingIntro() {
         return playingIntro;
     }
 
     private boolean playingIntro;
-    private int timer, xPos, yPos, logoCount, foundLogos;
+    private int timer, logoCount, foundLogos;
     Game game;
     private String pathPrefix;
 
 
-    ShaderProgram logoShader;
+    ShaderProgram logoShader, wheelShader;
     VertexArrayObject vao;
     public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
+
+    float[] logoVA, wheelVA;
+    int time;
+    Matrix4f rot = new Matrix4f();
 
 
     public Intro(Game game) {
@@ -39,7 +47,8 @@ public class Intro {
         foundLogos = i + 1;
 
         this.game = game;
-        t = new Texture();
+        logoTexture = new Texture();
+        wheelTexture = new Texture();
     }
 
     public void start() {
@@ -48,10 +57,16 @@ public class Intro {
         timer = 0;
         game.fadeInScreen(255);
 
+        wheelTexture.loadTexture(game, "logos\\wheel", 128, 128, false);
+        wheelTexture.uploadImageToGPU(0);
 
         logoShader = new ShaderProgram(game);
         logoShader.create("logo");
         logoShader.link();
+
+        wheelShader = new ShaderProgram(game);
+        wheelShader.create("loadingWheel");
+        wheelShader.link();
 
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
@@ -60,40 +75,39 @@ public class Intro {
         vao.addAttributePointer(2); //Position (x,y)
         vao.addAttributePointer(2); //TX coords (u,v)
 
-        float[] va = new float[16];
-        va[0] = -1;    //TL x
-        va[1] = -1;    //TL y
+        wheelVA = game.getMap().generateVertexArray(0,0,128,128);
 
-        va[2] = 0f;   //U
-        va[3] = 1f;   //V
+        logoVA = new float[16];
+        logoVA[0] = -1;    //TL x
+        logoVA[1] = -1;    //TL y
 
-        va[4] = 1;  //BR x
-        va[5] = 1;  //BR y
+        logoVA[2] = 0f;   //U
+        logoVA[3] = 1f;   //V
 
-        va[6] = 1f;   //U
-        va[7] = 0f;   //V
+        logoVA[4] = 1;  //BR x
+        logoVA[5] = 1;  //BR y
 
-        va[8] = 1;  //TR x
-        va[9] = -1;    //TR y
+        logoVA[6] = 1f;   //U
+        logoVA[7] = 0f;   //V
 
-        va[10] = 1f;   //U
-        va[11] = 1f;   //V
+        logoVA[8] = 1;  //TR x
+        logoVA[9] = -1;    //TR y
 
-        va[12] = -1;    //BL x
-        va[13] = 1;  //BL y
+        logoVA[10] = 1f;   //U
+        logoVA[11] = 1f;   //V
 
-        va[14] = 0f;   //U
-        va[15] = 0f;   //V
-        vao.setVertexData(va);
-        logoShader.bind();
-        t.bind();
+        logoVA[12] = -1;    //BL x
+        logoVA[13] = 1;  //BL y
+
+        logoVA[14] = 0f;   //U
+        logoVA[15] = 0f;   //V
+
     }
 
+
     private void nextLogo() {
-        t.loadTexture(game, ("\\logos\\logo" + logoCount), 1920, 1080, true);
-        t.uploadImageToGPU(0);
-        xPos = game.getWIDTH() / 2 - t.getWidth() / 2;
-        yPos = game.getHEIGHT() / 2 - t.getHeight() / 2;
+        logoTexture.loadTexture(game, ("\\logos\\logo" + logoCount), 1920, 1080, true);
+        logoTexture.uploadImageToGPU(0);
         logoCount++;
     }
 
@@ -104,8 +118,8 @@ public class Intro {
         game.resetScreenFade(true);
         game.fadeInScreen(255);
 
-        logoShader.unBind();
-        t.unBind();
+        logoShader.unBind(); //Any shader unbind is good
+        logoTexture.unBind(); //Any texture unbind is good
 
         playingIntro = false;
     }
@@ -132,10 +146,43 @@ public class Intro {
         }
 
         if (game.getScreenFadeAlpha() != 255) {
-            t.bind();
+            //logo
+            logoTexture.bind();
+
+            logoShader.bind();
             logoShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
+
+            vao.setVertexData(logoVA);
             GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
-            t.unBind();
+            logoTexture.unBind();
+            logoShader.unBind();
+
+
+            int fadeTime = 80;
+            boolean shouldWheelFade = logoCount == 1 && timer < fadeTime;
+
+            //wheel
+            renderWheel(shouldWheelFade ? game.getScreenFadeAlphaNormalized() : 0);
         }
+    }
+
+    public void renderWheel(float alpha) {
+        time++;
+        wheelTexture.bind();
+        wheelShader.bind();
+
+        wheelShader.uploadFloat("uAlpha", alpha);
+
+        wheelShader.uploadFloat("uTime", time);
+        wheelShader.uploadMat4("uProjMat", game.getMap().cam.getProjMat());
+        rot.identity();
+        rot.rotate((float)Math.toRadians(time*1.4f), 0, 0, 1);
+        wheelShader.uploadMat4("uRotMat", rot);
+
+        vao.bind(false);
+        vao.setVertexData(wheelVA);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+        wheelTexture.unBind();
+        wheelShader.unBind();
     }
 }

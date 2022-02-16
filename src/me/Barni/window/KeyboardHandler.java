@@ -1,4 +1,4 @@
-package window;
+package me.Barni.window;
 
 import me.Barni.Game;
 import org.lwjgl.glfw.GLFW;
@@ -17,7 +17,7 @@ public class KeyboardHandler {
     public static final int SHIFT = 340;
     public static final int CTRL = 341;
     public static final int ESC = 27;
-    public static final int F1 = 112;
+    public static final int F1 = 290;
     public static final int PLUS = 107;
     public static final int MINUS = 109;
     public static final int ARROW_UP = 38;
@@ -53,7 +53,7 @@ public class KeyboardHandler {
     }
 
     public static void update(Game game) {
-        if (pressed[F1 + 4])
+        if (pressed[F1 + 3])
             game.getLevelEditor().setEditing(!game.getLevelEditor().isEditing());
 
         if (pressed[R])

@@ -5,8 +5,8 @@ import me.Barni.entity.Entity;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
-import window.KeyboardHandler;
-import window.MouseHandler;
+import me.Barni.window.KeyboardHandler;
+import me.Barni.window.MouseHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -52,7 +52,6 @@ public class LevelEditor {
         mouseGizmo.loadTexture(game, "mouse_gizmos", 16, 16, true);
         setMouseGizmo(MOUSE_GIZMO_MOVE);
         this.game = game;
-        reloadMap(game.getMap()); //Init variables with map
         initPWin();
     }
 
@@ -91,7 +90,7 @@ public class LevelEditor {
         pWin.setVisible(editing);
         if (editing) {
             pWin.setTitle("Level editor: " + game.getMap().getFileName());
-            //game.window.requestFocus();
+            //game.me.Barni.window.requestFocus();
             eGUI.updateTxtPreviewImage();
         }
     }
@@ -104,7 +103,7 @@ public class LevelEditor {
         setMouseGizmo(MOUSE_GIZMO_ADD_DEC + eGUI.selectionBox.getSelectedIndex());
         waitingForMousePress = true;
         mousePressObtained = false;
-        //game.window.requestFocus();
+        //game.me.Barni.window.requestFocus();
     }
 
     public Vec2D getMouseClickLocation() {
@@ -152,7 +151,7 @@ public class LevelEditor {
 
             Vec2D selectedTile = MouseHandler.getPosition();
             selectedTile.add(game.getMap().cam.getScroll());
-            selectedTile.y -= 16;
+            //selectedTile.y -= 16;
             selectedTile.div(32);
 
             tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
@@ -291,7 +290,7 @@ public class LevelEditor {
                         selected = true;
                         break;
                     }
-                ent.renderDebug(g, cam, selected);
+                //ent.renderDebug(g, cam, selected);
             }
         }
     }

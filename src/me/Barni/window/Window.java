@@ -1,15 +1,10 @@
-package window;
+package me.Barni.window;
 
-import me.Barni.Game;
-import me.Barni.texture.Texture;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
-
-import java.util.Arrays;
 
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -40,7 +35,15 @@ public class Window {
     private String title;
     private int width, height;
     private long pWindow;
+    private static boolean lastFocused, focused, minimized;
 
+    public static boolean isFocused() {
+        return focused;
+    }
+
+    private static void windowFocusCallback(long win, boolean focused) {
+        Window.focused = focused;
+    }
 
     public Window(String title, int width, int height) {
         System.out.println("Window created");
@@ -48,6 +51,31 @@ public class Window {
         this.title = title;
         this.width = width;
         this.height = height;
+    }
+
+    public void update() {
+        GLFW.glfwPollEvents();
+
+        if (lastFocused != focused) // Is Focus changed
+            if (focused)
+                focus();
+            else
+                minimize();
+
+        lastFocused = focused;
+    }
+
+    public void focus() {
+        GLFW.glfwMaximizeWindow(pWindow);
+        GLFW.glfwFocusWindow(pWindow);
+        GLFW.glfwRequestWindowAttention(pWindow);
+        focused = true;
+        minimized = false;
+    }
+
+    public void minimize() {
+        GLFW.glfwIconifyWindow(pWindow);
+        minimized = true;
     }
 
     public void init() {
@@ -66,17 +94,19 @@ public class Window {
         GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
         GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 4);
+        //GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, GLFW.GLFW_TRUE);
 
-        //Create window
+        //Create me.Barni.window
         pWindow = GLFW.glfwCreateWindow(width, height, title, NULL, NULL);
         if (pWindow == NULL) {
-            throw new IllegalStateException("Unable to create GLFW window!");
+            throw new IllegalStateException("Unable to create GLFW me.Barni.window!");
         }
 
         //Set mouse callbacks
         GLFW.glfwSetCursorPosCallback(pWindow, MouseHandler::mousePosCallback);
         GLFW.glfwSetMouseButtonCallback(pWindow, MouseHandler::mouseButtonCallback);
         GLFW.glfwSetScrollCallback(pWindow, MouseHandler::mouseScrollCallback);
+        GLFW.glfwSetWindowFocusCallback(pWindow, Window::windowFocusCallback);
 
         //Set Keyboard callbacks
         GLFW.glfwSetKeyCallback(pWindow, KeyboardHandler::keyCallback);
@@ -87,7 +117,7 @@ public class Window {
         //Enable V-sync
         GLFW.glfwSwapInterval(1);
 
-        //Make window visible
+        //Make me.Barni.window visible
         GLFW.glfwShowWindow(pWindow);
 
         //Critical stuff - Don't remove!!!
@@ -98,11 +128,10 @@ public class Window {
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glEnable(GL30.GL_MULTISAMPLE);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
-        GLFW.glfwFocusWindow(pWindow);
+        focus();
     }
 
-    public void clear()
-    {
+    public void clear() {
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
     }
 }

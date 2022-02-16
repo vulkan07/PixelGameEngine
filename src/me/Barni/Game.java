@@ -2,11 +2,9 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
-import me.Barni.texture.Texture;
-import org.lwjgl.glfw.GLFWImage;
-import window.KeyboardHandler;
-import window.MouseHandler;
-import window.Window;
+import me.Barni.window.KeyboardHandler;
+import me.Barni.window.MouseHandler;
+import me.Barni.window.Window;
 import me.Barni.hud.HUD;
 import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
@@ -38,8 +36,10 @@ public final class Game implements Runnable {
     private Map map;
     private Player player;
 
-    public final String GAME_DIR; //Root game directory, which all file readers will use
+    public String GAME_DIR; //Root game directory, which all file readers will use
     public String SHADER_DIR; //Root game directory, which all file readers will use
+
+    public String nextLevel; //if not empty, game will change to this map
 
     //Screen fading variables
     private boolean isScreenFadingIn, isScreenFadingOut;
@@ -107,7 +107,7 @@ public final class Game implements Runnable {
         window = new Window(title + "  -  " + loadRandomTitleMsg(), w, h);
 
         //Level editor
-        //levelEditor = new LevelEditor(this);
+        levelEditor = new LevelEditor(this);
 
         //Intro
         intro = new Intro(this);
@@ -133,6 +133,8 @@ public final class Game implements Runnable {
 
     public void loadNewMap(String path) {
 
+        nextLevel = "";
+
         if (map != null)
             map.destroy(); //Old map
 
@@ -157,10 +159,8 @@ public final class Game implements Runnable {
         map.addEntity(player);          //Add player
         map.cam.followEntity = player;  //Make camera follow player
 
-        try {
-            levelEditor.reloadMap(map);     //Refresh level editor
-        } catch (NullPointerException ignored) {
-        }
+        if (levelEditor != null)
+            levelEditor.reloadMap(map);
 
         resetScreenFade(true);
         fadeInScreen(255);//Add screen fading effect
@@ -190,8 +190,7 @@ public final class Game implements Runnable {
 
         while (!GLFW.glfwWindowShouldClose(window.getWindow())) {
             if ((System.nanoTime() - lastFPSUPSOutput) > 1000000000) {
-                System.out.println("FPS: " + (double) fps);
-                System.out.println("UPS: " + (double) ups);
+                System.out.println((double) fps + "/" + (double) ups + " | FPS/UPS");
 
                 fps = 0;
                 ups = 0;
@@ -202,13 +201,15 @@ public final class Game implements Runnable {
             if ((System.nanoTime() - lastUPS) > updateThreshold) {
                 lastUPS = System.nanoTime();
                 tick();
-                GLFW.glfwPollEvents();
+                window.update();
                 ups++;
             }
 
             if ((System.nanoTime() - lastFPS) > drawThreshold) {
                 lastFPS = System.nanoTime();
-                render();
+                if (Window.isFocused()) {
+                    render();
+                }
                 fps++;
             }
 
@@ -220,12 +221,14 @@ public final class Game implements Runnable {
                 long minScheduled = Math.min(nextScheduledUP, nextScheduledDraw);
 
                 long nanosToWait = minScheduled - System.nanoTime();
+                int finalWait = (int) (nanosToWait / 1000000 / 1.7f);
 
-                try {
-                    Thread.sleep((int) (nanosToWait / 1000000 / 1.7f));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                if (finalWait > 0) //Safety check
+                    try {
+                        Thread.sleep(finalWait);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
             }
         }
         stop();
@@ -248,7 +251,8 @@ public final class Game implements Runnable {
     //---------------------------------\\
     //----------->   Tick   <----------\\
     private void tick() {
-        //if (intro.isPlayingIntro()) return; //Return if playing intro
+        if (!nextLevel.equals(""))
+            loadNewMap(nextLevel);
 
         hud.update();
 
@@ -257,7 +261,7 @@ public final class Game implements Runnable {
 
         map.tick();
 
-        //levelEditor.update();
+        levelEditor.update();
     }
 
     //---------------------------------\\
@@ -274,10 +278,13 @@ public final class Game implements Runnable {
 
         updateScreenFade();
 
+
         GLFW.glfwSwapBuffers(window.getWindow());
     }
 
     private void updateScreenFade() {
+        if (!intro.isPlayingIntro() && (isScreenFadingIn || isScreenFadingOut))
+            intro.renderWheel(1-getScreenFadeAlphaNormalized());
         //None -> back
         if (isScreenFadingOut) {
             blankAlpha += .1f;

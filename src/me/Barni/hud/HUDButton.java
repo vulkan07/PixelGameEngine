@@ -1,7 +1,7 @@
 package me.Barni.hud;
 
 import me.Barni.Game;
-import window.MouseHandler;
+import me.Barni.window.MouseHandler;
 import me.Barni.hud.events.ButtonEventListener;
 
 import java.awt.*;

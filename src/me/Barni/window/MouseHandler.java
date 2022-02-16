@@ -1,4 +1,4 @@
-package window;
+package me.Barni.window;
 
 import me.Barni.Game;
 import me.Barni.physics.Vec2D;
