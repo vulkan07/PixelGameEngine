@@ -19,7 +19,7 @@ public class Camera {
     public final float DEFAULT_LERP = .05f;
 
     public Vector2f pos, target, center;
-    private Matrix4f projMat, viewMat;
+    private Matrix4f projMat, viewMat, defProjMat;
 
     private float zoom = 1, targZoom = 1;
 
@@ -39,8 +39,12 @@ public class Camera {
 
         //Initialize matrices
         projMat = new Matrix4f();
+        defProjMat = new Matrix4f();
         viewMat = new Matrix4f();
         adjutProjection();
+
+        defProjMat.identity();
+        defProjMat.ortho(0f, 1920f, 1080f, 0f, 0f, 100f);
     }
 
     public void setViewSize(int w, int h) {
@@ -128,6 +132,9 @@ public class Camera {
 
     public Matrix4f getProjMat() {
         return projMat;
+    }
+    public Matrix4f getDefaultProjMat() {
+        return defProjMat;
     }
 
 

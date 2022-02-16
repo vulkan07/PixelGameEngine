@@ -1,6 +1,9 @@
 package me.Barni;
 
+import me.Barni.graphics.ShaderProgram;
+import me.Barni.graphics.VertexArrayObject;
 import me.Barni.texture.Texture;
+import org.lwjgl.opengl.GL30;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -8,14 +11,14 @@ import java.awt.image.BufferedImage;
 public class Decorative {
     Game game;
     public Texture texture;
-    public int x, y, z, w, h;
+    public float x, y, z, w, h;
     public int id;
     public float parallax;
     //Z = -1 : behind map
     //Z =  0 : before map
     //Z =  1 : before entities
 
-    public Decorative(Game g, int x, int y, int zPlane, float parallax, int w, int h, String path) {
+    public Decorative(Game g, float x, float y, int zPlane, float parallax, int w, int h, String path) {
         game = g;
         this.x = x;
         this.y = y;
@@ -25,17 +28,25 @@ public class Decorative {
         this.parallax = Math.abs(parallax);
         texture = new Texture();
         texture.loadTexture(game, path, w, h, true);
+        texture.uploadImageToGPU(0);
     }
 
     public void tick() {
         texture.update();
     }
 
-    public void render(BufferedImage img, Camera cam) {
-        /*
-        Graphics g = img.getGraphics();
-        g.drawImage(texture.getTexture(), (int)(x - cam..xi()*parallax), (int)(y - cam.scroll.yi()*parallax), w, h, null);
-    */
+
+    public void render(VertexArrayObject vao, ShaderProgram shader) {
+        if (!texture.isValid()) return;
+
+        float[] vArray = game.getMap().generateVertexArray(x, y, w, h);
+
+        vao.setVertexData(vArray);
+
+        shader.selectTextureSlot("uTexSampler", 0);
+        texture.bind();
+        GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+        texture.unBind();
     }
 
     public void renderDebug(Graphics g, Camera cam, boolean selected) {/*

@@ -211,9 +211,10 @@ public class MapLoader {
             JSONObject decObj = (JSONObject) lines.get(lineIndex);
 
             String path = decObj.getString("texture");
-            int x, y, z, w, h;
-            x = decObj.getInt("x");
-            y = decObj.getInt("y");
+            float x, y;
+            int z, w, h;
+            x = decObj.getFloat("x");
+            y = decObj.getFloat("y");
             z = decObj.getInt("z-layer");
 
             w = decObj.getInt("w");

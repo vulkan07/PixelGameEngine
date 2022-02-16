@@ -39,7 +39,7 @@ public class Map {
 
     public Camera cam;
 
-    ShaderProgram frontShader, backShader, entShader;
+    ShaderProgram frontShader, backShader, entShader, decShader;
     VertexArrayObject vao;
     public TextureAtlas atlas, normAtlas;
     public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
@@ -125,6 +125,10 @@ public class Map {
         entShader = new ShaderProgram(game);
         entShader.create("entityDefault");
         entShader.link();
+
+        decShader = new ShaderProgram(game);
+        decShader.create("decorativeDefault");
+        decShader.link();
 
 
         vao = new VertexArrayObject();
@@ -273,6 +277,7 @@ public class Map {
 
         renderTiles(false, cam);
         renderTiles(true, cam);
+        renderDecoratives();
         renderEntities();
 
         vao.unBind();
@@ -366,12 +371,20 @@ public class Map {
         entShader.unBind();
     }
 
-    public void renderDecoratives(BufferedImage img, int zPlane) {
+    public void renderDecoratives() {
+        decShader.bind();
+
+        decShader.uploadMat4("uProjMat", cam.getProjMat());
+        decShader.uploadMat4("uViewMat", cam.getViewMat());
+        decShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
+
         for (Decorative d : decoratives) {
-            if (d != null)
-                if (d.z == zPlane)
-                    d.render(img, cam);
+            if (d != null) {
+                decShader.uploadFloat("uParallax", d.parallax);
+                d.render(vao, decShader);
+            }
         }
+        decShader.unBind();
     }
 
 

@@ -173,7 +173,7 @@ public final class Game implements Runnable {
 
         window.init();
 
-        loadNewMap(GAME_DIR + "01.map");
+        loadNewMap(GAME_DIR + "03.map");
         map.createShaderPrograms();
         intro.start();
 
