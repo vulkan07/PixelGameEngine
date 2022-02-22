@@ -201,19 +201,20 @@ public class EditorGUI {
 
         //Data variables
         String path;
-        int x, y, w, h, z;
-        float p;
+        float x, y, p;
+        int w, h, z;
 
         TableModel t = propertiesTable.getModel();
         path = t.getValueAt(0, 1).toString();
         try {
-            x = Integer.parseInt(t.getValueAt(1, 1).toString());
-            y = Integer.parseInt(t.getValueAt(2, 1).toString());
+            x = Float.parseFloat(t.getValueAt(1, 1).toString());
+            y = Float.parseFloat(t.getValueAt(2, 1).toString());
             w = Integer.parseInt(t.getValueAt(3, 1).toString());
             h = Integer.parseInt(t.getValueAt(4, 1).toString());
             z = Integer.parseInt(t.getValueAt(5, 1).toString());
             p = Float.parseFloat(t.getValueAt(6, 1).toString());
         } catch (NumberFormatException e) {
+            System.out.println(e.getMessage());
             editor.game.getLogger().err("[EDITOR] Invalid values in property table! Can't parse!");
             applyButton.setForeground(Color.RED);
             return;
@@ -221,6 +222,7 @@ public class EditorGUI {
         applyButton.setForeground(Color.BLACK);
         for (Decorative d : decs) {
             d.texture.loadTexture(editor.game, path, w, h, true);
+            d.texture.markForReload();
             d.x = x;
             d.y = y;
             d.w = w;

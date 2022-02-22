@@ -39,11 +39,15 @@ public class Map {
 
     public Camera cam;
 
-    ShaderProgram frontShader, backShader, entShader, decShader;
-    VertexArrayObject vao;
+    private ShaderProgram frontShader, backShader, entShader, decShader, backImageShader;
+    private VertexArrayObject vao;
+
+    private Texture backgroundTexture;
+    private String backgroundTexturePath;
+
     public TextureAtlas atlas, normAtlas;
     public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
-
+    public static final float[] BG_VERTEX_ARRAY = {-1, -1, 0, 1, 1, 1, 1, 0, 1, -1, 1, 1, -1, 1, 0, 0};
 
     //----------------------------
     //-- Getters & Setters -------
@@ -130,6 +134,10 @@ public class Map {
         decShader.create("decorativeDefault");
         decShader.link();
 
+        backImageShader = new ShaderProgram(game);
+        backImageShader.create("backImage");
+        backImageShader.link();
+
 
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
@@ -186,6 +194,7 @@ public class Map {
         objList.put("Entities", entsToJSON());
 
         mapObj.put("ObjectList", objList);
+        mapObj.put("backImage", backgroundTexturePath);
 
         jobj.put("bmap", mapObj);
         try {
@@ -237,7 +246,17 @@ public class Map {
         return array;
     }
 
+    public void setBackgroundTexture(String path) {
+        backgroundTexturePath = path;
+        if (backgroundTexture == null)
+            backgroundTexture = new Texture();
+        backgroundTexture.loadTexture(game, backgroundTexturePath, 1920, 1080, true);
+        backgroundTexture.uploadImageToGPU(0);
+    }
+
     public void loadTextures() {
+
+        setBackgroundTexture(backgroundTexturePath);
 
         for (int i = 1; i < Material.materialPath.length; i++) {
             Texture t = new Texture();
@@ -247,10 +266,11 @@ public class Map {
 
             //Normal texture
             Texture normalT = new Texture();
-            normalT.loadTexture(game, Material.materialPath[i] + "_nor", 32, 32, true);
-            normalT.uploadImageToGPU(0);
+            //normalT.loadTexture(game, Material.materialPath[i] + "_nor", 32, 32, true);
+            //normalT.uploadImageToGPU(0);
             normAtlas.addTexture(normalT);
         }
+        System.out.println("Normal textures are temporarily disabled!");
     }
 
     private void destroyTextures() {
@@ -275,12 +295,41 @@ public class Map {
         cam.update();
         vao.bind(false);
 
-        renderTiles(false, cam);
-        renderTiles(true, cam);
-        renderDecoratives();
-        renderEntities();
+        renderBackground(); //Background
+
+        //I should make the render layer "system" better
+        //Loop for each layer and render objects only that are on the layer
+        for (int layer = 0; layer < RENDER_LAYERS; layer++) {
+            if (layer == TILE_RENDER_LAYER) {
+                renderTiles(false, cam);
+                renderTiles(true, cam);
+            }
+            if (layer == ENT_RENDER_LAYER) {
+                renderEntities();
+            }
+
+            renderDecoratives(layer);
+        }
 
         vao.unBind();
+    }
+
+    public final int ENT_RENDER_LAYER = 8;
+    public final int TILE_RENDER_LAYER = 4;
+    public final int RENDER_LAYERS = 12;
+
+    private void renderBackground() {
+        if (backgroundTexture == null || !backgroundTexture.isValid())
+            return;
+
+        backgroundTexture.bind();
+        backImageShader.bind();
+        backImageShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
+
+        vao.setVertexData(BG_VERTEX_ARRAY);
+        GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+
+        backImageShader.unBind();
     }
 
     private void renderTiles(boolean front, Camera camera) {
@@ -309,16 +358,24 @@ public class Map {
             vao.setVertexData(vArray);
 
             if (front) {
-                if (normAtlas.getImage(tiles[i] - 1) != null) {
+                //Nor
+                Texture t = normAtlas.getTexture(tiles[i] - 1);
+                if (t != null && t.isValid()) {
                     currentShader.selectTextureSlot("uNorSampler", 1);
-                    normAtlas.getTexture(tiles[i] - 1).bind();
+                    t.bind();
                 }
-                currentShader.selectTextureSlot("uTexSampler", 0);
-                atlas.getTexture(tiles[i] - 1).bind();
+                //Dif
+                t = atlas.getTexture(tiles[i] - 1);
+                if (t != null && t.isValid()) {
+                    currentShader.selectTextureSlot("uTexSampler", 1);
+                    t.bind();
+                }
             } else {
-                if (normAtlas.getImage(backTiles[i] - 1) != null) {
-                    currentShader.selectTextureSlot("uTexSampler", 0);
-                    atlas.getTexture(backTiles[i] - 1).bind();
+                //Dif (background)
+                Texture t = atlas.getTexture(backTiles[i] - 1);
+                if (t != null && t.isValid()) {
+                    currentShader.selectTextureSlot("uTexSampler", 1);
+                    t.bind();
                 }
 
 
@@ -371,7 +428,7 @@ public class Map {
         entShader.unBind();
     }
 
-    public void renderDecoratives() {
+    public void renderDecoratives(int layer) {
         decShader.bind();
 
         decShader.uploadMat4("uProjMat", cam.getProjMat());
@@ -379,7 +436,7 @@ public class Map {
         decShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
 
         for (Decorative d : decoratives) {
-            if (d != null) {
+            if (d != null && d.z == layer) {
                 decShader.uploadFloat("uParallax", d.parallax);
                 d.render(vao, decShader);
             }

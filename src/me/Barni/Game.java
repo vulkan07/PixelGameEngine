@@ -16,6 +16,7 @@ import org.lwjgl.system.MemoryUtil;
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
@@ -173,7 +174,7 @@ public final class Game implements Runnable {
 
         window.init();
 
-        loadNewMap(GAME_DIR + "03.map");
+        loadNewMap(GAME_DIR + "01.map");
         map.createShaderPrograms();
         intro.start();
 
@@ -190,8 +191,10 @@ public final class Game implements Runnable {
 
         while (!GLFW.glfwWindowShouldClose(window.getWindow())) {
             if ((System.nanoTime() - lastFPSUPSOutput) > 1000000000) {
-                System.out.println((double) fps + "/" + (double) ups + " | FPS/UPS");
 
+                //
+                //System.out.println((double) fps + "/" + (double) ups + " | FPS/UPS");
+                //
                 fps = 0;
                 ups = 0;
 
@@ -242,8 +245,8 @@ public final class Game implements Runnable {
         map.destroy();
 
         GLFW.glfwDestroyWindow(window.getWindow());
-        GLFW.glfwTerminate();
         GLFW.glfwSetErrorCallback(null);
+        GLFW.glfwTerminate();
 
         System.exit(0);
     }

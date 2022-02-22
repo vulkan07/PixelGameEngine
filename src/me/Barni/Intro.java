@@ -101,7 +101,6 @@ public class Intro {
 
         logoVA[14] = 0f;   //U
         logoVA[15] = 0f;   //V
-
     }
 
 
@@ -159,10 +158,11 @@ public class Intro {
 
 
             int fadeTime = 80;
-            boolean shouldWheelFade = logoCount == 1 && timer < fadeTime;
+            boolean shouldWheelFade = logoCount == 2 && timer < fadeTime;
 
             //wheel
-            renderWheel(shouldWheelFade ? game.getScreenFadeAlphaNormalized() : 0);
+            if (logoCount > 1)
+                renderWheel(shouldWheelFade ? game.getScreenFadeAlphaNormalized() : 0);
         }
     }
 

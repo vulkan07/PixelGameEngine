@@ -1,6 +1,8 @@
 package me.Barni.entity.childs;
 
 import me.Barni.Game;
+import me.Barni.graphics.ShaderProgram;
+import me.Barni.graphics.VertexArrayObject;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.entity.Entity;
 import me.Barni.particle.ParticleData;
@@ -224,26 +226,10 @@ public class Player extends Entity {
         }
     }
 
-
-    /*
     @Override
-    public void render(BufferedImage img, Camera cam) {
-        Graphics g = img.getGraphics();
-        if (!alive) {
-            g.setColor(Color.BLUE);
-            g.fillRect(0, 0, (int) Vec2D.remap(respawnTimer, 0, respawnTime, 0, game.getWIDTH()), 16);
-        }
-
-        if (!visible) return;
-        super.render(img, cam);
-
-        if (face != null)
-            g.drawImage(face.getTexture(),
-                    position.xi() - cam.scroll.xi(),
-                    position.yi() - cam.scroll.yi(),
-                    size.xi(),
-                    size.yi(),
-                    null);
+    public void render(VertexArrayObject vao, ShaderProgram shader) {
+        shader.bind();
+        shader.uploadBool("uSelected", true);
+        super.render(vao, shader);
     }
-*/
 }

@@ -166,6 +166,7 @@ public abstract class Entity {
 
 
         shader.selectTextureSlot("uTexSampler", 0);
+        shader.uploadBool("uSelected", false);
         texture.bind();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         texture.unBind();

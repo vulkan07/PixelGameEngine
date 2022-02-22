@@ -1,10 +1,13 @@
 package me.Barni.window;
 
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
+
+import java.util.Objects;
 
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -78,6 +81,20 @@ public class Window {
         minimized = true;
     }
 
+    public void changeMonitor(int monitorIndex) {
+        //Create window
+        try {
+            pWindow = GLFW.glfwCreateWindow(width, height, title, GLFW.glfwGetMonitors().get(monitorIndex), NULL);
+        } catch (Exception e) {
+            throw new IllegalStateException("Unable to find monitor number " + monitorIndex + "! (" + e.getMessage() + ")");
+        }
+
+        if (pWindow == NULL) {
+            throw new IllegalStateException("Unable to create GLFW window!");
+        }
+        initWindow();
+    }
+
     public void init() {
         //Error callback
         GLFWErrorCallback.createPrint(System.err);
@@ -96,12 +113,11 @@ public class Window {
         GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 4);
         //GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, GLFW.GLFW_TRUE);
 
-        //Create me.Barni.window
-        pWindow = GLFW.glfwCreateWindow(width, height, title, NULL, NULL);
-        if (pWindow == NULL) {
-            throw new IllegalStateException("Unable to create GLFW me.Barni.window!");
-        }
+        changeMonitor(0);
+    }
 
+    private void initWindow()
+    {
         //Set mouse callbacks
         GLFW.glfwSetCursorPosCallback(pWindow, MouseHandler::mousePosCallback);
         GLFW.glfwSetMouseButtonCallback(pWindow, MouseHandler::mouseButtonCallback);

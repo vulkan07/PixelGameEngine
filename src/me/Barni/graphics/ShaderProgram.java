@@ -111,6 +111,11 @@ public class ShaderProgram {
         int varLoc = GL30.glGetUniformLocation(id, varName);
         GL30.glUniform1f(varLoc, f);
     }
+    public void uploadBool(String varName, boolean b) {
+        bind();
+        int varLoc = GL30.glGetUniformLocation(id, varName);
+        GL30.glUniform1i(varLoc, b ? 1 : 0);
+    }
 
     public void selectTextureSlot(String varName, int slot) {
         bind();

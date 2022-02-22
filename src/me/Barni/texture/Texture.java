@@ -23,11 +23,9 @@ public class Texture {
     private String generalPathName;
     private AnimSequence[] sequences;
     int currSequence, frameCount;
-
-    //new
+    private int lastUploadedFrame = -1;
+    private boolean markedForReload; //If true, reuploads image to gpu on next update()
     private int id;
-    //new
-
     private String path;
     public static final String TEXTURE_BONUS_PATH = "textures\\";
 
@@ -156,6 +154,7 @@ public class Texture {
             errMsg("Can't chop texture frames!");
             amIValid = false;
         }
+        lastUploadedFrame = -1;
     }
 
     public int getID() {
@@ -189,8 +188,13 @@ public class Texture {
     }
 
     public void bind() {
-        if (!amIValid) return;
+        if (!amIValid) throw new IllegalStateException("Attempted to bind invalid texture! : " + getPath());
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
+    }
+
+    public void markForReload()
+    {
+        markedForReload = true;
     }
 
     public void unBind() {
@@ -213,7 +217,10 @@ public class Texture {
 
     public void uploadImageToGPU(int frameIndex) {
         if (!amIValid) return;
-        generate();
+        if (frameIndex == lastUploadedFrame) return;
+        if (id < 1) generate();
+
+        lastUploadedFrame = frameIndex;
 
         BufferedImage img;
         img = textures[frameIndex];
@@ -245,6 +252,10 @@ public class Texture {
     }
 
     public void update() {
+        if (markedForReload) {
+            uploadImageToGPU(0);
+            markedForReload = false;
+        }
         if (animated) {
             if (sequences[currSequence].isEnded()) {
 

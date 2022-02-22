@@ -11,7 +11,8 @@ import java.awt.image.BufferedImage;
 public class Decorative {
     Game game;
     public Texture texture;
-    public float x, y, z, w, h;
+    public float x, y;
+    public int z, w, h;
     public int id;
     public float parallax;
     //Z = -1 : behind map

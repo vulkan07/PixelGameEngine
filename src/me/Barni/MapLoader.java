@@ -73,6 +73,11 @@ public class MapLoader {
             map.playerStartPos = strToVector(mapObj.getString("spawnPos"));
             map.playerStartVel = strToVector(mapObj.getString("spawnVel"));
 
+            if (mapObj.has("backImage"))
+                map.setBackgroundTexture(mapObj.getString("backImage"));
+            else
+                logger.info("Couldn't find background image");
+
             logger.increaseIndention("DECORATIVES");
             JSONObject objList = mapObj.getJSONObject("ObjectList");
             JSONArray decList = objList.getJSONArray("Decoratives");
