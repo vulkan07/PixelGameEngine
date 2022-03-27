@@ -132,6 +132,18 @@ public class EditorGUI {
                 if (selectionBox.getSelectedIndex() == 0) {
                     //Decoratives
                     editor.selectedDecorativesID = selectTable.getSelectedRows();
+                    int i = 0;
+                    for (Decorative dec : editor.map.decoratives) {
+                        if (dec == null)
+                            continue;
+                        dec.selected = false;
+                        for (int j : editor.selectedDecorativesID)
+                            if (j == i) {
+                                dec.selected = true;
+                                break;
+                            }
+                        i++;
+                    }
                     if (selectTable.getSelectedRows().length < 1)
                         deleteButton.setForeground(new Color(202, 202, 200));
                     else
@@ -151,8 +163,13 @@ public class EditorGUI {
     public void trySelectDeleteButtonAction(int fType) {
         switch (fType) {
             case 0: //Decorative
-                for (int i : editor.selectedDecorativesID)
-                    editor.map.removeDecorative(i);
+                for (int i = 0; i < editor.selectedDecorativesID.length; i++) {
+                    editor.map.removeDecorative(editor.selectedDecorativesID[i]);
+                    for (int j = i; j < editor.selectedDecorativesID.length-i; j++)
+                    {
+                        editor.selectedDecorativesID[j] -= 1;
+                    }
+                }
                 reloadTablesOnFilterChange(0);
                 break;
             case 1:
@@ -181,7 +198,7 @@ public class EditorGUI {
                 }
                 break;
             case 1:
-                System.out.println("not programmed yet");
+                System.out.println("entity add behavior not programmed yet");
                 break;
 
         }

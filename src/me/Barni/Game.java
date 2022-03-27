@@ -2,6 +2,7 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
+import me.Barni.texture.AnimSequenceLoader;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
 import me.Barni.window.Window;
@@ -10,6 +11,8 @@ import me.Barni.hud.HUDButton;
 import me.Barni.hud.HUDNotification;
 import me.Barni.physics.Vec2D;
 import me.Barni.tools.LevelEditor;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryUtil;
 
@@ -38,7 +41,10 @@ public final class Game implements Runnable {
     private Player player;
 
     public String GAME_DIR; //Root game directory, which all file readers will use
-    public String SHADER_DIR; //Root game directory, which all file readers will use
+    public String SHADER_DIR;
+    public String BG_DIR;
+    public String TEXTURE_DIR;
+    public String MAP_DIR;
 
     public String nextLevel; //if not empty, game will change to this map
 
@@ -86,6 +92,48 @@ public final class Game implements Runnable {
         return msg;
     }
 
+    private boolean loadSearchPaths() {
+        String rawStr;
+        //Try read titles.txt
+        try {
+            File file = new File(System.getProperty("user.dir") + "/game.json");
+            FileInputStream fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+            rawStr = new String(data, StandardCharsets.UTF_8);
+        } catch (Exception ignored) {
+            logger.err("Can't read game.json to load root search paths!");
+            return false;
+        }
+
+        JSONObject jsonObject;
+        //Try to convert the raw string to JSONObject
+        try {
+            jsonObject = new JSONObject(rawStr);
+        } catch (JSONException e) {
+            logger.err("Can't read game.json to load root search paths!");
+            return false;
+        }
+
+        try {
+            if (jsonObject.getString("base").equals("$"))
+                GAME_DIR = System.getProperty("user.dir");
+            else
+                GAME_DIR = jsonObject.getString("base") + "/";
+            TEXTURE_DIR = jsonObject.getString("textures").replace("$", GAME_DIR + "/") + "/";
+            BG_DIR = jsonObject.getString("background").replace("$", GAME_DIR + "/") + "/";
+            SHADER_DIR = jsonObject.getString("shaders").replace("$", GAME_DIR + "/") + "/";
+            MAP_DIR = jsonObject.getString("maps").replace("$", GAME_DIR + "/") + "/";
+        } catch (JSONException e) {
+
+            logger.err("Invalid game.json file! " + e.getMessage());
+            return false;
+        }
+
+        return true;
+    }
+
     //--------------------------------\\
     //----------->  Start  <----------\\
     public synchronized void start(String title, int w, int h, boolean fullscreen, boolean resizeable, byte logLevel) {
@@ -96,10 +144,15 @@ public final class Game implements Runnable {
             return;
         }
 
-        SHADER_DIR = GAME_DIR + "textures\\shaders\\";
 
         //Logger
         this.logger = new Logger(logLevel);
+
+        if (!loadSearchPaths())
+            throw new IllegalStateException("Can't load search paths!");
+
+        //Set Logger for static classes
+        AnimSequenceLoader.logger = logger;
 
         WIDTH = w;
         HEIGHT = h;
@@ -115,6 +168,7 @@ public final class Game implements Runnable {
 
         //Hud
         hud = new HUD(this);
+
 
         //Add PlayerNotification
         getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "<initial>", 16, 30));
@@ -174,7 +228,7 @@ public final class Game implements Runnable {
 
         window.init();
 
-        loadNewMap(GAME_DIR + "01.map");
+        loadNewMap("01.map");
         map.createShaderPrograms();
         intro.start();
 
@@ -287,7 +341,7 @@ public final class Game implements Runnable {
 
     private void updateScreenFade() {
         if (!intro.isPlayingIntro() && (isScreenFadingIn || isScreenFadingOut))
-            intro.renderWheel(1-getScreenFadeAlphaNormalized());
+            intro.renderWheel(1 - getScreenFadeAlphaNormalized());
         //None -> back
         if (isScreenFadingOut) {
             blankAlpha += .1f;

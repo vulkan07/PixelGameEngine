@@ -41,7 +41,7 @@ public class LevelExit extends Entity {
     @Override
     public void tick() {
         if (triggered && game.getScreenFadeAlpha() == 255)
-            game.loadNewMap(game.GAME_DIR + nextMap + ".map");
+            game.loadNewMap(game.MAP_DIR + nextMap + ".map");
     }
 
     @Override

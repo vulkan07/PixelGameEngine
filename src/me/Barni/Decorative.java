@@ -15,6 +15,7 @@ public class Decorative {
     public int z, w, h;
     public int id;
     public float parallax;
+    public boolean selected;
     //Z = -1 : behind map
     //Z =  0 : before map
     //Z =  1 : before entities
@@ -45,6 +46,7 @@ public class Decorative {
         vao.setVertexData(vArray);
 
         shader.selectTextureSlot("uTexSampler", 0);
+        shader.uploadBool("uSelected", selected);
         texture.bind();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         texture.unBind();

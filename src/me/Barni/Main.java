@@ -3,6 +3,7 @@ package me.Barni;
 import javax.sound.sampled.*;
 import java.awt.*;
 import java.io.File;
+import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) {
@@ -12,7 +13,23 @@ public class Main {
         //System.getProperty("user.home");          //Good to get some paths
 
         Game game;
+        game = new Game("C:\\Dev\\");
 
+        int w = 1280, h = 720;
+        try {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].equals("-w"))
+                    w = Integer.parseInt(args[i + 1]);
+
+                if (args[i].equals("-h"))
+                    h = Integer.parseInt(args[i + 1]);
+            }
+        } catch (Exception e) {
+            System.err.println("Invalid arguments!");
+            e.printStackTrace();
+        }
+        System.out.println("fun");
+        /*
         boolean devMode = false;
         if (args.length > 0)
             devMode = args[0].equalsIgnoreCase("true");
@@ -23,8 +40,9 @@ public class Main {
             game = new Game("C:\\Dev\\");
 
         //game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), false, false, Logger.LOG_ALL);
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        game.start("Über Brutal Platformer 2077", screenSize.width, screenSize.height, true, false, Logger.LOG_ALL);
+        //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        game.start("Über Brutal Platformer 2077", screenSize.width, screenSize.height, true, false, Logger.LOG_ALL);*/
+        game.start("Über Brutal Platformer 2077", w, h, true, false, Logger.LOG_ALL);
     }
 }
 

@@ -34,14 +34,23 @@ public class MapLoader {
     /**
      * Returns null if there's an error
      **/
-    public Map loadMap(String completePath) {
+    public Map loadMap(String relPath) {
 
         logger.increaseIndention("MAP LOADER");
-        logger.info("[MAP+] Loading map: " + completePath);
-        fullPath = completePath;
+        logger.info("[MAP+] Loading map: " + relPath);
 
+        File file = new File(relPath);
+        if (!file.exists())
+        {
+            file = new File(game.GAME_DIR + relPath);
+            if (!file.exists())
+            {
+                file = new File(game.MAP_DIR + relPath);
+            }
+        }
+        fullPath = file.getAbsolutePath();
         try {
-            File file = new File(completePath);
+
             FileInputStream fis = new FileInputStream(file);
             byte[] data = new byte[(int) file.length()];
             fis.read(data);
@@ -61,7 +70,7 @@ public class MapLoader {
             h = mapObj.getInt("sizeY");
 
 
-            String[] pathBroken = completePath.split("\\\\");
+            String[] pathBroken = fullPath.split("\\\\");
             map = new Map(game, h, w, 32, pathBroken[pathBroken.length-1]);
 
             JSONArray grid = mapObj.getJSONArray("grid");
@@ -97,7 +106,7 @@ public class MapLoader {
         } catch (IOException e) {
             errMsg("Can't read map file!");
         } catch (JSONException e) {
-            errMsg("Invalid JSON file!\n" + e.getMessage());
+            errMsg("Invalid JSON file! : " + e.getMessage());
         }
 
         return null;
@@ -186,6 +195,7 @@ public class MapLoader {
         e.size = new Vec2D(w, h);
 
         e.texture = new Texture();
+        //TODO: don't load textures here!
         e.texture.loadTexture(game, texture, (int) w, (int) h, true);
 
         if (entObj.has("visible"))

@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class Texture {
 
@@ -27,7 +26,6 @@ public class Texture {
     private boolean markedForReload; //If true, reuploads image to gpu on next update()
     private int id;
     private String path;
-    public static final String TEXTURE_BONUS_PATH = "textures\\";
 
     private void errMsg(String msg) {
         game.getLogger().err("[TEXTURE] " + msg + " \n" + game.getLogger().getIndentStr() + "\n    At: " + generalPathName);
@@ -88,7 +86,7 @@ public class Texture {
 
     public BufferedImage getTexture() {
         if (hasAnimation) {
-            return textures[sequences[currSequence].getCurrentFrame()];
+            return textures[sequences[currSequence].getCurrentFrameIndex()];
         } else
             return textures[0];
     }
@@ -107,11 +105,11 @@ public class Texture {
         String dataPath = path + ".anim";
 
         sequences = null;
-        generalPathName = game.GAME_DIR + TEXTURE_BONUS_PATH;
+        generalPathName = game.TEXTURE_DIR;
 
-        File dFile = new File(game.GAME_DIR + TEXTURE_BONUS_PATH + dataPath);
+        File dFile = new File(game.TEXTURE_DIR + dataPath);
         if (dFile.exists()) {
-            sequences = AnimSequenceLoader.loadSequences(game.getLogger(), game.GAME_DIR + TEXTURE_BONUS_PATH + dataPath, this);
+            sequences = AnimSequenceLoader.loadSequences(game.TEXTURE_DIR + dataPath, this);
             hasAnimation = true;
             animated = true;
         }
@@ -124,9 +122,9 @@ public class Texture {
 
         //READ IMAGE
         try {
-            fullImg = ImageIO.read(new File(game.GAME_DIR + TEXTURE_BONUS_PATH + imgPath));
+            fullImg = ImageIO.read(new File(game.TEXTURE_DIR + imgPath));
         } catch (IOException e) {
-            errMsg("Can't read file! " + game.GAME_DIR + TEXTURE_BONUS_PATH + imgPath);
+            errMsg("Can't read file! " + game.TEXTURE_DIR + imgPath);
             amIValid = false;
         }
 
@@ -179,7 +177,40 @@ public class Texture {
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_S, GL30.GL_REPEAT);      //Wrap x
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_T, GL30.GL_REPEAT);      //Wrap y
     }
+
     // S,T = U,V = X,Y
+    public static final int FILTERING_LINEAR = GL30.GL_LINEAR;
+    public static final int FILTERING_NEAREST = GL30.GL_NEAREST;
+    public static final int WRAP_TO_EDGE = GL30.GL_CLAMP_TO_EDGE;
+    public static final int WRAP_REPEAT = GL30.GL_REPEAT;
+
+    public void setFiltering(int mode) {
+        bind();
+        switch (mode) {
+            case FILTERING_LINEAR:
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MIN_FILTER, GL30.GL_LINEAR);
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MAG_FILTER, GL30.GL_LINEAR);
+            case FILTERING_NEAREST:
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MIN_FILTER, GL30.GL_NEAREST);
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MAG_FILTER, GL30.GL_NEAREST);
+            default:
+                game.getLogger().err("[TEXTURE] Invalid filtering mode: " + mode + " (" + path + ")");
+        }
+    }
+
+    public void setWrapping(int mode) {
+        bind();
+        switch (mode) {
+            case WRAP_TO_EDGE:
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_S, GL30.GL_CLAMP_TO_EDGE);
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_T, GL30.GL_CLAMP_TO_EDGE);
+            case WRAP_REPEAT:
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_S, GL30.GL_REPEAT);
+                GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_T, GL30.GL_REPEAT);
+            default:
+                game.getLogger().err("[TEXTURE] Invalid wrapping mode: " + mode + " (" + path + ")");
+        }
+    }
 
     public void setGLTexParameter(int param, int value) {
         if (!amIValid) return;
@@ -192,8 +223,7 @@ public class Texture {
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
     }
 
-    public void markForReload()
-    {
+    public void markForReload() {
         markedForReload = true;
     }
 
@@ -253,12 +283,13 @@ public class Texture {
 
     public void update() {
         if (markedForReload) {
-            uploadImageToGPU(0);
+            uploadImageToGPU(sequences[currSequence].getCurrentFrameIndex());
             markedForReload = false;
         }
         if (animated) {
             if (sequences[currSequence].isEnded()) {
-
+                if (getPath().equals("pressure_plate"))
+                    System.out.println("end");
                 String n = sequences[currSequence].nextName;
                 if (setAnimationSequence(n))
                     return;

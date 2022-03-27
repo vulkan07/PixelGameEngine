@@ -1,0 +1,8 @@
+{
+    "base": "C:/Dev",
+    "textures": "$textures",
+    "shaders": "$textures/shaders",
+    "background": "$textures/bg",
+    "maps": "$maps",
+    "version": "0.2-dev"
+}

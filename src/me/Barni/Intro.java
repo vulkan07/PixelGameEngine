@@ -36,15 +36,15 @@ public class Intro {
 
     public Intro(Game game) {
 
-        pathPrefix = game.GAME_DIR + Texture.TEXTURE_BONUS_PATH + "logos\\logo";
+        pathPrefix = game.TEXTURE_DIR + "logos\\logo";
         File f;
-        int i = 0;
+        int i = -1;
         do {
             i++;
             f = new File(pathPrefix + i + ".png");
         } while (f.exists());
         logoCount = 0;
-        foundLogos = i + 1;
+        foundLogos = i;
 
         this.game = game;
         logoTexture = new Texture();
@@ -105,7 +105,7 @@ public class Intro {
 
 
     private void nextLogo() {
-        logoTexture.loadTexture(game, ("\\logos\\logo" + logoCount), 1920, 1080, true);
+        logoTexture.loadTexture(game, ("logos/logo" + logoCount), 1920, 1080, true);
         logoTexture.uploadImageToGPU(0);
         logoCount++;
     }
@@ -134,13 +134,13 @@ public class Intro {
 
         //OnFadedOut
         if (timer >= 150 && game.getScreenFadeAlpha() == 255) {
-            nextLogo();
-            game.fadeInScreen(255);
-            timer = 0;
-
-            //End
+            //End check
             if (logoCount >= foundLogos) {
                 end();
+            } else {
+                nextLogo();
+                game.fadeInScreen(255);
+                timer = 0;
             }
         }
 
