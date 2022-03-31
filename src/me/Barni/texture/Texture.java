@@ -124,7 +124,7 @@ public class Texture {
         try {
             fullImg = ImageIO.read(new File(game.TEXTURE_DIR + imgPath));
         } catch (IOException e) {
-            errMsg("Can't read file! " + game.TEXTURE_DIR + imgPath);
+            errMsg("Can't read file!");
             amIValid = false;
         }
 

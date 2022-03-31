@@ -105,8 +105,8 @@ public class Map {
         tiles = new byte[width * height];
         backTiles = new byte[width * height];
         game = g;
-        atlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
-        normAtlas = new TextureAtlas(game, Material.materialPath.length, tileSize);
+        atlas = new TextureAtlas(game, Material.getMatCount(), tileSize);
+        normAtlas = new TextureAtlas(game, Material.getMatCount(), tileSize);
 
         game.getLogger().info("[MAP] Initialized new map [" + w + "x" + h + "]");
 
@@ -258,9 +258,9 @@ public class Map {
 
         setBackgroundTexture(backgroundTexturePath);
 
-        for (int i = 1; i < Material.materialPath.length; i++) {
+        for (int i = 1; i < Material.getMatCount(); i++) {
             Texture t = new Texture();
-            t.loadTexture(game, Material.materialPath[i], 32, 32, true);
+            t.loadTexture(game, Material.getPath(i), 32, 32, true);
             t.uploadImageToGPU(0);
             atlas.addTexture(t);
 
@@ -274,7 +274,7 @@ public class Map {
     }
 
     private void destroyTextures() {
-        for (int i = 1; i < Material.materialPath.length; i++) {
+        for (int i = 1; i < Material.getMatCount(); i++) {
             if (atlas.getTexture(i) != null)
                 atlas.getTexture(i).destroy();
 

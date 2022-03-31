@@ -51,12 +51,12 @@ public class Window {
         Window.focused = focused;
     }
 
-    public Window(Game g, String title, int width, int height) {
+    public Window(Game g, String title, int width, int height, boolean fullScreen) {
         this.game = g;
         g.getLogger().info("[WINDOW] Created [" + width + "x" + height + "]");
         g.getLogger().info("[LWJGL] " + Version.getVersion());
         this.title = title;
-        setSize(width, height, false, false);
+        setSize(width, height, fullScreen, false);
     }
 
 

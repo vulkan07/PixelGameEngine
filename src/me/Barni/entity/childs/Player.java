@@ -135,7 +135,6 @@ public class Player extends Entity {
 
     @Override
     public boolean onTouchTile(Hitbox tile) {
-
         switch (tile.solidType) {
             case 2:
                 velocity.clamp(2);

@@ -156,12 +156,15 @@ public final class Game implements Runnable {
 
         //Set Logger for static classes
         AnimSequenceLoader.logger = logger;
+        Material.logger = logger;
 
         WIDTH = w;
         HEIGHT = h;
 
 
-        window = new Window(this, title + "  -  " + loadRandomTitleMsg(), w, h);
+        window = new Window(this, title + "  -  " + loadRandomTitleMsg(), w, h, fullscreen);
+
+        if (!Material.loadMaterials(GAME_DIR+"materials.json")) return;
 
         //Level editor
         levelEditor = new LevelEditor(this);
@@ -191,10 +194,13 @@ public final class Game implements Runnable {
 
     public void loadNewMap(String path) {
 
+
         nextLevel = "";
 
         if (map != null)
             map.destroy(); //Old map
+
+        if (!Material.loadMaterials(GAME_DIR+"materials.json")) stop();
 
         MapLoader ml = new MapLoader(this);
 

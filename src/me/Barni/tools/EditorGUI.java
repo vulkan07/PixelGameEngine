@@ -360,9 +360,8 @@ public class EditorGUI {
         pathField.setText("C:\\dev\\01.map");
 
         //Add txt names to texture select combo box
-        for (String s : Material.materialPath) {
-            if (s != null)
-                textureSelectBox.addItem(s);
+        for (int i = 0; i < Material.getMatCount(); i++) {
+            textureSelectBox.addItem(Material.getPath(i));
         }
     }
 

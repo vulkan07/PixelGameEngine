@@ -11,6 +11,7 @@ public class Main {
         game = new Game("C:\\Dev\\");
 
         int w = 1920, h = 1080;
+        boolean fc = false;
         try {
             for (int i = 0; i < args.length; i++) {
                 if (args[i].equals("-w"))
@@ -18,12 +19,14 @@ public class Main {
 
                 if (args[i].equals("-h"))
                     h = Integer.parseInt(args[i + 1]);
+                if (args[i].equals("-fullscreen"))
+                    fc = true;
             }
         } catch (Exception e) {
             System.err.println("Invalid arguments!");
             e.printStackTrace();
         }
-        game.start("Über Brutal Platformer 2077", w, h, true, false, Logger.LOG_INFO);
+        game.start("Über Brutal Platformer 2077", w, h, fc, false, Logger.LOG_INFO);
     }
 }
 

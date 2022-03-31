@@ -60,7 +60,7 @@ public class Hitbox {
                 return;
 
         //If Material class says other.solidType is not solid, return
-        if ( !Material.isTypeSolid(other.solidType) )
+        if ( other.solidType != 1 )
             return;
 
         //Actual collision handling
@@ -145,7 +145,7 @@ public class Hitbox {
                 for (int j = 0; j < out.length; j++) {
                     if (out[j] == null) {
                         out[j] = new Hitbox(other.x, other.y, map.tileSize, map.tileSize);
-                        out[j].solidType = Material.solid[map.getTile(i)];
+                        out[j].solidType = Material.isSolid(map.getTile(i));
                         break;
                     }
                 }
