@@ -41,7 +41,7 @@ public class KeyboardHandler {
     }
 
     public static void keyCallback(long window, int key, int scancode, int action, int mods) {
-        if (key > MAX_KEYS)
+        if (key > MAX_KEYS || key < 0)
             return;
 
         if (action == GLFW.GLFW_PRESS) {

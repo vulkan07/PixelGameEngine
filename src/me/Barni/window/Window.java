@@ -1,5 +1,6 @@
 package me.Barni.window;
 
+import me.Barni.Game;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFW;
@@ -36,6 +37,8 @@ public class Window {
     }
 
     private String title;
+    private Game game;
+    private boolean fullScreen;
     private int width, height;
     private long pWindow;
     private static boolean lastFocused, focused, minimized;
@@ -48,13 +51,14 @@ public class Window {
         Window.focused = focused;
     }
 
-    public Window(String title, int width, int height) {
-        System.out.println("Window created");
-        System.out.println("LWJGL - " + Version.getVersion() + "!");
+    public Window(Game g, String title, int width, int height) {
+        this.game = g;
+        g.getLogger().info("[WINDOW] Created [" + width + "x" + height + "]");
+        g.getLogger().info("[LWJGL] " + Version.getVersion());
         this.title = title;
-        this.width = width;
-        this.height = height;
+        setSize(width, height, false, false);
     }
+
 
     public void update() {
         GLFW.glfwPollEvents();
@@ -69,22 +73,34 @@ public class Window {
     }
 
     public void focus() {
-        GLFW.glfwMaximizeWindow(pWindow);
+        if (fullScreen) {
+            GLFW.glfwMaximizeWindow(pWindow);
+            GLFW.glfwRequestWindowAttention(pWindow); //Windows taskbar yellow thingie
+        }
         GLFW.glfwFocusWindow(pWindow);
-        GLFW.glfwRequestWindowAttention(pWindow);
         focused = true;
         minimized = false;
     }
 
     public void minimize() {
-        GLFW.glfwIconifyWindow(pWindow);
+        if (fullScreen)
+            GLFW.glfwIconifyWindow(pWindow);
         minimized = true;
     }
 
+    public void destroy() {
+        GLFW.glfwDestroyWindow(pWindow);
+        pWindow = -1;
+    }
+
     public void changeMonitor(int monitorIndex) {
+        destroy();
         //Create window
         try {
-            pWindow = GLFW.glfwCreateWindow(width, height, title, GLFW.glfwGetMonitors().get(monitorIndex), NULL);
+            if (fullScreen)
+                pWindow = GLFW.glfwCreateWindow(width, height, title, GLFW.glfwGetMonitors().get(monitorIndex), NULL);
+            else
+                pWindow = GLFW.glfwCreateWindow(width, height, title, NULL, NULL);
         } catch (Exception e) {
             throw new IllegalStateException("Unable to find monitor number " + monitorIndex + "! (" + e.getMessage() + ")");
         }
@@ -95,9 +111,10 @@ public class Window {
         initWindow();
     }
 
+
     public void init() {
         //Error callback
-        GLFWErrorCallback.createPrint(System.err);
+        GLFWErrorCallback.createPrint(System.out);
 
         //Init GLFW
         if (!GLFW.glfwInit()) {
@@ -107,17 +124,29 @@ public class Window {
         //Configure GLFW
         GLFW.glfwDefaultWindowHints();
         GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
-        GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
-        GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_TRUE);
-        GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
-        GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 4);
-        //GLFW.glfwWindowHint(GLFW.GLFW_TRANSPARENT_FRAMEBUFFER, GLFW.GLFW_TRUE);
+        if (fullScreen) {
+            GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
+            GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
+            GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
+        } else {
+            GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
+            GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
+            GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_TRUE);
+        }
+        GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 1);
 
         changeMonitor(0);
     }
 
-    private void initWindow()
-    {
+    private void setSize(int w, int h, boolean fullScreen, boolean refresh) {
+        width = w;
+        height = h;
+        this.fullScreen = fullScreen;
+        if (refresh)
+            init();
+    }
+
+    private void initWindow() {
         //Set mouse callbacks
         GLFW.glfwSetCursorPosCallback(pWindow, MouseHandler::mousePosCallback);
         GLFW.glfwSetMouseButtonCallback(pWindow, MouseHandler::mouseButtonCallback);
@@ -139,7 +168,6 @@ public class Window {
         //Critical stuff - Don't remove!!!
         GL.createCapabilities();
 
-        //GL30.glClearColor(.53f,.7f,.8f, 1f);
         GL30.glClearColor(0f, 0f, 0f, 1f);
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glEnable(GL30.GL_MULTISAMPLE);

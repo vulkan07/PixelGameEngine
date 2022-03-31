@@ -45,6 +45,7 @@ public final class Game implements Runnable {
     public String BG_DIR;
     public String TEXTURE_DIR;
     public String MAP_DIR;
+    public float GAME_VERSION;
 
     public String nextLevel; //if not empty, game will change to this map
 
@@ -125,6 +126,7 @@ public final class Game implements Runnable {
             BG_DIR = jsonObject.getString("background").replace("$", GAME_DIR + "/") + "/";
             SHADER_DIR = jsonObject.getString("shaders").replace("$", GAME_DIR + "/") + "/";
             MAP_DIR = jsonObject.getString("maps").replace("$", GAME_DIR + "/") + "/";
+            GAME_VERSION = jsonObject.getFloat("version");
         } catch (JSONException e) {
 
             logger.err("Invalid game.json file! " + e.getMessage());
@@ -147,6 +149,7 @@ public final class Game implements Runnable {
 
         //Logger
         this.logger = new Logger(logLevel);
+        logger.info("PixelGameEngine v" + GAME_VERSION);
 
         if (!loadSearchPaths())
             throw new IllegalStateException("Can't load search paths!");
@@ -158,7 +161,7 @@ public final class Game implements Runnable {
         HEIGHT = h;
 
 
-        window = new Window(title + "  -  " + loadRandomTitleMsg(), w, h);
+        window = new Window(this, title + "  -  " + loadRandomTitleMsg(), w, h);
 
         //Level editor
         levelEditor = new LevelEditor(this);
@@ -298,7 +301,7 @@ public final class Game implements Runnable {
 
         map.destroy();
 
-        GLFW.glfwDestroyWindow(window.getWindow());
+        window.destroy();
         GLFW.glfwSetErrorCallback(null);
         GLFW.glfwTerminate();
 
@@ -324,11 +327,14 @@ public final class Game implements Runnable {
     //---------------------------------\\
     //----------->  Render  <----------\\
     private void render() {
-        window.clear();
 
         //-----------------\\
+        if (intro.isPlayingIntro() || getScreenFadeAlpha() != 0)
+            window.clear(); //Only clear when playing intro, game overdraws every surface anyways
+
         if (intro.isPlayingIntro())
             intro.render();
+
         else
             map.render(map.cam);
         //-----------------\\

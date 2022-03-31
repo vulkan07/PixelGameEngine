@@ -190,7 +190,7 @@ public class AnimSequenceLoader {
             finalSeqArray[i] = sequenceArrayList.get(i);
         }
 
-        logger.info("[ANIM] Loaded anim sequences for: " + fullPath);
+        logger.subInfo("[ANIM] Loaded anim sequences for: " + fullPath);
         return finalSeqArray;
     }
 }

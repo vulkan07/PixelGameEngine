@@ -7,7 +7,7 @@ public class Logger {
     private static String currentIndent = "";
     public static final boolean LOG_ERRORS_TO_SYS_OUT = true;
     public static final byte LOG_SUPER = 4;
-    public static final byte LOG_ALL = 3;
+    public static final byte LOG_INFO = 3;
     public static final byte LOG_WARN_ERR = 2;
     public static final byte LOG_ERR = 1;
     public static final byte LOG_NONE = 0;
@@ -56,7 +56,7 @@ public class Logger {
     public void increaseIndention(String indentionName) {
         indentLevel++;
         if (indentionName != null)
-            System.out.println(currentIndent + "    -< " + indentionName + " >-");
+            System.out.println(currentIndent + "    << " + indentionName + " >>");
         updateIndentionString();
     }
 
@@ -66,7 +66,7 @@ public class Logger {
             indentLevel = 0;
         updateIndentionString();
         if (indentionName != null)
-            System.out.println(currentIndent + "    -< " + indentionName + " >-\n");
+            System.out.println(currentIndent + "    << " + indentionName + " >>\n");
     }
 
     public void warn(String msg) {

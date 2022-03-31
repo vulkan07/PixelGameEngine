@@ -58,10 +58,10 @@ public class ShaderProgram {
         vertex.compile();
         fragment.compile();
 
-        System.out.println("Creating shaderProgram...");
         id = GL30.glCreateProgram();
         GL30.glAttachShader(id, vertex.getId());
         GL30.glAttachShader(id, fragment.getId());
+        game.getLogger().subInfo("[SHADER] ShaderProgram created: \"" + shaderName + "\"" );
     }
 
     public void link() {

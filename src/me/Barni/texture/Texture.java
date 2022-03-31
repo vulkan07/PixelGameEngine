@@ -28,7 +28,7 @@ public class Texture {
     private String path;
 
     private void errMsg(String msg) {
-        game.getLogger().err("[TEXTURE] " + msg + " \n" + game.getLogger().getIndentStr() + "\n    At: " + generalPathName);
+        game.getLogger().err("[TEXTURE] " + msg + "    At: " + generalPathName);
     }
 
     public int getWidth() {
@@ -249,7 +249,6 @@ public class Texture {
         if (!amIValid) return;
         if (frameIndex == lastUploadedFrame) return;
         if (id < 1) generate();
-
         lastUploadedFrame = frameIndex;
 
         BufferedImage img;
@@ -288,8 +287,6 @@ public class Texture {
         }
         if (animated) {
             if (sequences[currSequence].isEnded()) {
-                if (getPath().equals("pressure_plate"))
-                    System.out.println("end");
                 String n = sequences[currSequence].nextName;
                 if (setAnimationSequence(n))
                     return;

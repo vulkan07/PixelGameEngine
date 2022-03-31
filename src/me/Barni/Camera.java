@@ -44,7 +44,7 @@ public class Camera {
         adjutProjection();
 
         defProjMat.identity();
-        defProjMat.ortho(0f, 1920f, 1080f, 0f, 0f, 100f);
+        defProjMat.ortho(0f, width, height, 0f, 0f, 100f);
     }
 
     public void setViewSize(int w, int h) {
@@ -55,7 +55,7 @@ public class Camera {
     public void update() {
         //Follow target entity
         if (followEntity != null)
-            if (followEntity.position.dist(new Vec2D(center)) >= followDistTreshold)
+            if (followEntity.position.dist(new Vec2D(pos)) >= followDistTreshold)
                 lookAt(followEntity.position.copy().sub(followEntity.size.copy().div(2)));
 
         //Lerp pos to target
@@ -92,8 +92,8 @@ public class Camera {
     }
 
     public void lookAt(Vec2D target) {
-        this.target.x = target.x - (float) width / 2;
-        this.target.y = target.y - (float) height / 2;
+        this.target.x = target.x;
+        this.target.y = target.y;
     }
 
     public void setZoom(float v, boolean noLerp) {
@@ -105,8 +105,8 @@ public class Camera {
 
     private void adjustMatricesToZoom() {
         projMat.identity();
-        projMat.ortho(0f, 1920f, 1080f, 0f, 0f, 100f);
-        projMat.scale(zoom);
+        projMat.ortho(0, 1920f*zoom, 1080f*zoom, 0f, 0f, 100f);
+        //projMat.scale(zoom);
     }
 
     public void adjutProjection() {
@@ -120,10 +120,13 @@ public class Camera {
 
         viewMat.identity();
 
+        //Shifts center pos according to zoom
+        float wm = pos.x - (width/2f*zoom);
+        float hm = pos.y - (height/2f*zoom);
         //Generates viewmatrix
         viewMat.lookAt(
-                new Vector3f(pos.x, pos.y, 10f),  // Position
-                camFront.add(pos.x, pos.y, 0f),  // Looking at
+                new Vector3f(wm, hm, 10f),  // Position
+                camFront.add(wm, hm, 0f),  // Looking at
                 camUp                                               // Where's up
         );
 

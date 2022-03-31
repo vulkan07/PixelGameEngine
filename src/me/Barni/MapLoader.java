@@ -37,7 +37,7 @@ public class MapLoader {
     public Map loadMap(String relPath) {
 
         logger.increaseIndention("MAP LOADER");
-        logger.info("[MAP+] Loading map: " + relPath);
+        logger.info("[MAPLOAD] Loading map: " + relPath);
 
         File file = new File(relPath);
         if (!file.exists())
@@ -99,7 +99,7 @@ public class MapLoader {
             logger.decreaseIndention("ENTITIES");
 
 
-            logger.info("[MAP+] Loaded map: " + fullPath);
+            logger.info("[MAPLOAD] Loaded map: " + fullPath);
             logger.decreaseIndention("MAP LOADER");
             return map;
 
@@ -121,8 +121,7 @@ public class MapLoader {
 
 
     private void errMsg(String msg) {
-        logger.err("[MAP+] " + msg + "\n   In: " + fullPath);
-        logger.decreaseIndention("MAP LOADER");
+        logger.err("[MAPLOAD] " + msg + "    In: " + fullPath);
     }
 
 

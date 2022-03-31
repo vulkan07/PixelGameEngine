@@ -17,8 +17,6 @@ package me.Barni.texture;
 //          "static" means the sequence consists of only one frame.
 //-----------------------------------
 
-import java.util.Arrays;
-
 public class AnimSequence {
 
     String name, nextName;
@@ -76,7 +74,6 @@ public class AnimSequence {
         //Return if Texture isn't animated, or the seq. is over, or is static
         if (!texture.isAnimated() || !valid)
             return;
-
         if (staticFrame != -1) {
             texture.uploadImageToGPU(staticFrame);
             return;
@@ -88,9 +85,6 @@ public class AnimSequence {
         //If timer reaches the current frame's delay
         if (timer >= delays[currentFrame]) {
             texture.uploadImageToGPU(frameIndexes[currentFrame]); //Upload the Texture's new frame
-
-            if (name.equals("launch"))
-                System.out.println("set to:" + frameIndexes[currentFrame]);
             currentFrame++; //Set the current frame
             timer = 0; //Reset timer
         }

@@ -1,10 +1,5 @@
 package me.Barni;
 
-import javax.sound.sampled.*;
-import java.awt.*;
-import java.io.File;
-import java.util.Arrays;
-
 public class Main {
     public static void main(String[] args) {
 
@@ -15,7 +10,7 @@ public class Main {
         Game game;
         game = new Game("C:\\Dev\\");
 
-        int w = 1280, h = 720;
+        int w = 1920, h = 1080;
         try {
             for (int i = 0; i < args.length; i++) {
                 if (args[i].equals("-w"))
@@ -28,39 +23,24 @@ public class Main {
             System.err.println("Invalid arguments!");
             e.printStackTrace();
         }
-        System.out.println("fun");
-        /*
-        boolean devMode = false;
-        if (args.length > 0)
-            devMode = args[0].equalsIgnoreCase("true");
-
-        if (devMode)
-            game = new Game(System.getProperty("user.dir") + "\\assets\\");
-        else
-            game = new Game("C:\\Dev\\");
-
-        //game.start("Über Brutal Platformer 2077", (int)(1920/1.2), (int)(1080/1.2), false, false, Logger.LOG_ALL);
-        //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        game.start("Über Brutal Platformer 2077", screenSize.width, screenSize.height, true, false, Logger.LOG_ALL);*/
-        game.start("Über Brutal Platformer 2077", w, h, true, false, Logger.LOG_ALL);
+        game.start("Über Brutal Platformer 2077", w, h, true, false, Logger.LOG_INFO);
     }
 }
 
 //====================================================================================\\
 //============================= T O D O     L I S T ==================================\\
 //====================================================================================\\
-//DONE [X] PLAYER: Two hitboxes: touchHitbox, collideHitbox
 
-//DONE [X] *Texture: If animated, texture array+indexer, that's changing by ticks, controlled by tick-data scheduler array; All read from files
-//                   If single texture: texture array[0], others are bypassed/null
+//TODO [X] Fix camera shift on zoom
+//TODO [ ] Fix native resolution set
 
-//DONE [X] *Physics: Make physics work independent from entities, maybe have a map to connect ent groups
+//TODO [ ] Fix GPU Usage
+
+//TODO [ ] Add gizmos to edit levels
+//TODO [ ] Add menus to edit levels
+
+//TODO [ ] Text rendering
 
 //TODO [ ] PHYSICS optimize ent to ent collision
 //TODO [ ] PHYSICS fix side stuck collision
 
-//DONE [X] *Camera: Abstract render from Game
-//                  Do scrolling in directions
-
-
-//TODO [ ] GAME: reduce processor usage
