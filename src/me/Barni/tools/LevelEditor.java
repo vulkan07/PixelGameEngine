@@ -151,9 +151,9 @@ public class LevelEditor {
 
             Vec2D selectedTile = MouseHandler.getPosition();
             selectedTile.add(game.getMap().cam.getScroll());
-            //selectedTile.y -= 16;
+            selectedTile.x -= game.getWIDTH()/2f;
+            selectedTile.y -= game.getHEIGHT()/2f;
             selectedTile.div(32);
-
             tPos1 = ((int) selectedTile.x + (int) selectedTile.y * map.width);
             if (MouseHandler.isPressed(MouseHandler.LMB)) {
                 if (KeyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {

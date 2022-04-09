@@ -32,11 +32,12 @@ public class Map {
     public Decorative[] decoratives = new Decorative[32];
 
     private int decCount = 0;
+    Player player;
 
     private String title, fileName;
     public Vec2D playerStartPos = new Vec2D(), playerStartVel = new Vec2D();
 
-
+    public float deathGray;
     public Camera cam;
 
     private ShaderProgram frontShader, backShader, entShader, decShader, backImageShader;
@@ -258,7 +259,7 @@ public class Map {
 
         setBackgroundTexture(backgroundTexturePath);
 
-        for (int i = 1; i < Material.getMatCount(); i++) {
+        for (int i = 1; i < Material.getMatCount() - 1; i++) {
             Texture t = new Texture();
             t.loadTexture(game, Material.getPath(i), 32, 32, true);
             t.uploadImageToGPU(0);
@@ -325,6 +326,7 @@ public class Map {
         backgroundTexture.bind();
         backImageShader.bind();
         backImageShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
+        backImageShader.uploadFloat("uGray", deathGray);
 
         vao.setVertexData(BG_VERTEX_ARRAY);
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
@@ -344,6 +346,7 @@ public class Map {
         currentShader.uploadMat4("uProjMat", camera.getProjMat());
         currentShader.uploadMat4("uViewMat", camera.getViewMat());
         currentShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
+        currentShader.uploadFloat("uGray", deathGray);
 
         for (int i = 0; i < width * height; i++) {
 
@@ -444,8 +447,7 @@ public class Map {
         decShader.unBind();
     }
 
-
-    public void tick() {
+    public void tick(float dt) {
 
         atlas.update();
 
@@ -455,7 +457,10 @@ public class Map {
             if (e != null)
                 e.tick();
         }
-        physics.update();
+        physics.update(dt);
+
+        deathGray = Vec2D.lerp(deathGray, player.alive ? 0 : 0.6f, player.alive ? .06f : .04f);
+
 
         for (Decorative d : decoratives) {
             if (d != null)
@@ -496,6 +501,7 @@ public class Map {
         p.spawnLocation = playerStartPos.copy();
         p.position = playerStartPos.copy();
         p.velocity = playerStartVel.copy();
+        player = p;
     }
 
     public Entity getEntity(String name) {

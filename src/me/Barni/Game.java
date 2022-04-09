@@ -265,8 +265,11 @@ public final class Game implements Runnable {
             }
 
             if ((System.nanoTime() - lastUPS) > updateThreshold) {
+                float delta = (System.nanoTime() - lastUPS) * 0.0000001f;
                 lastUPS = System.nanoTime();
-                tick();
+
+                tick(1.1f);
+
                 window.update();
                 ups++;
             }
@@ -316,7 +319,7 @@ public final class Game implements Runnable {
 
     //---------------------------------\\
     //----------->   Tick   <----------\\
-    private void tick() {
+    private void tick(float delta) {
         if (!nextLevel.equals(""))
             loadNewMap(nextLevel);
 
@@ -325,7 +328,7 @@ public final class Game implements Runnable {
         MouseHandler.update(this);
         KeyboardHandler.update(this);
 
-        map.tick();
+        map.tick(delta);
 
         levelEditor.update();
     }

@@ -29,7 +29,7 @@ public class Physics {
         }
     }
 
-    public void update() {
+    public void update(float delta) {
         for (Entity ent : map.entities) {
             if (ent == null) continue;
             if (!ent.active || !ent.collidesWithMap) continue;

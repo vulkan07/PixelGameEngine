@@ -3,6 +3,7 @@ package me.Barni;
 import me.Barni.entity.Entity;
 import me.Barni.physics.Vec2D;
 import org.joml.Matrix4f;
+import org.joml.Random;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import me.Barni.window.MouseHandler;
@@ -19,7 +20,7 @@ public class Camera {
     public final float DEFAULT_LERP = .05f;
 
     public Vector2f pos, target, center;
-    private Matrix4f projMat, viewMat, defProjMat;
+    private final Matrix4f projMat, viewMat, defProjMat;
 
     private float zoom = 1, targZoom = 1;
 
@@ -52,7 +53,31 @@ public class Camera {
         height = h;
     }
 
+    private int timer, setTimer, ticks;
+    private float ampl, setAmpl;
+    private Vec2D noise = new Vec2D();
+    private Random r = new Random();
+
+    public void shake(float ampl, int duration) {
+        this.ampl = ampl;
+        this.setAmpl = ampl;
+        this.timer = duration;
+        this.setTimer = duration;
+    }
+
     public void update() {
+        ticks++;
+        if (timer > 0) {
+            timer--;
+            ampl = lerp(setAmpl, 0, 1-Vec2D.remap(timer, 0, setTimer, 0,1));
+            noise.y = (float)(Math.sin(ticks / ampl) * ampl*0.1);
+            noise.x = (float)(Math.cos(ticks / ampl) * ampl*0.1);
+        }
+        if (timer == 0) {
+            noise.x = 0;
+            noise.y = 0;
+        }
+
         //Follow target entity
         if (followEntity != null)
             if (followEntity.position.dist(new Vec2D(pos)) >= followDistTreshold)
@@ -60,7 +85,11 @@ public class Camera {
 
         //Lerp pos to target
         pos = pos.lerp(target, lerp);
-        targZoom += MouseHandler.getScrollY() / 20;
+        targZoom -= MouseHandler.getScrollY() / 15 * targZoom;
+        if (targZoom < 0.15f)
+            targZoom = 0.15f;
+        if (targZoom > 1.75f)
+            targZoom = 1.75f;
 
         //Lerp zoom to target value
         zoom = lerp(zoom, targZoom, 0.03f);
@@ -121,8 +150,8 @@ public class Camera {
         viewMat.identity();
 
         //Shifts center pos according to zoom
-        float wm = pos.x - (width/2f*zoom);
-        float hm = pos.y - (height/2f*zoom);
+        float wm = pos.x - (width/2f*zoom) + (noise.x*ampl*zoom);
+        float hm = pos.y - (height/2f*zoom) + (noise.y*ampl*zoom);
         //Generates viewmatrix
         viewMat.lookAt(
                 new Vector3f(wm, hm, 10f),  // Position

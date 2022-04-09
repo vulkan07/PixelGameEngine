@@ -1,15 +1,14 @@
 package me.Barni.window;
 
 import me.Barni.Game;
-import org.lwjgl.PointerBuffer;
 import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
 
 import java.util.Objects;
 
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
@@ -20,7 +19,7 @@ public class Window {
 
     public void setTitle(String title) {
         this.title = title;
-        GLFW.glfwSetWindowTitle(pWindow, title);
+        glfwSetWindowTitle(pWindow, title);
     }
 
 
@@ -61,7 +60,7 @@ public class Window {
 
 
     public void update() {
-        GLFW.glfwPollEvents();
+        glfwPollEvents();
 
         if (lastFocused != focused) // Is Focus changed
             if (focused)
@@ -73,23 +72,23 @@ public class Window {
     }
 
     public void focus() {
-        if (fullScreen) {
-            GLFW.glfwMaximizeWindow(pWindow);
-            GLFW.glfwRequestWindowAttention(pWindow); //Windows taskbar yellow thingie
-        }
-        GLFW.glfwFocusWindow(pWindow);
+        //if (fullScreen) {
+        //    glfwRequestWindowAttention(pWindow); //Windows taskbar yellow thingie
+        //}
+        glfwMaximizeWindow(pWindow);
+        glfwFocusWindow(pWindow);
         focused = true;
         minimized = false;
     }
 
     public void minimize() {
         if (fullScreen)
-            GLFW.glfwIconifyWindow(pWindow);
+            glfwIconifyWindow(pWindow);
         minimized = true;
     }
 
     public void destroy() {
-        GLFW.glfwDestroyWindow(pWindow);
+        glfwDestroyWindow(pWindow);
         pWindow = -1;
     }
 
@@ -98,9 +97,9 @@ public class Window {
         //Create window
         try {
             if (fullScreen)
-                pWindow = GLFW.glfwCreateWindow(width, height, title, GLFW.glfwGetMonitors().get(monitorIndex), NULL);
+                pWindow = glfwCreateWindow(width, height, title, glfwGetMonitors().get(monitorIndex), NULL);
             else
-                pWindow = GLFW.glfwCreateWindow(width, height, title, NULL, NULL);
+                pWindow = glfwCreateWindow(width, height, title, NULL, NULL);
         } catch (Exception e) {
             throw new IllegalStateException("Unable to find monitor number " + monitorIndex + "! (" + e.getMessage() + ")");
         }
@@ -117,23 +116,23 @@ public class Window {
         GLFWErrorCallback.createPrint(System.out);
 
         //Init GLFW
-        if (!GLFW.glfwInit()) {
+        if (!glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW!");
         }
 
         //Configure GLFW
-        GLFW.glfwDefaultWindowHints();
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         if (fullScreen) {
-            GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_FALSE);
-            GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
-            GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_FALSE);
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
+            glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
         } else {
-            GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
-            GLFW.glfwWindowHint(GLFW.GLFW_MAXIMIZED, GLFW.GLFW_FALSE);
-            GLFW.glfwWindowHint(GLFW.GLFW_DECORATED, GLFW.GLFW_TRUE);
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
+            glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
         }
-        GLFW.glfwWindowHint(GLFW.GLFW_SAMPLES, 1);
+        glfwWindowHint(GLFW_SAMPLES, 1);
 
         changeMonitor(0);
     }
@@ -146,24 +145,29 @@ public class Window {
             init();
     }
 
+    public void setHideCursor(boolean hidden) {
+        glfwSetInputMode(pWindow, GLFW_CURSOR, hidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+    }
+
     private void initWindow() {
         //Set mouse callbacks
-        GLFW.glfwSetCursorPosCallback(pWindow, MouseHandler::mousePosCallback);
-        GLFW.glfwSetMouseButtonCallback(pWindow, MouseHandler::mouseButtonCallback);
-        GLFW.glfwSetScrollCallback(pWindow, MouseHandler::mouseScrollCallback);
-        GLFW.glfwSetWindowFocusCallback(pWindow, Window::windowFocusCallback);
+        glfwSetCursorPosCallback(pWindow, MouseHandler::mousePosCallback);
+        glfwSetMouseButtonCallback(pWindow, MouseHandler::mouseButtonCallback);
+        glfwSetScrollCallback(pWindow, MouseHandler::mouseScrollCallback);
+        glfwSetWindowFocusCallback(pWindow, Window::windowFocusCallback);
 
+        glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         //Set Keyboard callbacks
-        GLFW.glfwSetKeyCallback(pWindow, KeyboardHandler::keyCallback);
+        glfwSetKeyCallback(pWindow, KeyboardHandler::keyCallback);
 
         //Make OpenGL context current
-        GLFW.glfwMakeContextCurrent(pWindow);
+        glfwMakeContextCurrent(pWindow);
 
         //Enable V-sync
-        GLFW.glfwSwapInterval(1);
+        glfwSwapInterval(1);
 
         //Make me.Barni.window visible
-        GLFW.glfwShowWindow(pWindow);
+        glfwShowWindow(pWindow);
 
         //Critical stuff - Don't remove!!!
         GL.createCapabilities();

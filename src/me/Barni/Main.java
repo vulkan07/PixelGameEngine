@@ -12,15 +12,26 @@ public class Main {
 
         int w = 1920, h = 1080;
         boolean fc = false;
+        boolean lookingForNext = false;
         try {
             for (int i = 0; i < args.length; i++) {
-                if (args[i].equals("-w"))
+                if (args[i].equals("-w")) {
                     w = Integer.parseInt(args[i + 1]);
-
-                if (args[i].equals("-h"))
+                    lookingForNext = true;
+                    continue;
+                }
+                if (args[i].equals("-h")) {
                     h = Integer.parseInt(args[i + 1]);
-                if (args[i].equals("-fullscreen"))
+                    lookingForNext = true;
+                    continue;
+                }
+                if (args[i].equals("-fullscreen")) {
                     fc = true;
+                    continue;
+                }
+                if (!lookingForNext)
+                    System.out.println("Unknown launch argument: " + args[i]);
+                lookingForNext = false;
             }
         } catch (Exception e) {
             System.err.println("Invalid arguments!");

@@ -3,6 +3,8 @@ package me.Barni.window;
 import me.Barni.Game;
 import org.lwjgl.glfw.GLFW;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 public class KeyboardHandler {
     Game game;
 
@@ -11,29 +13,25 @@ public class KeyboardHandler {
     public static final int LEFT = 65;
     public static final int RIGHT = 68;
     public static final int SPACE = 32;
-    public static final int E = 69;
-    public static final int Q = 81;
-    public static final int R = 82;
     public static final int SHIFT = 340;
     public static final int CTRL = 341;
-    public static final int ESC = 27;
     public static final int F1 = 290;
-    public static final int PLUS = 107;
-    public static final int MINUS = 109;
-    public static final int ARROW_UP = 38;
-    public static final int ARROW_DOWN = 40;
-    public static final int DELETE = 127;
-    public static final int ENTER = 10;
+    public static final int A = 65;
+    public static final int C = 67;
+    public static final int D = 68;
+    public static final int X = 87;
+    public static final int Y = 88;
+    public static final int Z = 89;
 
     public static final int MAX_KEYS = 525;
 
-    public boolean logPresses;
+    public static boolean logPresses;
     private static boolean[] pressed = new boolean[MAX_KEYS];
 
 
     public KeyboardHandler(Game g, boolean logPress) {
         game = g;
-        this.logPresses = logPress;
+        logPresses = logPress;
     }
 
     public static boolean getKeyState(int key) {
@@ -41,23 +39,40 @@ public class KeyboardHandler {
     }
 
     public static void keyCallback(long window, int key, int scancode, int action, int mods) {
+        if (logPresses)
+            System.out.println("Pressed " + key);
+
         if (key > MAX_KEYS || key < 0)
             return;
 
-        if (action == GLFW.GLFW_PRESS) {
+        //Catch modified keypress
+        if (mods == GLFW_MOD_CONTROL && key != 341 && action == GLFW_PRESS) {
+            switch (key) {
+                case C:
+                    System.out.println("CTRL+C");
+                    break;
+                case D:
+                    System.out.println("CTRL+D");
+                    break;
+                //These are bad, need to use localized: glfwSetCharCallback(window, character_callback);
+                case Z:
+                    System.out.println("CTRL+Z");
+                    break;
+            }
+            return;
+        }
+
+        if (action == GLFW_PRESS) {
             pressed[key] = true;
         }
-        if (action == GLFW.GLFW_RELEASE) {
+        if (action == GLFW_RELEASE) {
             pressed[key] = false;
         }
     }
 
     public static void update(Game game) {
-        if (pressed[F1 + 3])
+        if (pressed[F1 + 2])
             game.getLevelEditor().setEditing(!game.getLevelEditor().isEditing());
-
-        if (pressed[R])
-            game.getMap().dumpCurrentMapIntoFile("CurrentMap");
 
         if (pressed[SPACE])
             if (game.getIntro().isPlayingIntro())

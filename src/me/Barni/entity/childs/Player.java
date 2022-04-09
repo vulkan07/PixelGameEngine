@@ -120,6 +120,9 @@ public class Player extends Entity {
             n.show(180);
         }
 
+        game.getMap().cam.shake(8, 100);
+        game.getMap().cam.setZoom(game.getMap().cam.getZoom() + .05f, false);
+
         velocity.mult(0);
         position = spawnLocation.copy();
         respawnTimer = respawnTimeTicks / level / reducedRespawnTime;
@@ -130,7 +133,7 @@ public class Player extends Entity {
         game.getMap().cam.lerp = game.getMap().cam.DEFAULT_LERP;
         visible = true;
         alive = true;
-        //game.fadeInScreen(255);
+        game.getMap().cam.setZoom(game.getMap().cam.getZoom() - .05f, false);
     }
 
     @Override

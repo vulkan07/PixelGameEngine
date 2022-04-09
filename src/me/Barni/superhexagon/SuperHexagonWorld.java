@@ -138,7 +138,7 @@ public class SuperHexagonWorld {
         willRenderModeChange = false;
 
 
-        if (KeyboardHandler.getKeyState(KeyboardHandler.ENTER)) {
+        if (KeyboardHandler.getKeyState(KeyboardHandler.SPACE)) {
             willRenderModeChange = true;
             if (!isRenderModeChanged) {
                 oldRenderMode = !oldRenderMode;
