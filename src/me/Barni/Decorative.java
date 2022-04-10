@@ -1,5 +1,6 @@
 package me.Barni;
 
+import me.Barni.graphics.GraphicsUtils;
 import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.texture.Texture;
@@ -41,7 +42,7 @@ public class Decorative {
     public void render(VertexArrayObject vao, ShaderProgram shader) {
         if (!texture.isValid()) return;
 
-        float[] vArray = game.getMap().generateVertexArray(x, y, w, h);
+        float[] vArray = GraphicsUtils.generateVertexArray(x, y, w, h);
 
         vao.setVertexData(vArray);
 

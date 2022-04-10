@@ -104,7 +104,7 @@ public class Player extends Entity {
 
         if (godMode) //particles still spawn even if godmode is on
             return;
-
+        game.getMap().test.setText("Deaths: " + deaths);
         game.getMap().cam.lerp = 0.02f;
         faceIndex = 2;
         deaths++;

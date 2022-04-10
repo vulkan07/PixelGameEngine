@@ -38,26 +38,32 @@ public class Material {
         try {
             //Get "tiles" array
             JSONArray ja = jsonObject.getJSONArray("tiles");
-
+            try {
+                maxTypes = jsonObject.getInt("maxTypes");
+            }catch (Exception e) {
+                logger.err("Invalid field \"maxTypes\"!");
+                maxTypes = 8;
+            }
             //Init arrays
-            solid = new int[ja.length()];
-            translucent = new int[ja.length()];
-            path = new String[ja.length()];
+            solid = new int[ja.length()][maxTypes];
+            translucent = new int[ja.length()][maxTypes];
+            path = new String[ja.length()][maxTypes];
             matCount = ja.length();
 
             //load data
             for(int i = 0; i < ja.length(); i++) {
                 //Get data
                 int matIndex = ((JSONObject) ja.get(i)).getInt("id");
+                int typeIndex = ((JSONObject) ja.get(i)).getInt("type");
                 if (matIndex >= ja.length())
                 {
                     logger.err("[MAT] Material id larger than the array: " + matIndex);
                     return false;
                 }
 
-                solid[matIndex] = ((JSONObject) ja.get(i)).getInt("solid");
-                translucent[matIndex] = ((JSONObject) ja.get(i)).getInt("translucent");
-                path[matIndex] = ((JSONObject) ja.get(i)).getString("path");
+                solid[matIndex][typeIndex] = ((JSONObject) ja.get(i)).getInt("solid");
+                translucent[matIndex][typeIndex] = ((JSONObject) ja.get(i)).getInt("translucent");
+                path[matIndex][typeIndex] = ((JSONObject) ja.get(i)).getString("path");
             }
 
         } catch (JSONException e) {
@@ -70,21 +76,27 @@ public class Material {
         return true;
     }
 
-    private static int[] solid;
-    private static int[] translucent;
-    private static String[] path;
+    private static int[][] solid;
+    private static int[][] translucent;
+    private static String[][] path;
     private static int matCount;
 
-    public static int isSolid(int id) {
-        return solid[id];
+
+    private static int maxTypes;
+
+    public static int isSolid(int id, int type) {
+        return solid[id][type];
     }
-    public static  int isTranslucent(int id) {
-        return translucent[id];
+    public static  int isTranslucent(int id, int type) {
+        return translucent[id][type];
     }
-    public static String getPath(int id) {
-        return path[id];
+    public static String getPath(int id, int type) {
+        return path[id][type];
     }
     public static  int getMatCount() {
         return matCount;
+    }
+    public static int getMaxTypes() {
+        return maxTypes;
     }
 }

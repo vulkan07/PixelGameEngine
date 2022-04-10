@@ -91,6 +91,17 @@ public class Texture {
             return textures[0];
     }
 
+    public void setTexture(Game g, BufferedImage img) {
+        amIValid = true;
+        game = g;
+        width = img.getWidth();
+        height = img.getHeight();
+        this.animated = false;
+        textures = new BufferedImage[1];
+        textures[0] = img;
+        path = null;
+        lastUploadedFrame = -1;
+    }
 
     public void loadTexture(Game g, String relativePath, int w, int h, boolean isAnimated) {
         amIValid = true;
@@ -124,7 +135,10 @@ public class Texture {
         try {
             fullImg = ImageIO.read(new File(game.TEXTURE_DIR + imgPath));
         } catch (IOException e) {
-            errMsg("Can't read file!");
+            if (e instanceof FileNotFoundException)
+                game.getLogger().err("[TEXTURE] Can't find file: " + game.TEXTURE_DIR + imgPath);
+            else
+                game.getLogger().err("[TEXTURE] Can't read file: " + game.TEXTURE_DIR + imgPath);
             amIValid = false;
         }
 

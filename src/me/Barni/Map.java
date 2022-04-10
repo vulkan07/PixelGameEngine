@@ -2,7 +2,9 @@ package me.Barni;
 
 import me.Barni.entity.Entity;
 import me.Barni.entity.childs.Player;
+import me.Barni.graphics.RenderableText;
 import me.Barni.graphics.ShaderProgram;
+import me.Barni.graphics.TextRenderer;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Physics;
 import me.Barni.physics.Vec2D;
@@ -18,6 +20,10 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
+import static me.Barni.Intro.ELEMENT_ARRAY;
+import static me.Barni.graphics.GraphicsUtils.SCREEN_VERTEX_ARRAY;
+import static me.Barni.graphics.GraphicsUtils.generateVertexArray;
+
 public class Map {
 
     Game game;
@@ -25,8 +31,8 @@ public class Map {
 
     public int width, height, tileSize;
 
-    private byte[] tiles;
-    private byte[] backTiles;
+    private Tile[] tiles;
+    private Tile[] backTiles;
 
     public Entity[] entities = new Entity[16];
     public Decorative[] decoratives = new Decorative[32];
@@ -46,9 +52,7 @@ public class Map {
     private Texture backgroundTexture;
     private String backgroundTexturePath;
 
-    public TextureAtlas atlas, normAtlas;
-    public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
-    public static final float[] BG_VERTEX_ARRAY = {-1, -1, 0, 1, 1, 1, 1, 0, 1, -1, 1, 1, -1, 1, 0, 0};
+    public TextureAtlas atlas;
 
     //----------------------------
     //-- Getters & Setters -------
@@ -60,35 +64,42 @@ public class Map {
         return fileName;
     }
 
-    public byte getBackTile(int i) {
-        return backTiles[i];
+    public int getBackTile(int i) {
+        return backTiles[i].id;
     }
 
-    public void setBackTile(int i, int id) {
-        backTiles[i] = (byte) id;
+    public void setBackTile(int i, Tile t) {
+        backTiles[i] = t;
+    }
+    public void setBackTileID(int i, int id) {
+        backTiles[i].id = id;
+    }
+    public void setTileID(int i, int id) {
+        tiles[i].id = id;
+    }
+    public int getTile(int i) {
+        return tiles[i].id;
+    }
+    public int getTileType(int i) {
+        return tiles[i].type;
     }
 
-    public byte getTile(int i) {
-        return tiles[i];
+    public void setTile(int i, Tile t) {
+        tiles[i] = t;
     }
-
-    public void setTile(int i, int id) {
-        tiles[i] = (byte) id;
-    }
-
     public void setTile(int x, int y, int id) {
-        tiles[y * width + x] = (byte) id;
+        tiles[y * width + x].id = id;
     }
 
-    public byte getTile(int x, int y) {
-        return tiles[y * width + x];
+    public int getTile(int x, int y) {
+        return tiles[y * width + x].id;
     }
 
     public int getTilesLength() {
         return tiles.length;
     }
 
-    public void setTileArray(byte[] newTiles) {
+    public void setTileArray(Tile[] newTiles) {
         tiles = newTiles;
     }
 
@@ -103,11 +114,10 @@ public class Map {
         width = h;
         height = w;
         tileSize = tSize;
-        tiles = new byte[width * height];
-        backTiles = new byte[width * height];
+        tiles = new Tile[width * height];
+        backTiles = new Tile[width * height];
         game = g;
         atlas = new TextureAtlas(game, Material.getMatCount(), tileSize);
-        normAtlas = new TextureAtlas(game, Material.getMatCount(), tileSize);
 
         game.getLogger().info("[MAP] Initialized new map [" + w + "x" + h + "]");
 
@@ -259,29 +269,22 @@ public class Map {
 
         setBackgroundTexture(backgroundTexturePath);
 
-        for (int i = 1; i < Material.getMatCount() - 1; i++) {
-            Texture t = new Texture();
-            t.loadTexture(game, Material.getPath(i), 32, 32, true);
-            t.uploadImageToGPU(0);
-            atlas.addTexture(t);
-
-            //Normal texture
-            Texture normalT = new Texture();
-            //normalT.loadTexture(game, Material.materialPath[i] + "_nor", 32, 32, true);
-            //normalT.uploadImageToGPU(0);
-            normAtlas.addTexture(normalT);
+        for (int i = 1; i < Material.getMatCount(); i++) {
+            Texture[] txts = new Texture[Material.getMaxTypes()];
+            for (int j = 0; j < Material.getMaxTypes() - 1; j++) {
+                if (Material.getPath(i,j) == null)
+                    continue;
+                Texture t = new Texture();
+                t.loadTexture(game, Material.getPath(i,j), 32, 32, true);
+                t.uploadImageToGPU(0);
+                txts[j] = t;
+            }
+            atlas.addTexture(txts);
         }
-        System.out.println("Normal textures are temporarily disabled!");
     }
 
     private void destroyTextures() {
-        for (int i = 1; i < Material.getMatCount(); i++) {
-            if (atlas.getTexture(i) != null)
-                atlas.getTexture(i).destroy();
-
-            if (normAtlas.getTexture(i) != null)
-                normAtlas.getTexture(i).destroy();
-        }
+        atlas.destroy();
         game.getLogger().info("[MAP] Deleted textures from GPU");
     }
 
@@ -313,7 +316,10 @@ public class Map {
         }
 
         vao.unBind();
+        test.render(cam);
+
     }
+    public RenderableText test= new RenderableText("Tengerimalacos jóreggelt", 200, 500, 40, Color.ORANGE);;
 
     public final int ENT_RENDER_LAYER = 8;
     public final int TILE_RENDER_LAYER = 4;
@@ -323,12 +329,13 @@ public class Map {
         if (backgroundTexture == null || !backgroundTexture.isValid())
             return;
 
-        backgroundTexture.bind();
         backImageShader.bind();
         backImageShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
         backImageShader.uploadFloat("uGray", deathGray);
+        backImageShader.selectTextureSlot("uTexSampler", 1);
+        backgroundTexture.bind();
 
-        vao.setVertexData(BG_VERTEX_ARRAY);
+        vao.setVertexData(SCREEN_VERTEX_ARRAY);
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
 
         backImageShader.unBind();
@@ -350,32 +357,34 @@ public class Map {
 
         for (int i = 0; i < width * height; i++) {
 
-            if (front) {
-                if (tiles[i] == 0)
+            if (front)
+                if (tiles[i].id == 0)
                     continue;
-            } else if (backTiles[i] == 0)
-                continue;
+
+            if (!front)
+                if (backTiles[i].id == 0)
+                    continue;
 
             float[] vArray = generateVertexArray(i % width * 32,
                     i / width * 32, 32, 32);
             vao.setVertexData(vArray);
 
             if (front) {
-                //Nor
+                /*Nor
                 Texture t = normAtlas.getTexture(tiles[i] - 1);
                 if (t != null && t.isValid()) {
                     currentShader.selectTextureSlot("uNorSampler", 1);
                     t.bind();
-                }
+                }*/
                 //Dif
-                t = atlas.getTexture(tiles[i] - 1);
+                Texture t = atlas.getTexture(tiles[i].id-1, tiles[i].type);
                 if (t != null && t.isValid()) {
                     currentShader.selectTextureSlot("uTexSampler", 1);
                     t.bind();
                 }
             } else {
                 //Dif (background)
-                Texture t = atlas.getTexture(backTiles[i] - 1);
+                Texture t = atlas.getTexture(backTiles[i].id-1, backTiles[i].type);
                 if (t != null && t.isValid()) {
                     currentShader.selectTextureSlot("uTexSampler", 1);
                     t.bind();
@@ -388,34 +397,6 @@ public class Map {
         currentShader.unBind();
     }
 
-    public float[] generateVertexArray(float x, float y, float w, float h) {
-        float[] va = new float[16];
-        va[0] = x;    //TL x
-        va[1] = y;    //TL y
-
-        va[2] = 0f;   //U
-        va[3] = 0f;   //V
-
-        va[4] = x + w;  //BR x
-        va[5] = y + h;  //BR y
-
-        va[6] = 1f;   //U
-        va[7] = 1f;   //V
-
-        va[8] = x + w;  //TR x
-        va[9] = y;    //TR y
-
-        va[10] = 1f;   //U
-        va[11] = 0f;   //V
-
-        va[12] = x;    //BL x
-        va[13] = y + h;  //BL y
-
-        va[14] = 0f;   //U
-        va[15] = 1f;   //V
-
-        return va;
-    }
 
     public void renderEntities() {
         entShader.bind();

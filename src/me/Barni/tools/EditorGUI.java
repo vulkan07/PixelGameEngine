@@ -306,7 +306,7 @@ public class EditorGUI {
     }
 
     public void updateTxtPreviewImage() {
-        BufferedImage img = editor.game.getMap().atlas.getImage(textureSelectBox.getSelectedIndex());
+        BufferedImage img = editor.game.getMap().atlas.getImage(textureSelectBox.getSelectedIndex(), 0);
         BufferedImage resImg = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
         resImg.getGraphics().drawImage(img, 0, 0, 64, 64, null);
         ImageIcon icon = new ImageIcon(resImg);
@@ -361,7 +361,7 @@ public class EditorGUI {
 
         //Add txt names to texture select combo box
         for (int i = 0; i < Material.getMatCount(); i++) {
-            textureSelectBox.addItem(Material.getPath(i));
+            textureSelectBox.addItem(Material.getPath(i, 0));
         }
     }
 

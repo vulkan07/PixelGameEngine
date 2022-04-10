@@ -2,6 +2,8 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
+import me.Barni.graphics.RenderableText;
+import me.Barni.graphics.TextRenderer;
 import me.Barni.texture.AnimSequenceLoader;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
@@ -45,7 +47,7 @@ public final class Game implements Runnable {
     public String BG_DIR;
     public String TEXTURE_DIR;
     public String MAP_DIR;
-    public float GAME_VERSION;
+    public double GAME_VERSION;
 
     public String nextLevel; //if not empty, game will change to this map
 
@@ -122,11 +124,11 @@ public final class Game implements Runnable {
                 GAME_DIR = System.getProperty("user.dir");
             else
                 GAME_DIR = jsonObject.getString("base") + "/";
-            TEXTURE_DIR = jsonObject.getString("textures").replace("$", GAME_DIR + "/") + "/";
-            BG_DIR = jsonObject.getString("background").replace("$", GAME_DIR + "/") + "/";
-            SHADER_DIR = jsonObject.getString("shaders").replace("$", GAME_DIR + "/") + "/";
-            MAP_DIR = jsonObject.getString("maps").replace("$", GAME_DIR + "/") + "/";
-            GAME_VERSION = jsonObject.getFloat("version");
+            TEXTURE_DIR = jsonObject.getString("textures").replace("$", GAME_DIR) + "/";
+            BG_DIR = jsonObject.getString("background").replace("$", GAME_DIR) + "/";
+            SHADER_DIR = jsonObject.getString("shaders").replace("$", GAME_DIR) + "/";
+            MAP_DIR = jsonObject.getString("maps").replace("$", GAME_DIR) + "/";
+            GAME_VERSION = jsonObject.getDouble("version");
         } catch (JSONException e) {
 
             logger.err("Invalid game.json file! " + e.getMessage());
@@ -149,11 +151,14 @@ public final class Game implements Runnable {
 
         //Logger
         this.logger = new Logger(logLevel);
-        logger.info("PixelGameEngine v" + GAME_VERSION);
 
         if (!loadSearchPaths())
             throw new IllegalStateException("Can't load search paths!");
 
+        System.out.println(">---------------------<");
+        System.out.println("    PixelGameEngine");
+        System.out.println("         v" + GAME_VERSION);
+        System.out.println(">---------------------<");
         //Set Logger for static classes
         AnimSequenceLoader.logger = logger;
         Material.logger = logger;
@@ -194,6 +199,8 @@ public final class Game implements Runnable {
 
     public void loadNewMap(String path) {
 
+        TextRenderer.init(this);
+        RenderableText.init(this);
 
         nextLevel = "";
 
@@ -210,7 +217,7 @@ public final class Game implements Runnable {
         //If map doesn't load, a hardcoded map loads
         if (map == null) {
             map = new Map(this, 3, 5, 32, "<default>");
-            byte[] defaultmap = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2,};
+            Tile[] defaultmap = new Tile[15];
             map.setTileArray(defaultmap);
         }
 

@@ -1,5 +1,6 @@
 package me.Barni;
 
+import me.Barni.graphics.GraphicsUtils;
 import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.texture.Texture;
@@ -75,7 +76,7 @@ public class Intro {
         vao.addAttributePointer(2); //Position (x,y)
         vao.addAttributePointer(2); //TX coords (u,v)
 
-        wheelVA = game.getMap().generateVertexArray(0,0,128,128);
+        wheelVA = GraphicsUtils.generateVertexArray(0,0,128,128);
 
         logoVA = new float[16];
         logoVA[0] = -1;    //TL x

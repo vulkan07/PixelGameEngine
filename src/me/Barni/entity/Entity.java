@@ -1,6 +1,7 @@
 package me.Barni.entity;
 
 import me.Barni.*;
+import me.Barni.graphics.GraphicsUtils;
 import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Hitbox;
@@ -8,10 +9,6 @@ import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
 import org.json.JSONObject;
 import org.lwjgl.opengl.GL30;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
 public abstract class Entity {
 
@@ -159,8 +156,7 @@ public abstract class Entity {
     public void render(VertexArrayObject vao, ShaderProgram shader) {
         if (!visible || !texture.isValid()) return;
 
-        float[] vArray = game.getMap().generateVertexArray(position.x,
-                position.y, size.x, size.y);
+        float[] vArray = GraphicsUtils.generateVertexArray(position.x, position.y, size.x, size.y);
 
         vao.setVertexData(vArray);
 

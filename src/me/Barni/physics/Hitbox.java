@@ -145,7 +145,7 @@ public class Hitbox {
                 for (int j = 0; j < out.length; j++) {
                     if (out[j] == null) {
                         out[j] = new Hitbox(other.x, other.y, map.tileSize, map.tileSize);
-                        out[j].solidType = Material.isSolid(map.getTile(i));
+                        out[j].solidType = Material.isSolid(map.getTile(i), map.getTileType(i));
                         break;
                     }
                 }

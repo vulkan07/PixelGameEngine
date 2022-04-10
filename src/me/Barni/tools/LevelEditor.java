@@ -158,14 +158,14 @@ public class LevelEditor {
             if (MouseHandler.isPressed(MouseHandler.LMB)) {
                 if (KeyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
                     try {
-                        map.setBackTile(tPos1, paintTileIndex);
+                        map.setBackTileID(tPos1, paintTileIndex);
                     } catch (ArrayIndexOutOfBoundsException e) {
                     }
                 } else {
                     if (tPos1 != tPos2) {
                         tPos2 = tPos1;
                         try {
-                            map.setTile(tPos1, paintTileIndex);
+                            map.setTileID(tPos1, paintTileIndex);
                         } catch (ArrayIndexOutOfBoundsException e) {
                         }
                     }
@@ -173,12 +173,12 @@ public class LevelEditor {
             } else if (MouseHandler.isPressed(MouseHandler.RMB))
                 if (KeyboardHandler.getKeyState(KeyboardHandler.SHIFT)) {
                     try {
-                        map.setBackTile(tPos1, 0);
+                        map.setBackTileID(tPos1, 0);
                     } catch (ArrayIndexOutOfBoundsException e) {
                     }
                 } else {
                     try {
-                        map.setTile(tPos1, 0);
+                        map.setTileID(tPos1, 0);
                     } catch (ArrayIndexOutOfBoundsException e) {
                     }
                 }

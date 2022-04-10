@@ -36,8 +36,8 @@ public class MapLoader {
      **/
     public Map loadMap(String relPath) {
 
-        logger.increaseIndention("MAP LOADER");
         logger.info("[MAPLOAD] Loading map: " + relPath);
+        logger.increaseIndention("MAP LOADER");
 
         File file = new File(relPath);
         if (!file.exists())
@@ -265,10 +265,21 @@ public class MapLoader {
                     errMsg("Invalid map grid format: \"sizeX\" doesn't match row count! Too few rows!");
                     return;
                 }
+
+                //TODO error handling
+                int id, type;
+                if (tilesRaw[x].contains(":")) {
+                    id = Integer.parseInt(tilesRaw[x].split(":")[0]);
+                    type = Integer.parseInt(tilesRaw[x].split(":")[1]);
+                } else {
+                    id = Integer.parseInt(tilesRaw[x]);
+                    type = 0;
+                }
+
                 if (backGround)
-                    map.setBackTile(y * map.width + x, Integer.parseInt(tilesRaw[x]));
+                    map.setBackTile(y * map.width + x, new Tile(id,type));
                 else
-                    map.setTile(y * map.width + x, Integer.parseInt(tilesRaw[x]));
+                    map.setTile(y * map.width + x, new Tile(id,type));
             }
         }
     }
