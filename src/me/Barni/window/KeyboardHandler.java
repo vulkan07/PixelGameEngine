@@ -1,6 +1,7 @@
 package me.Barni.window;
 
 import me.Barni.Game;
+import me.Barni.tools.LevelEditor;
 import org.lwjgl.glfw.GLFW;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -46,6 +47,7 @@ public class KeyboardHandler {
             return;
 
         //Catch modified keypress
+        if (LevelEditor.isEditing())
         if (mods == GLFW_MOD_CONTROL && key != 341 && action == GLFW_PRESS) {
             switch (key) {
                 case C:

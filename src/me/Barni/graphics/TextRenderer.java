@@ -12,7 +12,7 @@ public class TextRenderer {
 
     public static Game game;
     public static int RENDER_QUALITY_MULT = 2;
-    public static Font defFont = new Font("Verdana", Font.PLAIN, 20);
+    public static Font defFont = new Font("Dialog", Font.PLAIN, 20);
     public static FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, true);
 
     public  static ShaderProgram textShader;

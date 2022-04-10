@@ -5,6 +5,7 @@ import me.Barni.entity.childs.Player;
 import me.Barni.graphics.RenderableText;
 import me.Barni.graphics.TextRenderer;
 import me.Barni.texture.AnimSequenceLoader;
+import me.Barni.tools.EditorGUI;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
 import me.Barni.window.Window;
@@ -21,7 +22,6 @@ import org.lwjgl.system.MemoryUtil;
 import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
@@ -201,6 +201,8 @@ public final class Game implements Runnable {
 
         TextRenderer.init(this);
         RenderableText.init(this);
+        EditorGUI.init(this);
+        LevelEditor.init(this);
 
         nextLevel = "";
 
@@ -217,8 +219,14 @@ public final class Game implements Runnable {
         //If map doesn't load, a hardcoded map loads
         if (map == null) {
             map = new Map(this, 3, 5, 32, "<default>");
-            Tile[] defaultmap = new Tile[15];
-            map.setTileArray(defaultmap);
+            //Tile[] defaultmap = new Tile[15];
+            Tile t;
+            for (int i = 0;i < 15; i++) {
+                t = new Tile(0,0);
+                map.setTile(i,t);
+                map.setBackTile(i,t);
+            }
+            map.setTile(10, new Tile(3,0));
         }
 
         map.createShaderPrograms();
@@ -231,7 +239,7 @@ public final class Game implements Runnable {
         map.cam.followEntity = player;  //Make camera follow player
 
         if (levelEditor != null)
-            levelEditor.reloadMap(map);
+            levelEditor.setMap(map);
 
         resetScreenFade(true);
         fadeInScreen(255);//Add screen fading effect
@@ -283,7 +291,7 @@ public final class Game implements Runnable {
 
             if ((System.nanoTime() - lastFPS) > drawThreshold) {
                 lastFPS = System.nanoTime();
-                if (Window.isFocused()) {
+                if (Window.isFocused() || getScreenFadeAlpha() != 0) {
                     render();
                 }
                 fps++;

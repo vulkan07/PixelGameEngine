@@ -1,7 +1,9 @@
 package me.Barni.window;
 
 import me.Barni.Game;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.Version;
+import org.lwjgl.glfw.GLFWDropCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
@@ -9,7 +11,7 @@ import org.lwjgl.opengl.GL30;
 import java.util.Objects;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.system.MemoryUtil.*;
 
 public class Window {
 
@@ -36,7 +38,7 @@ public class Window {
     }
 
     private String title;
-    private Game game;
+    private static Game game;
     private boolean fullScreen;
     private int width, height;
     private long pWindow;
@@ -48,6 +50,12 @@ public class Window {
 
     private static void windowFocusCallback(long win, boolean focused) {
         Window.focused = focused;
+    }
+    private static void fileDropCallback(long win, int count, long names) {
+        PointerBuffer nameBuffer = memPointerBuffer(names, count);
+        String path = memUTF8(memByteBufferNT1(nameBuffer.get(0)));
+        if (game != null)
+            game.loadNewMap(path);
     }
 
     public Window(Game g, String title, int width, int height, boolean fullScreen) {
@@ -155,6 +163,7 @@ public class Window {
         glfwSetMouseButtonCallback(pWindow, MouseHandler::mouseButtonCallback);
         glfwSetScrollCallback(pWindow, MouseHandler::mouseScrollCallback);
         glfwSetWindowFocusCallback(pWindow, Window::windowFocusCallback);
+        glfwSetDropCallback(pWindow, Window::fileDropCallback);
 
         glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         //Set Keyboard callbacks

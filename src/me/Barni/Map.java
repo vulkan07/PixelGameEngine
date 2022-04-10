@@ -158,11 +158,11 @@ public class Map {
         vao.addAttributePointer(2); //TX coords (u,v)
     }
 
-    public void dumpCurrentMapIntoFile(String path) {
-        game.getLogger().info("[MAP] Writing out current map");
+    public void dumpCurrentMapIntoFile(String absolutePath) {
+        game.getLogger().info("[MAP] Saving...");
 
 
-        File file = new File(game.GAME_DIR + path + ".map");
+        File file = new File(absolutePath);
         try {
             file.createNewFile();
         } catch (IOException e) {
@@ -182,7 +182,8 @@ public class Map {
         for (int y = 0; y < height; y++) {
             data = "";
             for (int x = 0; x < width; x++) {
-                data += tiles[y * width + x] + ",";
+                int pos = y* width + x;
+                data += tiles[pos].id + String.valueOf(tiles[pos].type==0?"":tiles[pos].type) + ",";
             }
             grid.put(y, data);
         }
@@ -193,7 +194,8 @@ public class Map {
         for (int y = 0; y < height; y++) {
             data = "";
             for (int x = 0; x < width; x++) {
-                data += backTiles[y * width + x] + ",";
+                int pos = y* width + x;
+                data += backTiles[pos].id + String.valueOf(backTiles[pos].type==0?"":backTiles[pos].type) + ",";
             }
             grid2.put(y, data);
         }
@@ -212,7 +214,7 @@ public class Map {
             FileWriter writer = new FileWriter(file);
             writer.write(jobj.toString(4));
             writer.close();
-            game.getLogger().info("[MAP] Dumped map file into " + game.GAME_DIR + path + ".json");
+            game.getLogger().info("[MAP] Saved [" + absolutePath + "]");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -316,10 +318,13 @@ public class Map {
         }
 
         vao.unBind();
+        test.setX(player.position.xi()+32);
+        test.setY(player.position.yi()-32);
+        test.setText("x:"+player.position.x);
         test.render(cam);
 
     }
-    public RenderableText test= new RenderableText("Tengerimalacos jóreggelt", 200, 500, 40, Color.ORANGE);;
+    public RenderableText test= new RenderableText("DONÁLD", 200, 500, 15, Color.RED);
 
     public final int ENT_RENDER_LAYER = 8;
     public final int TILE_RENDER_LAYER = 4;
