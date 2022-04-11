@@ -6,33 +6,24 @@ import me.Barni.window.KeyboardHandler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 public class LevelEditor {
 
     private static Game game;
     private Map map;
-    private Camera cam;
 
 
     private JFrame pWin = new JFrame();
     private EditorGUI eGUI = new EditorGUI(this);
 
 
-    private int tPos1, tPos2, selectionType;
     Vec2D pos = new Vec2D();
-    Vec2D mouseClick = new Vec2D();
     final int SPEED = 12;
 
-
-    public boolean showGrid;
-
-    boolean outlineEnts, outlineDecs, freeCam, paintingGrid;
-    private boolean waitingForMousePress, mousePressObtained;
+    private boolean freeCam, painting, winFocued;
     private static boolean editing;
-    private boolean mouseBeenPressed;
-
-    int[] selectedDecorativesID = {};
-    int[] selectedEntitiesID = {};
 
     public LevelEditor(Game g) {
         game = g;
@@ -42,21 +33,25 @@ public class LevelEditor {
     public static void init(Game g) {
         game = g;
     }
-    public void requestWindowFocus() {
+
+    public void focus() {
+        winFocued = true;
+        pWin.toFront();
+        pWin.setVisible(true);
+        pWin.setExtendedState(JFrame.NORMAL);
         pWin.requestFocus();
     }
 
-    public void setMap(Map newMap) {
-        map = newMap;
-        cam = map.cam;
-
-        eGUI.setMap(map);
+    public void loseFocus() {
+        winFocued= false;
+        pWin.setVisible(false);
+        pWin.setExtendedState(JFrame.ICONIFIED);
+        pWin.toBack();
     }
 
-    //Initialize JFrame
     private void initPWin() {
         pWin.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        pWin.setSize(670, 600);
+        pWin.setSize(670, 500);
         pWin.setMinimumSize(new Dimension(650, 520));
         pWin.setTitle("Level editor: <Undefined map>");
         pWin.setContentPane(eGUI.rootPanel);
@@ -66,20 +61,66 @@ public class LevelEditor {
                 setEditing(false);
             }
         });
+        pWin.addWindowStateListener(e -> {
+            if (e.getNewState() == 1){
+                setEditing(false);
+            }
+        });
+        pWin.addFocusListener(new FocusListener() {
+            public void focusGained(FocusEvent e) {
+                winFocued = true;
+            }
+            public void focusLost(FocusEvent e) {
+                winFocued = false;
+            }
+        });
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
         }
+        loseFocus();
+    }
+
+    public void setCamPos(Vec2D pos) {
+        this.pos = pos.copy();
+    }
+
+    public void setMap(Map newMap) {
+        map = newMap;
+        eGUI.setMap(map);
+    }
+
+    public void setFreeCam(boolean b) {
+        freeCam = b;
+        if (!b)
+            map.cam.followEntity =map.getPlayer();
+    }
+    public void setPainting(boolean painting) {
+        this.painting = painting;
+    }
+
+    public boolean isFreeCam() {
+        return freeCam;
+    }
+    public boolean isPainting() {
+        return painting;
+    }
+
+    public boolean isFocued() {
+        return winFocued;
     }
 
     public void setEditing(boolean e) {
         editing = e;
-        pWin.setVisible(editing);
         if (editing) {
+            focus();
+            game.window.setHideCursor(false);
             pWin.setTitle("Level editor: " + game.getMap().getFileName());
-            pWin.requestFocus();
+            pWin.setVisible(true);
             eGUI.update();
+        } else {
+            loseFocus();
         }
     }
 
@@ -109,5 +150,9 @@ public class LevelEditor {
             if (KeyboardHandler.getKeyState(KeyboardHandler.RIGHT))
                 pos.x += SPEED;
         }
+    }
+
+    public void refresh() {
+        eGUI.refresh();
     }
 }

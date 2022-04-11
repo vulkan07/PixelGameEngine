@@ -214,7 +214,7 @@ public final class Game implements Runnable {
         MapLoader ml = new MapLoader(this);
 
 
-        map = ml.loadMap(path); //Load map via ml
+        map = ml.loadMap(path, false); //Load map via ml
 
         //If map doesn't load, a hardcoded map loads
         if (map == null) {
@@ -291,7 +291,7 @@ public final class Game implements Runnable {
 
             if ((System.nanoTime() - lastFPS) > drawThreshold) {
                 lastFPS = System.nanoTime();
-                if (Window.isFocused() || getScreenFadeAlpha() != 0) {
+                if (Window.isFocused() || getScreenFadeAlpha() != 0 || levelEditor.isFocued()) {
                     render();
                 }
                 fps++;

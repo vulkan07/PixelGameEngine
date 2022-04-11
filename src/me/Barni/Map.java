@@ -38,7 +38,7 @@ public class Map {
     public Decorative[] decoratives = new Decorative[32];
 
     private int decCount = 0;
-    Player player;
+    private Player player;
 
     private String title, fileName;
     public Vec2D playerStartPos = new Vec2D(), playerStartVel = new Vec2D();
@@ -93,6 +93,10 @@ public class Map {
 
     public int getTile(int x, int y) {
         return tiles[y * width + x].id;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public int getTilesLength() {

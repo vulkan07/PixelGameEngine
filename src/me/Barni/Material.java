@@ -40,23 +40,31 @@ public class Material {
             JSONArray ja = jsonObject.getJSONArray("tiles");
             try {
                 maxTypes = jsonObject.getInt("maxTypes");
-            }catch (Exception e) {
+            } catch (Exception e) {
                 logger.err("Invalid field \"maxTypes\"!");
                 maxTypes = 8;
             }
+
+            matCount=0;
+            //Find the biggest material value
+            for (int i = 0; i < ja.length(); i++) {
+                int cid = ((JSONObject) ja.get(i)).getInt("id");
+                if (cid > matCount)
+                    matCount = cid;
+            }
+            matCount++; //Shift value because arrays start at 0
+
             //Init arrays
-            solid = new int[ja.length()][maxTypes];
-            translucent = new int[ja.length()][maxTypes];
-            path = new String[ja.length()][maxTypes];
-            matCount = ja.length();
+            solid = new int[matCount][maxTypes];
+            translucent = new int[matCount][maxTypes];
+            path = new String[matCount][maxTypes];
 
             //load data
-            for(int i = 0; i < ja.length(); i++) {
+            for (int i = 0; i < ja.length(); i++) {
                 //Get data
                 int matIndex = ((JSONObject) ja.get(i)).getInt("id");
                 int typeIndex = ((JSONObject) ja.get(i)).getInt("type");
-                if (matIndex >= ja.length())
-                {
+                if (matIndex >= ja.length()) {
                     logger.err("[MAT] Material id larger than the array: " + matIndex);
                     return false;
                 }
@@ -87,15 +95,19 @@ public class Material {
     public static int isSolid(int id, int type) {
         return solid[id][type];
     }
-    public static  int isTranslucent(int id, int type) {
+
+    public static int isTranslucent(int id, int type) {
         return translucent[id][type];
     }
+
     public static String getPath(int id, int type) {
         return path[id][type];
     }
-    public static  int getMatCount() {
+
+    public static int getMatCount() {
         return matCount;
     }
+
     public static int getMaxTypes() {
         return maxTypes;
     }

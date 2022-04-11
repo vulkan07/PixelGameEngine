@@ -18,10 +18,11 @@ import java.nio.charset.StandardCharsets;
 
 public class MapLoader {
 
-    Game game;
-    Logger logger;
-    Map map;
-    private String fullPath; //Used by other methods
+    private Game game;
+    private Logger logger;
+    private Map map;
+    private String fullPath;
+    private boolean silent;
 
     public static final double VALID_MAP_FILE_VERSION = 1.3;
 
@@ -30,21 +31,89 @@ public class MapLoader {
         this.logger = game.getLogger();
     }
 
+    //Returns an error as a string if the map is not valid
+    //Returns "" if it is valid
+    public static String isValid(String path, Game game) {
+        //TRY TO FIND FILE
+        File file = new File(path);
+        if (!file.exists()) {
+            file = new File(game.GAME_DIR + path);
+            if (!file.exists()) {
+                file = new File(game.MAP_DIR + path);
+            }
+        }
+        if (!file.exists())
+            return "File missing";
+
+        //TRY TO READ FILE
+        String rawStr;
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            byte[] data = new byte[(int) file.length()];
+            fis.read(data);
+            fis.close();
+            rawStr = new String(data, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return "Cannot read file";
+        }
+
+        //TRY TO CONVERT FILE TO JSON
+        JSONObject fullObj, mapObj;
+        try {
+            fullObj = new JSONObject(rawStr);
+            mapObj = fullObj.getJSONObject("bmap");
+        } catch (JSONException e) {
+            return "Invalid JSON:" + e.getMessage();
+        }
+
+        //CHECK IF ESSENTIAL KEYS ARE PRESENT
+        String[] essentials = {"sizeX", "sizeY", "version", "grid", "backGrid", "spawnPos", "spawnVel", "ObjectList"};
+
+        for (String key : essentials) {
+            if (!mapObj.has(key))
+                return "Missing key: '" + key + "'";
+        }
+
+        //Check if values are valid
+        try {
+            mapObj.getInt("sizeX");
+            mapObj.getInt("sizeY");
+            mapObj.getDouble("version");
+            mapObj.getString("spawnPos");
+            mapObj.getString("spawnVel");
+        } catch (JSONException e) {
+            return "Invalid value: " + e.getMessage();
+        }
+
+        //Check version
+        if (mapObj.getDouble("version") != VALID_MAP_FILE_VERSION) {
+            return "Invalid file version: " + mapObj.getDouble("version");
+        }
+
+        //TODO finish checking
+
+        return "";
+    }
+
+    private static String checkGridValid(JSONObject grid) {
+        return "";
+    }
 
     /**
      * Returns null if there's an error
      **/
-    public Map loadMap(String relPath) {
+    public Map loadMap(String relPath, boolean silent) {
+        this.silent = silent;
 
-        logger.info("[MAPLOAD] Loading map: " + relPath);
-        logger.increaseIndention("MAP LOADER");
+        if (!silent) {
+            logger.info("[MAPLOAD] Loading map: " + relPath);
+            logger.increaseIndention("MAP LOADER");
+        }
 
         File file = new File(relPath);
-        if (!file.exists())
-        {
+        if (!file.exists()) {
             file = new File(game.GAME_DIR + relPath);
-            if (!file.exists())
-            {
+            if (!file.exists()) {
                 file = new File(game.MAP_DIR + relPath);
             }
         }
@@ -71,7 +140,7 @@ public class MapLoader {
 
 
             String[] pathBroken = fullPath.split("\\\\");
-            map = new Map(game, h, w, 32, pathBroken[pathBroken.length-1]);
+            map = new Map(game, h, w, 32, pathBroken[pathBroken.length - 1]);
 
             JSONArray grid = mapObj.getJSONArray("grid");
             loadGrid(grid, false);
@@ -121,6 +190,7 @@ public class MapLoader {
 
 
     private void errMsg(String msg) {
+        if (silent) return;
         logger.err("[MAPLOAD] " + msg + "    In: " + fullPath);
     }
 
@@ -148,7 +218,8 @@ public class MapLoader {
                     pp.force = entObj.getFloat("force");
                     try {
                         pp.strictTrigger = entObj.getBoolean("strictTrigger");
-                    } catch (JSONException e) {}
+                    } catch (JSONException e) {
+                    }
                     map.addEntity(pp);
                     break;
 
@@ -277,9 +348,9 @@ public class MapLoader {
                 }
 
                 if (backGround)
-                    map.setBackTile(y * map.width + x, new Tile(id,type));
+                    map.setBackTile(y * map.width + x, new Tile(id, type));
                 else
-                    map.setTile(y * map.width + x, new Tile(id,type));
+                    map.setTile(y * map.width + x, new Tile(id, type));
             }
         }
     }

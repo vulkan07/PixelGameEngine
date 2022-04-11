@@ -2,6 +2,7 @@ package me.Barni.window;
 
 import me.Barni.Game;
 import me.Barni.physics.Vec2D;
+import me.Barni.tools.LevelEditor;
 import org.lwjgl.glfw.GLFW;
 
 public class MouseHandler {
@@ -68,6 +69,10 @@ public class MouseHandler {
         if (isPressed(LMB))
             if (game.getIntro().isPlayingIntro())
                 game.getIntro().end();
+
+        if (x < 10 && LevelEditor.isEditing()) {
+            game.getLevelEditor().focus();
+        }
     }
 
     public static void mouseButtonCallback(long window, int button, int action, int mods) {

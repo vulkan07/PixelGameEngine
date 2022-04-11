@@ -72,9 +72,15 @@ public class KeyboardHandler {
         }
     }
 
+    private static boolean prevF4;
     public static void update(Game game) {
-        if (pressed[F1 + 2])
-            game.getLevelEditor().setEditing(!game.getLevelEditor().isEditing());
+
+        if (pressed[F1 + 3]) {
+            if (!prevF4)
+                game.getLevelEditor().setEditing(!LevelEditor.isEditing());
+            prevF4 = true;
+        } else
+            prevF4 = false;
 
         if (pressed[SPACE])
             if (game.getIntro().isPlayingIntro())

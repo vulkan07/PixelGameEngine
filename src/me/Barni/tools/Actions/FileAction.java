@@ -23,5 +23,6 @@ public class FileAction extends EditorAction {
             g.loadNewMap(path);
         if (type == TYPE_SAVE)
             g.getMap().dumpCurrentMapIntoFile(path);
+        g.getLevelEditor().refresh();
     }
 }
