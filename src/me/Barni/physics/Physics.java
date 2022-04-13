@@ -52,7 +52,7 @@ public class Physics {
             if (ent.locked || !ent.solid || !ent.alive) continue;
 
             ent.velocity.add(gravity);
-            ent.velocity.clamp(20);
+            ent.velocity.clamp(12);
             ent.velocity.decrease(ent.resistance);
             ent.position.add(ent.velocity);
 

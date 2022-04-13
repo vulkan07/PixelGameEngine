@@ -17,7 +17,7 @@ public class LevelEditor {
 
 
     private JFrame pWin;
-    private EditorGUI eGUI;;
+    private EditorGUI eGUI;
 
 
     Vec2D pos = new Vec2D();

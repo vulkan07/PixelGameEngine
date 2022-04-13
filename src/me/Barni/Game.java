@@ -215,7 +215,7 @@ public final class Game implements Runnable {
 
         //If map doesn't load, a hardcoded map loads
         if (map == null) {
-            map = new Map(this, 3, 5, 32, "<default>");
+            map = new Map(this, 3, 5, 32, "error.map");
             //Tile[] defaultmap = new Tile[15];
             Tile t;
             for (int i = 0;i < 15; i++) {

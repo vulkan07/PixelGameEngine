@@ -223,8 +223,6 @@ public class Player extends Entity {
 
         if (!locked && active) {
             velocity.add(moving);
-            if (velocity.x > 8)
-                velocity.x = 8;
         }
     }
 

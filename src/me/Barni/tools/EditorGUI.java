@@ -52,6 +52,7 @@ public class EditorGUI {
     private JLabel pathInfoLabel;
     private JLabel solidityInfoLabel;
     private JLabel matPathInfoLabel;
+    private JButton newButton;
 
     ListSelectionModel sm;
 
@@ -64,6 +65,9 @@ public class EditorGUI {
     public void setMap(Map map) {
         this.map = map;
         initUIComponents();
+        if (map.getFileName().contains("blank.map")) {
+            pathField.setText(game.MAP_DIR + "untitled.map");
+        }
     }
 
     public void update() {
@@ -139,7 +143,7 @@ public class EditorGUI {
         try {
             img = game.getMap().atlas.getImage(id - 1, type);
         } catch (Exception e) {
-            System.out.println("invalid index" + e.getMessage());
+            System.out.println("<Editor> Invalid texture index: " + e.getMessage());
             txtPreview.setIcon(null);
             return;
         }
@@ -187,6 +191,11 @@ public class EditorGUI {
                         game,
                         FileAction.TYPE_SAVE,
                         pathField.getText())));
+        newButton.addActionListener(e -> actor.addAction(
+                new FileAction(
+                        game,
+                        FileAction.TYPE_NEW,
+                        pathField.getText())));
 
         // Listen for changes in the pathField text
         pathField.getDocument().addDocumentListener(new DocumentListener() {
@@ -206,8 +215,6 @@ public class EditorGUI {
         indexSpinner.addChangeListener(e -> updateMaterialPreview());
         typeSpinner.addChangeListener(e -> updateMaterialPreview());
 
-        //Initial texture update
-        updateMaterialPreview();
 
 
         //Restrict spinner values to numbers
@@ -217,12 +224,13 @@ public class EditorGUI {
         txt = ((JSpinner.NumberEditor) typeSpinner.getEditor()).getTextField();
         ((NumberFormatter) txt.getFormatter()).setAllowsInvalid(false);
 
-
-        updateCheckBoxStates();
         //Checkbox listeners
         paintCB.addActionListener(e -> checkBoxHandle(CB_PAINT, paintCB.isSelected()));
         freeCamCB.addActionListener(e -> checkBoxHandle(CB_FREECAM, freeCamCB.isSelected()));
         godCB.addActionListener(e -> checkBoxHandle(CB_GODMODE, godCB.isSelected()));
+
+        //Set all UI elements' values to correct ones
+        refresh();
     }
 
     public static final int CB_FREECAM = 0;

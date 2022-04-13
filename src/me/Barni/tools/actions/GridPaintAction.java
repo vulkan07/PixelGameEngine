@@ -30,6 +30,7 @@ public class GridPaintAction extends EditorAction {
         if (index < 0 || index > map.getTilesLength())
             return;
 
+        //TODO validate if index is out of bounds
         if (backTile)
             prevTile = new Tile(map.getBackTile(index).id, map.getBackTile(index).type);
         else
@@ -51,6 +52,7 @@ public class GridPaintAction extends EditorAction {
     }
 
     public static int getTileFromMousePos(Game game, Vec2D pos) {
+        //TODO validate if index is out of bounds (in coordinates)
         int w = game.getMap().getWidth();
         float zoom = game.getMap().getCamera().getZoom();
         float scrollX = game.getMap().getCamera().getScrollX();
