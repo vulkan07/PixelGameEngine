@@ -1,8 +1,9 @@
 package me.Barni.tools;
 
 import me.Barni.*;
-import me.Barni.tools.Actions.FileAction;
-import me.Barni.tools.Actions.GridPaintAction;
+import me.Barni.tools.actions.FileAction;
+import me.Barni.tools.actions.GridPaintAction;
+import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
 
 import javax.swing.*;
@@ -73,14 +74,28 @@ public class EditorGUI {
                     MouseHandler.isPressed(MouseHandler.RMB)) &&
                     me.Barni.window.Window.isFocused()) {
 
-                actor.addAction(
-                        new GridPaintAction(
-                                game,
-                                MouseHandler.getPosition(),
-                                MouseHandler.isPressed(MouseHandler.LMB) ? (int) indexSpinner.getValue() : 0, //Erease if RMB
-                                MouseHandler.isPressed(MouseHandler.LMB) ? (int) typeSpinner.getValue() : 0
-                        )
+                //Create action
+                GridPaintAction a = new GridPaintAction(
+                        game,
+                        MouseHandler.getPosition(),
+                        MouseHandler.isPressed(MouseHandler.LMB) ? (int) indexSpinner.getValue() : 0, //Erease if RMB
+                        MouseHandler.isPressed(MouseHandler.LMB) ? (int) typeSpinner.getValue() : 0,
+                        KeyboardHandler.getKeyState(KeyboardHandler.SHIFT) //Background tile if SHIFT is pressed
                 );
+                //Only add action if the tile is different
+                boolean addAction = true;
+                //If Last event was grid paint
+                if (actor.getLastAction() != null && actor.getLastAction() instanceof GridPaintAction) {
+                    //Previous tile index
+                    int prevTileIndex = ((GridPaintAction)actor.getLastAction()).getTileIndex();
+
+                    //If not different, don't add action
+                    if (a.getTileIndex() == prevTileIndex)
+                        addAction = false;
+                }
+                if (addAction) {
+                    actor.addAction(a);
+                }
             }
 
         actor.update();

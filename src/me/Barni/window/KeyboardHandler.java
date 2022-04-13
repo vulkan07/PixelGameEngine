@@ -66,7 +66,6 @@ public class KeyboardHandler {
                 //These are bad, need to use localized: glfwSetCharCallback(window, character_callback);
                 case Z:
                     pressed_CTRL_Z = true;
-                    System.out.println("CTRL+Z");
                     break;
             }
             return;

@@ -3,7 +3,7 @@ package me.Barni.tools;
 import me.Barni.Camera;
 import me.Barni.Game;
 import me.Barni.Map;
-import me.Barni.tools.Actions.EditorAction;
+import me.Barni.tools.actions.EditorAction;
 
 import java.util.ArrayList;
 
@@ -30,21 +30,23 @@ public class EditorActor {
         if (actions.size() < 2)
             return;
 
-        int index = actions.size()-1;
-        int actual;
-
+        int index = actions.size();
         //Find the latest not undone element
         do {
-            actual = index;
             index--;
-        } while (index >= 0 && actions.get(index).isUndone());
-
+        } while (index > 0 && actions.get(index).isUndone());
         EditorAction a = actions.get(index);
 
         if (a == null)
             return;
 
         a.undo();
+    }
+
+    public EditorAction getLastAction() {
+        if (actions.size() <= 1)
+            return null;
+        return actions.get(actions.size()-1);
     }
 
     public void executeLastAction(boolean force) {

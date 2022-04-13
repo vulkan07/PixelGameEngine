@@ -1,4 +1,4 @@
-package me.Barni.tools.Actions;
+package me.Barni.tools.actions;
 
 import me.Barni.Game;
 
