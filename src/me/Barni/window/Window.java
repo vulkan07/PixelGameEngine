@@ -1,15 +1,21 @@
 package me.Barni.window;
 
 import me.Barni.Game;
-import me.Barni.tools.LevelEditor;
+import me.Barni.texture.Texture;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.Version;
-import org.lwjgl.glfw.GLFWDropCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
 
-import java.util.Objects;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.*;
@@ -191,6 +197,42 @@ public class Window {
         GL30.glEnable(GL30.GL_MULTISAMPLE);
         GL30.glBlendFunc(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA);
         focus();
+
+        //Set icon
+        try {
+            setIcon(pWindow, ImageIO.read(new File(game.GAME_DIR + "game.png")));
+        } catch (IOException ignored) {}
+    }
+
+    //Copied code - DO NOT TOUCH!
+    private static void setIcon(long window, BufferedImage img) {
+        GLFWImage image = GLFWImage.malloc();
+        image.set(img.getWidth(), img.getHeight(), loadImageToByteBuffer(img));
+
+        GLFWImage.Buffer images = GLFWImage.malloc(1);
+        images.put(0, image);
+
+        glfwSetWindowIcon(window, images);
+
+        images.free();
+        image.free();
+    }
+    private static ByteBuffer loadImageToByteBuffer(final BufferedImage image) {
+        final byte[] buffer = new byte[image.getWidth() * image.getHeight() * 4];
+        int counter = 0;
+        for (int i = 0; i < image.getHeight(); i++) {
+            for (int j = 0; j < image.getWidth(); j++) {
+                final int c = image.getRGB(j, i);
+                buffer[counter + 0] = (byte) (c << 8 >> 24);
+                buffer[counter + 1] = (byte) (c << 16 >> 24);
+                buffer[counter + 2] = (byte) (c << 24 >> 24);
+                buffer[counter + 3] = (byte) (c >> 24);
+                counter += 4;
+            }
+        }
+        ByteBuffer bbuffer = BufferUtils.createByteBuffer(image.getWidth() * image.getHeight() * 4); //4 -> RGBA
+        bbuffer.put(buffer).flip();
+        return bbuffer;
     }
 
     public void clear() {

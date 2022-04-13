@@ -42,7 +42,7 @@ public class PressurePlate extends Entity {
                 if (Math.abs(other.position.x - position.x) > 2 || other.velocity.x > 4)
                     return;
 
-            other.velocity.y = -force;
+            other.acceleration.y = -force;
             if (strictTrigger) {
                 other.velocity.x = 0;
                 other.position.x = position.x;

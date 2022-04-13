@@ -15,7 +15,7 @@ public abstract class Entity {
     protected Game game;
     public String name;
 
-    public Vec2D position, size, velocity, gravity;
+    public Vec2D position, size, velocity, acceleration, gravity;
     public float speed, resistance;
     public boolean visible, active, solid, locked, collidesWithMap, alive;
 
@@ -118,6 +118,7 @@ public abstract class Entity {
 
         position = new Vec2D(0, 0);
         velocity = new Vec2D(0, 0);
+        acceleration = new Vec2D(0, 0);
         size = new Vec2D(32, 32);
 
         touchHitbox = new Hitbox(
@@ -142,7 +143,6 @@ public abstract class Entity {
 
     public void tick() {
         texture.update(); //Updates texture anyway (not need to be active)
-        if (!active) return;
     }
 
     //Overrideable events

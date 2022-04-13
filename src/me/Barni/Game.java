@@ -166,7 +166,7 @@ public final class Game implements Runnable {
         HEIGHT = h;
 
 
-        window = new Window(this, title + "  -  " + loadRandomTitleMsg(), w, h, fullscreen);
+        window = new Window(this, loadRandomTitleMsg() + "  -  " + title, w, h, fullscreen);
 
         if (!Material.loadMaterials(GAME_DIR+"materials.json")) return;
 

@@ -1,6 +1,7 @@
 package me.Barni.entity.childs;
 
 import me.Barni.Game;
+import me.Barni.graphics.GraphicsUtils;
 import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.window.KeyboardHandler;
@@ -11,6 +12,7 @@ import me.Barni.particle.render.BloodParticleRenderer;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
+import org.lwjgl.opengl.GL30;
 
 public class Player extends Entity {
 
@@ -26,12 +28,8 @@ public class Player extends Entity {
     public Vec2D spawnLocation;
 
     ParticleEmitter pem;
-    private Texture face = new Texture();
-
-    public int faceIndex = 0;
 
     private int respawnTimer, respawnTime, reducedRespawnTime = 1;
-    private int blinkTimer = 100;
 
     public int getRespawnTimer() {
         return respawnTimer;
@@ -72,8 +70,6 @@ public class Player extends Entity {
         alive = true;
         spawnLocation = new Vec2D();
 
-        face.loadTexture(g, "player_face", size.xi(), size.yi(), true);
-        //face.setAnimated(false);
 
         ParticleData pData = new ParticleData();
 
@@ -106,7 +102,6 @@ public class Player extends Entity {
             return;
         //game.getMap().test.setText("Deaths: " + deaths);
         game.getMap().getCamera().lerp = 0.02f;
-        faceIndex = 2;
         deaths++;
         alive = false;
         visible = false;
@@ -157,26 +152,6 @@ public class Player extends Entity {
     @Override
     public void tick() {
         super.tick();
-        face.setCurrentFrame(faceIndex);
-        //idleTimer++;
-
-        //if (idleTimer > 2000)
-        //    faceIndex = 3;
-
-
-        blinkTimer--;
-        //if (idleTimer < 2000) {
-        if (blinkTimer <= 0) {
-            blinkTimer = 620;
-            faceIndex = 1;
-        }
-        if (blinkTimer == 600) {
-            faceIndex = 0;
-        }
-        //}
-
-        if (godMode)
-            faceIndex = 3;
 
         if (!alive) {
             respawnTimer--;
@@ -188,9 +163,9 @@ public class Player extends Entity {
         Vec2D moving = new Vec2D(0, 0);
         //CTRL slowdown
         if (KeyboardHandler.getKeyState(KeyboardHandler.CTRL))
-            speed = 0.31f;
+            speed = 0.32f;
         else
-            speed = 0.5f;
+            speed = 0.47f;
 
         //Jump mechanism
         jumped = wantToJump;
@@ -222,14 +197,23 @@ public class Player extends Entity {
         }
 
         if (!locked && active) {
-            velocity.add(moving);
+            acceleration.add(moving);
         }
     }
 
     @Override
     public void render(VertexArrayObject vao, ShaderProgram shader) {
+        if (!visible || !texture.isValid()) return;
+
+        float[] vArray = GraphicsUtils.generateVertexArray(position.x, position.y, size.x, size.y);
+
+        vao.setVertexData(vArray);
+
         shader.bind();
-        shader.uploadBool("uSelected", true);
-        super.render(vao, shader);
+        shader.selectTextureSlot("uTexSampler", 0);
+        shader.uploadBool("uSelected", false);
+        texture.bind();
+        GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+        texture.unBind();
     }
 }

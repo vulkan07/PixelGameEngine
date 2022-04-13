@@ -95,7 +95,7 @@ public class Main {
             System.err.println("Invalid arguments!");
             e.printStackTrace();
         }
-        game.start("Über Brutal Platformer 2077", w, h, fc, false, Logger.LOG_INFO);
+        game.start("PixelGameEngine", w, h, fc, false, Logger.LOG_INFO);
     }
 }
 

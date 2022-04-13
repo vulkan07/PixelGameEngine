@@ -246,7 +246,7 @@ public class Texture {
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, 0);
     }
 
-    private static byte[] intARGBtoByteRGBA(int[] argb) {
+    public static byte[] intARGBtoByteRGBA(int[] argb) {
         byte[] rgba = new byte[argb.length * 4];
 
         for (int i = 0; i < argb.length; i++) {
