@@ -4,12 +4,16 @@ import me.Barni.Game;
 import me.Barni.Map;
 
 public abstract class EditorAction {
-    Game g;
+    Game game;
     Map map;
 
 
-    boolean success, executed;
+    protected boolean success, executed, undone;
 
+
+    public boolean isUndone() {
+        return undone;
+    }
     public boolean isSuccess() {
         return success;
     }
@@ -19,15 +23,17 @@ public abstract class EditorAction {
     }
 
     public EditorAction(Game g) {
-        this.g = g;
+        this.game = g;
         this.map = g.getMap();
     }
 
     public void execute() {
         executed = true;
+        undone = false;
         success = true;
     }
     public void undo() {
         executed = false;
+        undone = true;
     }
 }

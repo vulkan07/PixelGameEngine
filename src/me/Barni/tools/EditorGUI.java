@@ -2,6 +2,8 @@ package me.Barni.tools;
 
 import me.Barni.*;
 import me.Barni.tools.Actions.FileAction;
+import me.Barni.tools.Actions.GridPaintAction;
+import me.Barni.window.MouseHandler;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -54,13 +56,9 @@ public class EditorGUI {
 
     private LevelEditor editor;
     private EditorActor actor;
-    private static Game game;
+    private Game game;
     private Map map;
 
-
-    public static void init(Game g) {
-        game = g;
-    }
 
     public void setMap(Map map) {
         this.map = map;
@@ -68,11 +66,29 @@ public class EditorGUI {
     }
 
     public void update() {
+
+        //If painting & focused & LMB or RMB pressed -> add GridPaintAction to actor
+        if (editor.isPainting())
+            if ((MouseHandler.isPressed(MouseHandler.LMB) ||
+                    MouseHandler.isPressed(MouseHandler.RMB)) &&
+                    me.Barni.window.Window.isFocused()) {
+
+                actor.addAction(
+                        new GridPaintAction(
+                                game,
+                                MouseHandler.getPosition(),
+                                MouseHandler.isPressed(MouseHandler.LMB) ? (int) indexSpinner.getValue() : 0, //Erease if RMB
+                                MouseHandler.isPressed(MouseHandler.LMB) ? (int) typeSpinner.getValue() : 0
+                        )
+                );
+            }
+
         actor.update();
     }
 
 
-    public EditorGUI(LevelEditor editor) {
+    public EditorGUI(LevelEditor editor, Game game) {
+        this.game = game;
         this.editor = editor;
         this.actor = new EditorActor(game);
     }
@@ -120,15 +136,15 @@ public class EditorGUI {
         txtPreview.setIcon(icon);
 
 
-        matPathInfoLabel.setText("Path: " + Material.getPath(id,type));
-        solidityInfoLabel.setText("Solidity: " + Material.isSolid(id,type));
+        matPathInfoLabel.setText("Path: " + Material.getPath(id, type));
+        solidityInfoLabel.setText("Solidity: " + Material.isSolid(id, type));
     }
 
     public void validatePath() {
         File f = new File(pathField.getText());
         if (f.exists()) {
 
-            String result = MapLoader.isValid(pathField.getText(), game);
+            String result = MapLoader.isValidMapFile(pathField.getText(), game);
             if (result.equals("")) {
                 pathField.setForeground(Color.BLACK);
                 pathInfoLabel.setText("Valid file");
@@ -199,9 +215,9 @@ public class EditorGUI {
     public static final int CB_PAINT = 2;
 
     private void updateCheckBoxStates() {
-        freeCamCB.setSelected( editor.isFreeCam() );
-        godCB.setSelected( map.getPlayer().godMode );
-        paintCB.setSelected( editor.isPainting() );
+        freeCamCB.setSelected(editor.isFreeCam());
+        godCB.setSelected(map.getPlayer().godMode);
+        paintCB.setSelected(editor.isPainting());
     }
 
     //Handle checkbox updates
@@ -232,5 +248,9 @@ public class EditorGUI {
         updateMaterialPreview();
         validatePath();
         updateCheckBoxStates();
+    }
+
+    public void undo() {
+        actor.undoLastAction();
     }
 }

@@ -132,20 +132,20 @@ public class Hitbox {
 
     public Hitbox[] touchingMapTiles(Map map) {
         Hitbox[] out = new Hitbox[24];
-        Hitbox other = new Hitbox(0, 0, map.tileSize, map.tileSize);
+        Hitbox other = new Hitbox(0, 0, map.getTileSize(), map.getTileSize());
 
         for (int i = 0; i < map.getTilesLength(); i++) {
             //if (Material.solid[map.tiles[i]] == 0)
             //    continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST NOT SOLID TILES!!
             //HANDLED IN resolveCollision()
 
-            other.x = i % map.width * map.tileSize;
-            other.y = i / map.width * map.tileSize;
+            other.x = i % map.getWidth() * map.getTileSize();
+            other.y = i / map.getWidth() * map.getTileSize();
             if (isColliding(other)) {
                 for (int j = 0; j < out.length; j++) {
                     if (out[j] == null) {
-                        out[j] = new Hitbox(other.x, other.y, map.tileSize, map.tileSize);
-                        out[j].solidType = Material.isSolid(map.getTile(i), map.getTileType(i));
+                        out[j] = new Hitbox(other.x, other.y, map.getTileSize(), map.getTileSize());
+                        out[j].solidType = Material.isSolid(map.getTile(i).id, map.getTile(i).type);
                         break;
                     }
                 }

@@ -19,12 +19,32 @@ public class EditorActor {
 
     public void setMap(Map m) {
         map = m;
-        cam = map.cam;
+        cam = map.getCamera();
         reload();
     }
 
     public void reload() {
 
+    }
+    public void undoLastAction() {
+        if (actions.size() < 2)
+            return;
+
+        int index = actions.size()-1;
+        int actual;
+
+        //Find the latest not undone element
+        do {
+            actual = index;
+            index--;
+        } while (index >= 0 && actions.get(index).isUndone());
+
+        EditorAction a = actions.get(index);
+
+        if (a == null)
+            return;
+
+        a.undo();
     }
 
     public void executeLastAction(boolean force) {
@@ -35,12 +55,20 @@ public class EditorActor {
         if (a == null)
             return;
 
-        if (!force && a.isExecuted())
+        if (!force && (a.isExecuted() || a.isUndone()))
             return;
 
         a.execute();
     }
     public void addAction(EditorAction a) {
+
+        //Remove all undone actions
+        int index = actions.size()-1;
+        while (index >= 0 && actions.get(index).isUndone()) {
+            actions.remove(index);
+            index--;
+        }
+
         actions.add(a);
     }
 

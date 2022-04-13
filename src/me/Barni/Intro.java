@@ -5,9 +5,6 @@ import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.texture.Texture;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fc;
-import org.joml.Vector2f;
-import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
 
 import java.io.File;
@@ -175,7 +172,7 @@ public class Intro {
         wheelShader.uploadFloat("uAlpha", alpha);
 
         wheelShader.uploadFloat("uTime", time);
-        wheelShader.uploadMat4("uProjMat", game.getMap().cam.getDefaultProjMat());
+        wheelShader.uploadMat4("uProjMat", game.getMap().getCamera().getDefaultProjMat());
         rot.identity();
         rot.rotate((float)Math.toRadians(time*1.4f), 0, 0, 1);
         wheelShader.uploadMat4("uRotMat", rot);

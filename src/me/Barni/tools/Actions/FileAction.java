@@ -2,6 +2,8 @@ package me.Barni.tools.Actions;
 
 import me.Barni.Game;
 
+import javax.swing.*;
+
 public class FileAction extends EditorAction {
     public static final int TYPE_LOAD = 1;
     public static final int TYPE_SAVE = 2;
@@ -20,9 +22,13 @@ public class FileAction extends EditorAction {
         executed = true;
         success = true;
         if (type == TYPE_LOAD)
-            g.loadNewMap(path);
-        if (type == TYPE_SAVE)
-            g.getMap().dumpCurrentMapIntoFile(path);
-        g.getLevelEditor().refresh();
+            game.loadNewMap(path);
+        if (type == TYPE_SAVE) {
+            //Comfirm dialog
+            int n = JOptionPane.showConfirmDialog(null, "Do you want to overwrite file?", "Save", JOptionPane.OK_CANCEL_OPTION);
+            if (n == 0)
+                game.getMap().dumpCurrentMapIntoFile(path);
+        }
+        game.getLevelEditor().refresh();
     }
 }

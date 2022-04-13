@@ -3,6 +3,7 @@ package me.Barni.tools;
 import me.Barni.*;
 import me.Barni.physics.Vec2D;
 import me.Barni.window.KeyboardHandler;
+import me.Barni.window.MouseHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,31 +12,33 @@ import java.awt.event.FocusListener;
 
 public class LevelEditor {
 
-    private static Game game;
+    private Game game;
     private Map map;
 
 
-    private JFrame pWin = new JFrame();
-    private EditorGUI eGUI = new EditorGUI(this);
+    private JFrame pWin;
+    private EditorGUI eGUI;;
 
 
     Vec2D pos = new Vec2D();
     final int SPEED = 12;
 
-    private boolean freeCam, painting, winFocued;
+    private boolean freeCam, painting, winFocused;
     private static boolean editing;
 
     public LevelEditor(Game g) {
         game = g;
+        eGUI = new EditorGUI(this,game);
+        pWin = new JFrame();
         initPWin();
     }
 
-    public static void init(Game g) {
-        game = g;
+    public void undo() {
+        eGUI.undo();
     }
 
     public void focus() {
-        winFocued = true;
+        winFocused = true;
         pWin.toFront();
         pWin.setVisible(true);
         pWin.setExtendedState(JFrame.NORMAL);
@@ -43,7 +46,7 @@ public class LevelEditor {
     }
 
     public void loseFocus() {
-        winFocued= false;
+        winFocused = false;
         pWin.setVisible(false);
         pWin.setExtendedState(JFrame.ICONIFIED);
         pWin.toBack();
@@ -68,10 +71,10 @@ public class LevelEditor {
         });
         pWin.addFocusListener(new FocusListener() {
             public void focusGained(FocusEvent e) {
-                winFocued = true;
+                winFocused = true;
             }
             public void focusLost(FocusEvent e) {
-                winFocued = false;
+                winFocused = false; //Sus
             }
         });
 
@@ -89,12 +92,14 @@ public class LevelEditor {
     public void setMap(Map newMap) {
         map = newMap;
         eGUI.setMap(map);
+        if (editing)
+            focus();
     }
 
     public void setFreeCam(boolean b) {
         freeCam = b;
         if (!b)
-            map.cam.followEntity =map.getPlayer();
+            map.getCamera().followEntity =map.getPlayer();
     }
     public void setPainting(boolean painting) {
         this.painting = painting;
@@ -107,8 +112,8 @@ public class LevelEditor {
         return painting;
     }
 
-    public boolean isFocued() {
-        return winFocued;
+    public boolean isFocused() {
+        return winFocused;
     }
 
     public void setEditing(boolean e) {
@@ -120,6 +125,7 @@ public class LevelEditor {
             pWin.setVisible(true);
             eGUI.update();
         } else {
+            game.window.setHideCursor(true);
             loseFocus();
         }
     }
@@ -132,11 +138,13 @@ public class LevelEditor {
         if (!editing)
             return;
 
+        if (KeyboardHandler.poll_CTRL_Z())
+            undo();
         eGUI.update();
 
         if (freeCam) {
-            map.cam.followEntity = null;
-            map.cam.lookAt(pos);
+            map.getCamera().followEntity = null;
+            map.getCamera().lookAt(pos);
 
             if (KeyboardHandler.getKeyState(KeyboardHandler.UP))
                 pos.y -= SPEED;

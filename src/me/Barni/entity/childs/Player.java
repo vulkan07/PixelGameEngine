@@ -104,8 +104,8 @@ public class Player extends Entity {
 
         if (godMode) //particles still spawn even if godmode is on
             return;
-        game.getMap().test.setText("Deaths: " + deaths);
-        game.getMap().cam.lerp = 0.02f;
+        //game.getMap().test.setText("Deaths: " + deaths);
+        game.getMap().getCamera().lerp = 0.02f;
         faceIndex = 2;
         deaths++;
         alive = false;
@@ -120,8 +120,8 @@ public class Player extends Entity {
             n.show(180);
         }
 
-        game.getMap().cam.shake(8, 100);
-        game.getMap().cam.setZoom(game.getMap().cam.getZoom() + .05f, false);
+        game.getMap().getCamera().shake(8, 100);
+        game.getMap().getCamera().setZoom(game.getMap().getCamera().getZoom() + .05f, false);
 
         velocity.mult(0);
         position = spawnLocation.copy();
@@ -130,10 +130,10 @@ public class Player extends Entity {
     }
 
     public void respawn() {
-        game.getMap().cam.lerp = game.getMap().cam.DEFAULT_LERP;
+        game.getMap().getCamera().lerp = game.getMap().getCamera().DEFAULT_LERP;
         visible = true;
         alive = true;
-        game.getMap().cam.setZoom(game.getMap().cam.getZoom() - .05f, false);
+        game.getMap().getCamera().setZoom(game.getMap().getCamera().getZoom() - .05f, false);
     }
 
     @Override

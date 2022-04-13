@@ -1,17 +1,13 @@
 package me.Barni;
 
 import me.Barni.entity.*;
-import me.Barni.entity.childs.Checkpoint;
-import me.Barni.entity.childs.Collectable;
-import me.Barni.entity.childs.LevelExit;
-import me.Barni.entity.childs.PressurePlate;
+import me.Barni.entity.childs.*;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
@@ -33,7 +29,7 @@ public class MapLoader {
 
     //Returns an error as a string if the map is not valid
     //Returns "" if it is valid
-    public static String isValid(String path, Game game) {
+    public static String isValidMapFile(String path, Game game) {
         //TRY TO FIND FILE
         File file = new File(path);
         if (!file.exists()) {
@@ -166,7 +162,6 @@ public class MapLoader {
             JSONArray entList = objList.getJSONArray("Entities");
             loadEntities(entList);
             logger.decreaseIndention("ENTITIES");
-
 
             logger.info("[MAPLOAD] Loaded map: " + fullPath);
             logger.decreaseIndention("MAP LOADER");
@@ -316,20 +311,20 @@ public class MapLoader {
     private void loadGrid(JSONArray lines, boolean backGround) {
         String[] tilesRaw;
         //For every row
-        for (int y = 0; y < map.height; y++) {
+        for (int y = 0; y < map.getHeight(); y++) {
             try {
                 tilesRaw = ((String) lines.get(y)).split(",");
             } catch (NullPointerException e) {
                 errMsg("Invalid map grid format: too few lines!");
                 return;
             }
-            if (tilesRaw.length > map.width) {
+            if (tilesRaw.length > map.getWidth()) {
                 errMsg("Invalid map grid format: \"sizeX\" doesn't match row count! Too few rows!");
                 return;
             }
 
             //For every column
-            for (int x = 0; x < map.width; x++) {
+            for (int x = 0; x < map.getWidth(); x++) {
                 try {
                     tilesRaw[x] = tilesRaw[x].replace(" ", "");
                 } catch (ArrayIndexOutOfBoundsException e) {
@@ -348,9 +343,9 @@ public class MapLoader {
                 }
 
                 if (backGround)
-                    map.setBackTile(y * map.width + x, new Tile(id, type));
+                    map.setBackTile(y * map.getWidth() + x, new Tile(id, type));
                 else
-                    map.setTile(y * map.width + x, new Tile(id, type));
+                    map.setTile(y * map.getWidth() + x, new Tile(id, type));
             }
         }
     }

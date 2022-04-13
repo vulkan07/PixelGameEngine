@@ -5,7 +5,6 @@ import me.Barni.entity.childs.Player;
 import me.Barni.graphics.RenderableText;
 import me.Barni.graphics.TextRenderer;
 import me.Barni.texture.AnimSequenceLoader;
-import me.Barni.tools.EditorGUI;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
 import me.Barni.window.Window;
@@ -201,8 +200,6 @@ public final class Game implements Runnable {
 
         TextRenderer.init(this);
         RenderableText.init(this);
-        EditorGUI.init(this);
-        LevelEditor.init(this);
 
         nextLevel = "";
 
@@ -236,7 +233,7 @@ public final class Game implements Runnable {
         player.loadTexture("player_1"); //Load player texture
 
         map.addEntity(player);          //Add player
-        map.cam.followEntity = player;  //Make camera follow player
+        map.getCamera().followEntity = player;  //Make camera follow player
 
         if (levelEditor != null)
             levelEditor.setMap(map);
@@ -291,7 +288,7 @@ public final class Game implements Runnable {
 
             if ((System.nanoTime() - lastFPS) > drawThreshold) {
                 lastFPS = System.nanoTime();
-                if (Window.isFocused() || getScreenFadeAlpha() != 0 || levelEditor.isFocued()) {
+                if (Window.isFocused() || getScreenFadeAlpha() != 0 || levelEditor.isFocused()) {
                     render();
                 }
                 fps++;
@@ -360,7 +357,7 @@ public final class Game implements Runnable {
             intro.render();
 
         else
-            map.render(map.cam);
+            map.render(map.getCamera());
         //-----------------\\
 
         updateScreenFade();

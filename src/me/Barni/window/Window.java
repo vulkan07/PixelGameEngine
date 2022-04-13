@@ -1,6 +1,7 @@
 package me.Barni.window;
 
 import me.Barni.Game;
+import me.Barni.tools.LevelEditor;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWDropCallback;
@@ -46,6 +47,10 @@ public class Window {
 
     public static boolean isFocused() {
         return focused;
+    }
+
+    public boolean isFullScreen() {
+        return fullScreen;
     }
 
     private static void windowFocusCallback(long win, boolean focused) {

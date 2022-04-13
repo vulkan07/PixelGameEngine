@@ -16,8 +16,8 @@ public class Physics {
     public Physics(Game g, Map m) {
         game = g;
         map = m;
-        boundX = m.width * m.tileSize;
-        boundY = m.height * m.tileSize;
+        boundX = m.getWidth() * m.getTileSize();
+        boundY = m.getHeight() * m.getTileSize();
     }
 
     public void init() {

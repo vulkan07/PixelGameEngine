@@ -2,9 +2,7 @@ package me.Barni;
 
 import me.Barni.entity.Entity;
 import me.Barni.entity.childs.Player;
-import me.Barni.graphics.RenderableText;
 import me.Barni.graphics.ShaderProgram;
-import me.Barni.graphics.TextRenderer;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Physics;
 import me.Barni.physics.Vec2D;
@@ -16,8 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.lwjgl.opengl.GL30;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 
 import static me.Barni.Intro.ELEMENT_ARRAY;
@@ -26,25 +22,25 @@ import static me.Barni.graphics.GraphicsUtils.generateVertexArray;
 
 public class Map {
 
-    Game game;
-    public Physics physics;
+    private final Game game;
+    private Physics physics;
 
-    public int width, height, tileSize;
+    private int width, height, tileSize;
 
     private Tile[] tiles;
     private Tile[] backTiles;
 
     public Entity[] entities = new Entity[16];
     public Decorative[] decoratives = new Decorative[32];
-
-    private int decCount = 0;
-    private Player player;
+    private int decCount, entCount;
 
     private String title, fileName;
+
+    private Camera cam;
+    private Player player;
     public Vec2D playerStartPos = new Vec2D(), playerStartVel = new Vec2D();
 
     public float deathGray;
-    public Camera cam;
 
     private ShaderProgram frontShader, backShader, entShader, decShader, backImageShader;
     private VertexArrayObject vao;
@@ -54,64 +50,85 @@ public class Map {
 
     public TextureAtlas atlas;
 
-    //----------------------------
-    //-- Getters & Setters -------
+    //-----------------------------------------
+    //----------- Getters & Setters -----------
+    //-----------------------------------------
+
+    //Get Title & FileName
     public String getTitle() {
         return title;
     }
-
     public String getFileName() {
         return fileName;
     }
 
-    public int getBackTile(int i) {
-        return backTiles[i].id;
+    //Get width, height, tileSize
+    public int getWidth() {
+        return width;
+    }
+    public int getHeight() {
+        return height;
+    }
+    public int getTileSize() {
+        return tileSize;
     }
 
-    public void setBackTile(int i, Tile t) {
-        backTiles[i] = t;
+    //Get tiles
+    public Tile getBackTile(int i) {
+        return backTiles[i];
     }
-    public void setBackTileID(int i, int id) {
-        backTiles[i].id = id;
-    }
-    public void setTileID(int i, int id) {
-        tiles[i].id = id;
-    }
-    public int getTile(int i) {
-        return tiles[i].id;
-    }
-    public int getTileType(int i) {
-        return tiles[i].type;
+    public Tile getTile(int i) {
+        return tiles[i];
     }
 
+    //Set tiles as Tiles
     public void setTile(int i, Tile t) {
         tiles[i] = t;
     }
-    public void setTile(int x, int y, int id) {
-        tiles[y * width + x].id = id;
+    public void setBackTile(int i, Tile t) {
+        backTiles[i] = t;
     }
 
-    public int getTile(int x, int y) {
-        return tiles[y * width + x].id;
+    //Set tile data (with variables instead of new Tile object)
+    public void setTileData(int i, int id, int type) {
+        tiles[i].id = id;
+        tiles[i].type = type;
+    }
+    public void setBackTileData(int i, int id, int type) {
+        backTiles[i].id = id;
+        backTiles[i].type = type;
     }
 
+    //Get Player & Camera
     public Player getPlayer() {
         return player;
     }
+    public Camera getCamera() {
+        return cam;
+    }
 
+    //Get tile length
     public int getTilesLength() {
         return tiles.length;
     }
 
+    //Set tiles with arrays
     public void setTileArray(Tile[] newTiles) {
         tiles = newTiles;
     }
+    public void setBackTiles(Tile[] newTiles) {
+        backTiles = newTiles;
+    }
 
-    public int getDecCount() {
+    public int getDecorativeCount() {
         return decCount;
     }
-    //-- Getters & Setters -------
-    //----------------------------
+    public int getEntityCount() {
+        return entCount;
+    }
+    //-----------------------------------------
+    //-----------                   -----------
+    //-----------------------------------------
 
     public Map(Game g, int w, int h, int tSize, String fName) {
         fileName = fName;
@@ -129,6 +146,14 @@ public class Map {
 
         cam = new Camera(g.getWIDTH(), g.getHEIGHT());
         //cam.setZoom(1.3f, false);
+    }
+
+    public void initPlayer(Player p) {
+        p.setLevel(1);
+        p.spawnLocation = playerStartPos.copy();
+        p.position = playerStartPos.copy();
+        p.velocity = playerStartVel.copy();
+        player = p;
     }
 
     public void createShaderPrograms() {
@@ -299,6 +324,9 @@ public class Map {
         vao.unBind();
         GL30.glUseProgram(0); //Unbind shader
     }
+    public final int ENT_RENDER_LAYER = 8;
+    public final int TILE_RENDER_LAYER = 4;
+    public final int RENDER_LAYERS = 12;
 
     public void render(Camera cam) {
 
@@ -322,17 +350,8 @@ public class Map {
         }
 
         vao.unBind();
-        test.setX(player.position.xi()+32);
-        test.setY(player.position.yi()-32);
-        test.setText("x:"+player.position.x);
-        test.render(cam);
 
     }
-    public RenderableText test= new RenderableText("DONÁLD", 200, 500, 15, Color.RED);
-
-    public final int ENT_RENDER_LAYER = 8;
-    public final int TILE_RENDER_LAYER = 4;
-    public final int RENDER_LAYERS = 12;
 
     private void renderBackground() {
         if (backgroundTexture == null || !backgroundTexture.isValid())
@@ -406,12 +425,11 @@ public class Map {
         currentShader.unBind();
     }
 
-
     public void renderEntities() {
         entShader.bind();
 
-        entShader.uploadMat4("uProjMat", cam.getProjMat());
-        entShader.uploadMat4("uViewMat", cam.getViewMat());
+        entShader.uploadMat4("uProjMat", getCamera().getProjMat());
+        entShader.uploadMat4("uViewMat", getCamera().getViewMat());
         entShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
 
         for (Entity e : entities) {
@@ -424,8 +442,8 @@ public class Map {
     public void renderDecoratives(int layer) {
         decShader.bind();
 
-        decShader.uploadMat4("uProjMat", cam.getProjMat());
-        decShader.uploadMat4("uViewMat", cam.getViewMat());
+        decShader.uploadMat4("uProjMat", getCamera().getProjMat());
+        decShader.uploadMat4("uViewMat", getCamera().getViewMat());
         decShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
 
         for (Decorative d : decoratives) {
@@ -441,7 +459,7 @@ public class Map {
 
         atlas.update();
 
-        cam.update();
+        getCamera().update();
 
         for (Entity e : entities) {
             if (e != null)
@@ -459,65 +477,83 @@ public class Map {
     }
 
 
+    //--------------------------------
+    //Entity & decorative manipulation
+    //--------------------------------
+
+    //ADDERS
+    /**Returns the ID of the new decorative.**/
     public int addDecorative(Decorative dec) {
         if (decCount >= decoratives.length) {
-            game.getLogger().err("Decoratives array is full!");
-            return -1;
+            game.getLogger().err("Decoratives array is full! Resizing...");
+
+            //Create new array with size+2, copy decoratives, and set it as the new array
+            Decorative[] newDecs = new Decorative[decoratives.length+2];
+            System.arraycopy(decoratives, 0, newDecs, 0, decoratives.length);
+            decoratives = newDecs;
         }
         decoratives[decCount] = dec;
         decCount++;
         return decCount - 1;
     }
-
-    public void addEntity(Entity e) {
+    /**Returns the ID of the new entity.**/
+    public int addEntity(Entity e) {
         if (e instanceof Player)
             initPlayer((Player) e);
-        for (int i = 0; i < entities.length; i++) {
-            if (entities[i] == null) {
-                if (e.name == null || e.name.equals(""))
-                    game.getLogger().warn("[MAP] Entity added without name: " + e.getClass());
-                entities[i] = e;
-                e.setID(i);
-                physics.init();
-                game.getLogger().subInfo("[MAP] Added entity: " + e.getClass());
-                return;
-            }
+
+        if (entCount >= entities.length) {
+            game.getLogger().err("Entity array is full! Resizing...");
+
+            //Create new array with size+2, copy decoratives, and set it as the new array
+            Entity[] newEnts = new Entity[entities.length+2];
+            System.arraycopy(entities, 0, newEnts, 0, entities.length);
+            entities = newEnts;
         }
-        game.getLogger().err("[MAP] Entity array is full!!");
+        entities[entCount] = e;
+        entCount++;
+        return entCount - 1;
     }
 
-    public void initPlayer(Player p) {
-        p.setLevel(1);
-        p.spawnLocation = playerStartPos.copy();
-        p.position = playerStartPos.copy();
-        p.velocity = playerStartVel.copy();
-        player = p;
-    }
-
+    //GETTERS
     public Entity getEntity(String name) {
         for (Entity e : entities)
-            if (e == null) continue;
-            else if (e.name.equals(name)) return e;
+            if (e != null && e.name.equals(name)) return e;
         return null;
     }
-
-    public void removeEntity(String name) {
-        physics.init();
-        for (int i = 0; i < entities.length; i++)
-            if (entities[i] != null)
-                if (entities[i].name.equals(name)) entities[i] = null;
+    public Entity getEntity(int i) {
+        return entities[i];
+    }
+    public Decorative getDecorative(int i) {
+        return decoratives[i];
     }
 
-    /**
-     * Only for editor! Don't use it!
-     **/
+    //REMOVERS
+    public void removeEntity(String name) {
+        physics.init();
+        int index = -1;
+        for (int i = 0; i < entities.length; i++)
+            if (entities[i] != null) {
+                if (entities[i].name.equals(name)) entities[i] = null;
+                index = i;
+            }
+
+        //Couldn't find entity
+        if (index == -1)
+            return;
+
+        entCount--;
+        //Shift entity array back from the deletion
+        if (entities.length - 1 - index >= 0)
+            System.arraycopy(entities, index + 1, entities, index, entities.length - 1 - index);
+    }
     public void removeDecorative(int i) {
         decoratives[i] = null;
         decCount--;
 
-        for (int j = i; j < decoratives.length - 1; j++) {
-            decoratives[j] = decoratives[j + 1];
-        }
+        //Shift decorative array back from the deletion
+        if (decoratives.length - 1 - i >= 0)
+            System.arraycopy(decoratives, i + 1, decoratives, i, decoratives.length - 1 - i);
     }
+
 
 }

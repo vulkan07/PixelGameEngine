@@ -30,6 +30,13 @@ public class KeyboardHandler {
     private static boolean[] pressed = new boolean[MAX_KEYS];
 
 
+    private static boolean pressed_CTRL_Z;
+    public static boolean poll_CTRL_Z() {
+        boolean val = pressed_CTRL_Z;
+        pressed_CTRL_Z = false;
+        return val;
+    }
+
     public KeyboardHandler(Game g, boolean logPress) {
         game = g;
         logPresses = logPress;
@@ -58,6 +65,7 @@ public class KeyboardHandler {
                     break;
                 //These are bad, need to use localized: glfwSetCharCallback(window, character_callback);
                 case Z:
+                    pressed_CTRL_Z = true;
                     System.out.println("CTRL+Z");
                     break;
             }
