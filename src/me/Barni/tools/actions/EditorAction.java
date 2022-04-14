@@ -2,11 +2,12 @@ package me.Barni.tools.actions;
 
 import me.Barni.Game;
 import me.Barni.Map;
+import me.Barni.tools.EditorActor;
 
 public abstract class EditorAction {
-    Game game;
-    Map map;
-
+    protected Game game;
+    protected Map map;
+    protected EditorActor actor;
 
     protected boolean success, executed, undone;
 
@@ -22,9 +23,10 @@ public abstract class EditorAction {
         return executed;
     }
 
-    public EditorAction(Game g) {
+    public EditorAction(Game g, EditorActor actor) {
         this.game = g;
         this.map = g.getMap();
+        this.actor = actor;
     }
 
     public void execute() {

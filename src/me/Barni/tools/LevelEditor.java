@@ -23,7 +23,11 @@ public class LevelEditor {
     Vec2D pos = new Vec2D();
     final int SPEED = 12;
 
-    private boolean freeCam, painting, winFocused;
+    private boolean freeCam;
+    private boolean painting;
+    private boolean winFocused;
+
+    private boolean alwaysRender;
     private static boolean editing;
 
     public LevelEditor(Game g) {
@@ -54,8 +58,8 @@ public class LevelEditor {
 
     private void initPWin() {
         pWin.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        pWin.setSize(670, 500);
-        pWin.setMinimumSize(new Dimension(650, 520));
+        pWin.setSize(700, 480);
+        pWin.setMinimumSize(new Dimension(650, 400));
         pWin.setTitle("Level editor: <Undefined map>");
         pWin.setContentPane(eGUI.rootPanel);
         pWin.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -116,6 +120,13 @@ public class LevelEditor {
         return winFocused;
     }
 
+    public boolean isAlwaysRendering() {
+        return alwaysRender;
+    }
+    public void setAlwaysRender(boolean alwaysRender) {
+        this.alwaysRender = alwaysRender;
+    }
+
     public void setEditing(boolean e) {
         editing = e;
         if (editing) {
@@ -129,7 +140,6 @@ public class LevelEditor {
             loseFocus();
         }
     }
-
     public static boolean isEditing() {
         return editing;
     }

@@ -46,7 +46,7 @@ public final class Game implements Runnable {
     public String BG_DIR;
     public String TEXTURE_DIR;
     public String MAP_DIR;
-    public double GAME_VERSION;
+    public String GAME_VERSION;
 
     public String nextLevel; //if not empty, game will change to this map
 
@@ -70,6 +70,9 @@ public final class Game implements Runnable {
     //---------------------------------\\
     //--->  Load Title Random Msg  <---\\
     private String loadRandomTitleMsg() {
+        if (r.nextInt(5) != 1) //1:5 chance that a random title will be given
+            return "";
+
         String msg = "";
         String lines = "";
 
@@ -88,7 +91,7 @@ public final class Game implements Runnable {
         //If read successfully choose random line as title
         if (!lines.equals("")) {
             String[] msgs = lines.split("\n");
-            return msgs[r.nextInt(msgs.length - 1)];
+            return msgs[r.nextInt(msgs.length - 1)] + "  -  ";
         }
 
         return msg;
@@ -127,7 +130,7 @@ public final class Game implements Runnable {
             BG_DIR = jsonObject.getString("background").replace("$", GAME_DIR) + "/";
             SHADER_DIR = jsonObject.getString("shaders").replace("$", GAME_DIR) + "/";
             MAP_DIR = jsonObject.getString("maps").replace("$", GAME_DIR) + "/";
-            GAME_VERSION = jsonObject.getDouble("version");
+            GAME_VERSION = jsonObject.getString("version");
         } catch (JSONException e) {
 
             logger.err("Invalid game.json file! " + e.getMessage());
@@ -156,7 +159,7 @@ public final class Game implements Runnable {
 
         System.out.println(">---------------------<");
         System.out.println("    PixelGameEngine");
-        System.out.println("         v" + GAME_VERSION);
+        System.out.println("        v" + GAME_VERSION);
         System.out.println(">---------------------<");
         //Set Logger for static classes
         AnimSequenceLoader.logger = logger;
@@ -166,7 +169,7 @@ public final class Game implements Runnable {
         HEIGHT = h;
 
 
-        window = new Window(this, loadRandomTitleMsg() + "  -  " + title, w, h, fullscreen);
+        window = new Window(this, loadRandomTitleMsg() + title, w, h, fullscreen);
 
         if (!Material.loadMaterials(GAME_DIR+"materials.json")) return;
 
@@ -288,7 +291,7 @@ public final class Game implements Runnable {
 
             if ((System.nanoTime() - lastFPS) > drawThreshold) {
                 lastFPS = System.nanoTime();
-                if (Window.isFocused() || getScreenFadeAlpha() != 0 || levelEditor.isFocused()) {
+                if (Window.isFocused() || getScreenFadeAlpha() != 0 || levelEditor.isFocused() || levelEditor.isAlwaysRendering()) {
                     render();
                 }
                 fps++;

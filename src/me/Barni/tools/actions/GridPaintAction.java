@@ -3,6 +3,7 @@ package me.Barni.tools.actions;
 import me.Barni.Game;
 import me.Barni.Tile;
 import me.Barni.physics.Vec2D;
+import me.Barni.tools.EditorActor;
 
 public class GridPaintAction extends EditorAction {
 
@@ -13,8 +14,8 @@ public class GridPaintAction extends EditorAction {
     private int index = -1;
     private Tile prevTile;
 
-    public GridPaintAction(Game g, Vec2D mousePos, int tileID, int tileType, boolean backTile) {
-        super(g);
+    public GridPaintAction(Game g, EditorActor actor, Vec2D mousePos, int tileID, int tileType, boolean backTile) {
+        super(g, actor);
         this.mousePos = mousePos;
         this.tID = tileID;
         this.tType = tileType;

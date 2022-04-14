@@ -1,6 +1,6 @@
 package me.Barni.tools;
 
-import me.Barni.Camera;
+import me.Barni.Decorative;
 import me.Barni.Game;
 import me.Barni.Map;
 import me.Barni.tools.actions.EditorAction;
@@ -10,8 +10,8 @@ import java.util.ArrayList;
 public class EditorActor {
     private Game g;
     private Map map;
-    private Camera cam;
     private ArrayList<EditorAction> actions = new ArrayList<>();
+    private int[] selectedDecIndices = null;
 
     public EditorActor(Game g) {
         this.g = g;
@@ -19,7 +19,6 @@ public class EditorActor {
 
     public void setMap(Map m) {
         map = m;
-        cam = map.getCamera();
         reload();
     }
 
@@ -78,4 +77,21 @@ public class EditorActor {
         executeLastAction(false);
     }
 
+
+    public int[] getSelectedDecoratives() {
+        return selectedDecIndices;
+    }
+
+    public void setSelectedDecs(int[] selectedDecIndices) {
+        this.selectedDecIndices = selectedDecIndices;
+
+        //Reset
+        for (int i = 0; i < map.getDecorativeCount(); i++) {
+            map.getDecorative(i).selected = false;
+        }
+        //Set selected
+        for (int i : selectedDecIndices) {
+            map.getDecorative(i).selected = true;
+        }
+    }
 }

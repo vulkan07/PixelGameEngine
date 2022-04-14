@@ -1,6 +1,7 @@
 package me.Barni.tools.actions;
 
 import me.Barni.Game;
+import me.Barni.tools.EditorActor;
 
 import javax.swing.*;
 import java.io.File;
@@ -13,8 +14,8 @@ public class FileAction extends EditorAction {
     private int type;
     private String path;
 
-    public FileAction(Game g, int type, String path) {
-        super(g);
+    public FileAction(Game g, EditorActor actor, int type, String path) {
+        super(g, actor);
         this.type = type;
         this.path = path;
     }
