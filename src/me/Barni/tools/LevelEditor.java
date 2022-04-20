@@ -32,7 +32,7 @@ public class LevelEditor {
 
     public LevelEditor(Game g) {
         game = g;
-        eGUI = new EditorGUI(this,game);
+        eGUI = new EditorGUI(this, game);
         pWin = new JFrame();
         initPWin();
     }
@@ -69,7 +69,7 @@ public class LevelEditor {
             }
         });
         pWin.addWindowStateListener(e -> {
-            if (e.getNewState() == 1){
+            if (e.getNewState() == 1) {
                 setEditing(false);
             }
         });
@@ -77,6 +77,7 @@ public class LevelEditor {
             public void focusGained(FocusEvent e) {
                 winFocused = true;
             }
+
             public void focusLost(FocusEvent e) {
                 winFocused = false; //Sus
             }
@@ -102,9 +103,16 @@ public class LevelEditor {
 
     public void setFreeCam(boolean b) {
         freeCam = b;
-        if (!b)
-            map.getCamera().followEntity =map.getPlayer();
+        if (b) {
+            map.getPlayer().locked = true;
+            map.getCamera().setZoom(1, false);
+        }
+        if (!b) {
+            map.getPlayer().locked = false;
+            map.getCamera().followEntity = map.getPlayer();
+        }
     }
+
     public void setPainting(boolean painting) {
         this.painting = painting;
     }
@@ -112,6 +120,7 @@ public class LevelEditor {
     public boolean isFreeCam() {
         return freeCam;
     }
+
     public boolean isPainting() {
         return painting;
     }
@@ -123,6 +132,7 @@ public class LevelEditor {
     public boolean isAlwaysRendering() {
         return alwaysRender;
     }
+
     public void setAlwaysRender(boolean alwaysRender) {
         this.alwaysRender = alwaysRender;
     }
@@ -140,6 +150,7 @@ public class LevelEditor {
             loseFocus();
         }
     }
+
     public static boolean isEditing() {
         return editing;
     }

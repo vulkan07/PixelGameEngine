@@ -1,6 +1,5 @@
 package me.Barni.tools;
 
-import me.Barni.Decorative;
 import me.Barni.Game;
 import me.Barni.Map;
 import me.Barni.tools.actions.EditorAction;
@@ -9,12 +8,14 @@ import java.util.ArrayList;
 
 public class EditorActor {
     private Game g;
+    private EditorGUI eGUI;
     private Map map;
     private ArrayList<EditorAction> actions = new ArrayList<>();
-    private int[] selectedDecIndices = null;
+    private int[] selectedDecIndices = {-1};
 
-    public EditorActor(Game g) {
+    public EditorActor(Game g, EditorGUI eGUI) {
         this.g = g;
+        this.eGUI = eGUI;
     }
 
     public void setMap(Map m) {
@@ -93,5 +94,9 @@ public class EditorActor {
         for (int i : selectedDecIndices) {
             map.getDecorative(i).selected = true;
         }
+    }
+
+    public EditorGUI getGUI() {
+        return eGUI;
     }
 }

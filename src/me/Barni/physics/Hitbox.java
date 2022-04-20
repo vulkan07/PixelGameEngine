@@ -31,20 +31,21 @@ public class Hitbox {
         this.solidType = 1;
     }
 
+    //Hack
+    //Do not try to understand
     private boolean AABB(Hitbox other) {
         if (!(other.realH < y || y + h < other.y))
-            if (!(other.realW < x || x + w < other.x))
-                return true;
+            return !(other.realW < x || x + w < other.x);
         return false;
     }
 
     public boolean smallAABB(Hitbox other, int smaller) {
         if (!(other.realH - smaller < y || y + h - smaller < other.y))
-            if (!(other.realW - smaller < x || x + w - smaller < other.x))
-                return true;
+            return !(other.realW - smaller < x || x + w - smaller < other.x);
         return false;
     }
 
+    //What the utter f*ck is this
     public void resolveTileVSEntityCollision(Entity ent, Hitbox other) {
 
         //return if the tile is void
@@ -75,7 +76,6 @@ public class Hitbox {
                     return;
                 }
             }
-
             //FROM TOP
             if (realH >= other.y && realH < other.realH) {
                 if (ent.velocity.y > 0) {
@@ -98,7 +98,6 @@ public class Hitbox {
                     return;
                 }
             }
-
             //FROM RIGHT
             if (x <= other.realW && x > other.x) {
                 if (ent.velocity.x < 0) {
@@ -108,7 +107,6 @@ public class Hitbox {
                 }
             }
         }
-        return;
     }
 
     public boolean isColliding(Hitbox other) {
@@ -135,10 +133,6 @@ public class Hitbox {
         Hitbox other = new Hitbox(0, 0, map.getTileSize(), map.getTileSize());
 
         for (int i = 0; i < map.getTilesLength(); i++) {
-            //if (Material.solid[map.tiles[i]] == 0)
-            //    continue; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DISABLE TEST NOT SOLID TILES!!
-            //HANDLED IN resolveCollision()
-
             other.x = i % map.getWidth() * map.getTileSize();
             other.y = i / map.getWidth() * map.getTileSize();
             if (isColliding(other)) {

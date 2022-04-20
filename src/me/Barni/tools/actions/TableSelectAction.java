@@ -32,6 +32,7 @@ public class TableSelectAction extends EditorAction {
 
         //Set actor's array
         actor.setSelectedDecs(indices);
+        actor.getGUI().updateDecPropertyTable();
     }
 
     @Override

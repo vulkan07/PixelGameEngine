@@ -7,7 +7,8 @@ import org.lwjgl.opengl.GL30;
 
 import java.awt.*;
 
-import static me.Barni.Intro.ELEMENT_ARRAY;
+import static me.Barni.graphics.GraphicsUtils.QUAD_ELEMENT_ARRAY;
+
 
 public class RenderableText {
     private String text;
@@ -46,7 +47,7 @@ public class RenderableText {
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
-        vao.setElementData(ELEMENT_ARRAY);
+        vao.setElementData(QUAD_ELEMENT_ARRAY);
         vao.addAttributePointer(2); //Position (x,y)
         vao.addAttributePointer(2); //TX coords (u,v)
         t = new Texture();

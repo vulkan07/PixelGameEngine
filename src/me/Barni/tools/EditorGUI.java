@@ -117,7 +117,7 @@ public class EditorGUI {
     public EditorGUI(LevelEditor editor, Game game) {
         this.game = game;
         this.editor = editor;
-        this.actor = new EditorActor(game);
+        this.actor = new EditorActor(game, this);
     }
 
     public void updateMaterialPreview() {
@@ -206,6 +206,65 @@ public class EditorGUI {
 
     }
 
+    public void updateDecPropertyTable() {
+        boolean invalid = false;
+
+        //Is there more selected
+        invalid = actor.getSelectedDecoratives().length < 1;
+
+        int index = -1;
+        //Get index if length is not 0
+        if (actor.getSelectedDecoratives().length != 0)
+            index = actor.getSelectedDecoratives()[0];
+
+        //Declare decorative
+        Decorative d = null;
+
+        //Is the index valid (throws no exception?)
+        try {
+            d = map.getDecorative(index);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            invalid = true;
+        }
+
+        //Is the decorative null
+        invalid |= (d == null);
+
+        if (invalid) {
+            //Empty table
+            DefaultTableModel dtm = new DefaultTableModel(0, 2);
+            dtm.setColumnIdentifiers(new String[]{"Key", "Value"});
+            propertiesTable.setModel(dtm);
+            propertiesTable.getColumn("Key").setMaxWidth(60);
+            return;
+        }
+
+
+        //Keys: [x, y] [w, h] layer, parallax, path (total 7 keys, 2 pairs -> 5 rows)
+        //Create table model
+        DefaultTableModel dtm = new DefaultTableModel(5, 2);
+        //Set header to madel
+        dtm.setColumnIdentifiers(new String[]{"Key", "Value"});
+        //Set model to table
+        propertiesTable.setModel(dtm);
+        //Set max width for "ID" row
+        propertiesTable.getColumn("Key").setMaxWidth(60);
+
+
+        //Set data
+        String[] keys = {"Position", "Size", "Layer", "Parallax", "Material"};
+        //Set key texts to first column
+        for (int i = 0; i < keys.length; i++){
+            dtm.setValueAt(keys[i], i, 0);
+        }
+        //Set data
+        dtm.setValueAt(d.x + ", " + d.y, 0, 1);   //Pos
+        dtm.setValueAt(d.w + ", " + d.h, 1, 1);   //Size
+        dtm.setValueAt(d.z, 2, 1);                     //Layer
+        dtm.setValueAt(d.parallax, 3, 1);              //Prx
+        dtm.setValueAt(d.texture.getPath(), 4, 1);     //Mat
+    }
+
     private void initUIComponents() {
         pathField.setText(game.MAP_DIR + game.getMap().getFileName());
 
@@ -277,6 +336,7 @@ public class EditorGUI {
         freeCamCB.setSelected(editor.isFreeCam());
         godCB.setSelected(map.getPlayer().godMode);
         paintCB.setSelected(editor.isPainting());
+        renderCB.setSelected(editor.isAlwaysRendering());
     }
 
     private void handleSelection(ListSelectionEvent e) {
@@ -329,6 +389,7 @@ public class EditorGUI {
         validatePath();
         updateCheckBoxStates();
         updateSelectionTables();
+        updateDecPropertyTable(); //Get the actor's first selected decorative
     }
 
     public void undo() {
