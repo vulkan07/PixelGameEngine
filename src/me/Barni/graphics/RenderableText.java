@@ -12,10 +12,11 @@ import static me.Barni.graphics.GraphicsUtils.QUAD_ELEMENT_ARRAY;
 
 public class RenderableText {
     private String text;
-    private int x, y, size;
+    private float x, y;
+    private int size;
     private Color color;
     private Texture t;
-    private boolean outdatedTexture;
+    private boolean outdatedTexture, inMap;
 
     private static Game game;
     private VertexArrayObject vao;
@@ -44,6 +45,7 @@ public class RenderableText {
 
     //Constructors call this
     private void initGraphics() {
+
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
@@ -60,11 +62,26 @@ public class RenderableText {
             t = TextRenderer.renderText(text, color, size * TextRenderer.RENDER_QUALITY_MULT);
         }
         vao.bind(false);
-        vao.setVertexData(GraphicsUtils.generateVertexArray(x, y, t.getWidth() / TextRenderer.RENDER_QUALITY_MULT, t.getHeight() / TextRenderer.RENDER_QUALITY_MULT));
+        if (inMap)
+            vao.setVertexData(GraphicsUtils.generateVertexArray(
+                    x,
+                    y,
+                    t.getWidth() / TextRenderer.RENDER_QUALITY_MULT,
+                    t.getHeight() / TextRenderer.RENDER_QUALITY_MULT));
+        else
+            vao.setVertexData(GraphicsUtils.generateVertexArray(
+                    x,
+                    y,
+                    t.getWidth() / TextRenderer.RENDER_QUALITY_MULT,
+                    t.getHeight() / TextRenderer.RENDER_QUALITY_MULT));
 
         TextRenderer.textShader.bind();
-        TextRenderer.textShader.uploadMat4("uProjMat", cam.getProjMat());
-        TextRenderer.textShader.uploadMat4("uViewMat", cam.getViewMat());
+        if (inMap) {
+            TextRenderer.textShader.uploadMat4("uProjMat", cam.getProjMat());
+            TextRenderer.textShader.uploadMat4("uViewMat", cam.getViewMat());
+        } else
+            TextRenderer.textShader.uploadMat4("uProjMat", cam.getDefaultProjMat());
+        TextRenderer.textShader.uploadBool("uInMap", inMap);
         TextRenderer.textShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
         //TextRenderer.textShader.selectTextureSlot("uTexSampler", 1);
         t.bind();
@@ -73,6 +90,9 @@ public class RenderableText {
         TextRenderer.textShader.unBind();
     }
 
+    public Texture getT() {
+        return t;
+    }
 
     public String getText() {
         return text;
@@ -83,19 +103,19 @@ public class RenderableText {
         outdatedTexture = true;
     }
 
-    public int getX() {
+    public float getX() {
         return x;
     }
 
-    public void setX(int x) {
+    public void setX(float x) {
         this.x = x;
     }
 
-    public int getY() {
+    public float getY() {
         return y;
     }
 
-    public void setY(int y) {
+    public void setY(float y) {
         this.y = y;
     }
 
@@ -115,5 +135,13 @@ public class RenderableText {
     public void setColor(Color color) {
         this.color = color;
         outdatedTexture = true;
+    }
+
+    public boolean isInMap() {
+        return inMap;
+    }
+
+    public void setInMap(boolean inMap) {
+        this.inMap = inMap;
     }
 }

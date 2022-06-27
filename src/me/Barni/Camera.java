@@ -43,15 +43,17 @@ public class Camera {
         viewMat = new Matrix4f();
         defProjMat = new Matrix4f();
         defViewMat = new Matrix4f();
-        adjutProjection();
+        adjustProjection();
 
         defProjMat.identity();
-        defProjMat.ortho(0f, width, height, 0f, 0f, 100f);
+        defProjMat.ortho(0, 1920, 1080f, 0f, 0f, 100f);
+
         defViewMat.identity();
-        viewMat.lookAt(
+        defViewMat.lookAt(
                 new Vector3f(pos.x, pos.y, 10f),  // Position
-                camFront.add(pos.x, pos.y, 0f),  // Looking at
-                camUp);                         // Where's up);
+                new Vector3f(camFront).add(pos.x, pos.y, 0f),  // Looking at
+                camUp                         // Where's up
+        );
     }
 
     public void setViewSize(int w, int h) {
@@ -75,9 +77,9 @@ public class Camera {
         ticks++;
         if (timer > 0) {
             timer--;
-            ampl = lerp(setAmpl, 0, 1-Vec2D.remap(timer, 0, setTimer, 0,1));
-            noise.y = (float)(Math.sin(ticks / ampl) * ampl*0.1);
-            noise.x = (float)(Math.cos(ticks / ampl) * ampl*0.1);
+            ampl = lerp(setAmpl, 0, 1 - Vec2D.remap(timer, 0, setTimer, 0, 1));
+            noise.y = (float) (Math.sin(ticks / ampl) * ampl * 0.1);
+            noise.x = (float) (Math.cos(ticks / ampl) * ampl * 0.1);
         }
         if (timer == 0) {
             noise.x = 0;
@@ -140,22 +142,23 @@ public class Camera {
 
     private void adjustMatricesToZoom() {
         projMat.identity();
-        projMat.ortho(0, 1920f*zoom, 1080f*zoom, 0f, 0f, 100f);
+        projMat.ortho(0, 1920f * zoom, 1080f * zoom, 0f, 0f, 100f);
         //projMat.scale(zoom);
     }
 
-    public void adjutProjection() {
+    public void adjustProjection() {
         projMat.identity();
         projMat.ortho(0f, 1920f, 1080f, 0f, 0f, 100f);
     }
+
     Vector3f camFront = new Vector3f(0f, 0f, -1f);
     Vector3f camUp = new Vector3f(0f, 1f, 0f);
 
     public Matrix4f getViewMat() {
         viewMat.identity();
         //Shifts center pos according to zoom
-        float wm = pos.x - (width/2f*zoom) + (noise.x*ampl*zoom);
-        float hm = pos.y - (height/2f*zoom) + (noise.y*ampl*zoom);
+        float wm = pos.x - (width / 2f * zoom) + (noise.x * ampl * zoom);
+        float hm = pos.y - (height / 2f * zoom) + (noise.y * ampl * zoom);
         //Generates viewmatrix
         viewMat.lookAt(
                 new Vector3f(wm, hm, 10f),  // Position
@@ -164,6 +167,7 @@ public class Camera {
         );
         return viewMat;
     }
+
     public Matrix4f getDefaultViewMat() {
         Matrix4f m = new Matrix4f();
         m.identity();
@@ -182,6 +186,7 @@ public class Camera {
     public Matrix4f getProjMat() {
         return projMat;
     }
+
     public Matrix4f getDefaultProjMat() {
         return defProjMat;
     }

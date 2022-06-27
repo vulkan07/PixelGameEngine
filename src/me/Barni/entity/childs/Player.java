@@ -201,7 +201,7 @@ public class Player extends Entity {
         }
     }
 
-    private RenderableText velText = new RenderableText("",0,0);
+    //private RenderableText velText = new RenderableText("",0,0);
 
     @Override
     public void render(VertexArrayObject vao, ShaderProgram shader) {
@@ -218,16 +218,20 @@ public class Player extends Entity {
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         texture.unBind();
 
-        velText.setSize(15);
+        /*
+        velText.setSize(20);
         velText.setColor(Color.RED);
-        velText.setText((xColl ? "# " : "   ") + velocity.x);
-        velText.setX(position.xi());
-        velText.setY(position.yi());
+        velText.setText(String.valueOf(velocity.x));
+//        velText.setX(position.xi());
+//        velText.setY(position.yi());
+        velText.setX(40);
+        velText.setY(40);
         velText.render(game.getMap().getCamera());
 
 
-        velText.setText((yColl ? "# " : "   ") + velocity.x);
-        velText.setY(position.yi()+15);
+        velText.setText(String.valueOf(velocity.y));
+        velText.setY(position.y+15);
         velText.render(game.getMap().getCamera());
+        */
     }
 }

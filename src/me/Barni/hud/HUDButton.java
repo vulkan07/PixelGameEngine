@@ -63,31 +63,9 @@ public class HUDButton extends HUDElement {
     }
 
     @Override
-    public void render(BufferedImage img) {
+    public void render() {
         if (!visible) return;
-        Graphics g = img.getGraphics();
 
-        g.setColor(color);
-        if (hovered)
-            g.setColor(hoveredColor);
-        if (pressed)
-            g.setColor(pressedColor);
-
-        w = g.getFontMetrics().stringWidth(text) + 36;
-
-        g.fillRect((int) x, (int) y, (int) w, (int) h);
-        g.drawRect((int) x, (int) y, (int) w - 1, (int) h - 1);
-
-        g.setFont(game.getDefaultFont());
-
-        g.setColor(Color.white);
-        if (!pressable)
-            g.setColor(Color.GRAY);
-        g.drawString(text, (int) x + 8, (int) (y + h - 8));
-
-        if (pressed || hovered) {
-            g.drawRect((int) x - 2, (int) y - 2, (int) w + 3, (int) h + 3);
-        }
     }
 
 

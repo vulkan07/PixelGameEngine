@@ -2,10 +2,10 @@ package me.Barni.hud;
 
 
 import me.Barni.Game;
+import me.Barni.graphics.RenderableText;
 import me.Barni.physics.Vec2D;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class HUDNotification extends HUDElement {
 
@@ -15,7 +15,7 @@ public class HUDNotification extends HUDElement {
 
     public HUDNotification(Game g, String name, String text, int indent, int y) {
         super(g, name, 0, 0, 1, 32);
-        this.x = -w - 1;
+        this.x = -1000;
         this.indent = indent;
 
         if (indent < 0) {
@@ -26,33 +26,31 @@ public class HUDNotification extends HUDElement {
         this.y = y;
 
 
-        this.message = text;
+        setMessage(text);
         if (text == null & text.isEmpty()) {
-
             game.getLogger().warn("[HUDNotification] - \"" + name + "\" - Empty message!");
         }
 
         this.msgColor = Color.WHITE;
-        this.visible = false;
     }
 
+    public void setMessage(String text) {
+        this.message = text;
+    }
+
+    private RenderableText velText;
+
     @Override
-    public void render(BufferedImage img) {
-        x = Vec2D.lerp(x, tx, .08f);
-
-        if (!visible) return;
-        if (x <= -w) return;
-
-        Graphics g = img.getGraphics();
-        g.setFont(game.getDefaultFont());
-        w = g.getFontMetrics().stringWidth(message) + 40;
-
-        g.setColor(color);
-        g.fillRect((int) x, (int) y, (int) w, (int) h); //Box
-        g.fillRect((int) x, (int) y, 8, (int) h); // Decor box at left
-
-        g.setColor(msgColor);
-        g.drawString(message, (int) x + 16, (int) y + 24); //Text
+    public void render() {
+        velText.setSize(25);
+        velText.setColor(Color.BLACK);
+        velText.setInMap(false);
+        velText.setText(message);
+        velText.setX(x+20);
+        velText.setY(h);
+        velText.render(game.getMap().getCamera());
+        w = velText.getT().getWidth();
+        h = velText.getT().getHeight();
     }
 
     @Override
@@ -62,6 +60,8 @@ public class HUDNotification extends HUDElement {
 
         if (showTimer > 0)
             showTimer--;
+
+        x = Vec2D.lerp(x, tx, 0.08f);
 
         if (showTimer <= 0 && timed) {
             hide();
@@ -93,4 +93,9 @@ public class HUDNotification extends HUDElement {
         tx = x;
     }
 
+    @Override
+    public void init() {
+        velText = new RenderableText("",0,0);
+        hide();
+    }
 }

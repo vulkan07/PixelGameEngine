@@ -149,6 +149,7 @@ public class Intro {
             logoShader.bind();
             logoShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
 
+            vao.bind(false);
             vao.setVertexData(logoVA);
             GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
             logoTexture.unBind();

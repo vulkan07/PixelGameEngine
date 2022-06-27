@@ -1,6 +1,7 @@
 package me.Barni.hud;
 
 import me.Barni.Game;
+import me.Barni.graphics.RenderableText;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -96,9 +97,16 @@ public class HUDElement {
         }
     }
 
-    public void render(BufferedImage img) {
+
+    public void render() {
         for (int i = 0; i < childs.size(); i++) {
-            childs.get(i).render(img);
+            childs.get(i).render();
+        }
+    }
+
+    public void init() {
+        for (int i = 0; i < childs.size(); i++) {
+            childs.get(i).init();
         }
     }
 }

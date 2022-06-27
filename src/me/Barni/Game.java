@@ -184,12 +184,12 @@ public final class Game implements Runnable {
 
 
         //Add PlayerNotification
-        getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "<initial>", 16, 30));
+        getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "<no msg>", 16, 30));
 
         //Add button & set colors
-        getHud().getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
-        ((HUDButton) getHud().getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
-        ((HUDButton) getHud().getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
+        //getHud().getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
+        //((HUDButton) getHud().getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
+        //((HUDButton) getHud().getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
 
         GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 
@@ -203,7 +203,6 @@ public final class Game implements Runnable {
 
         TextRenderer.init(this);
         RenderableText.init(this);
-
         nextLevel = "";
 
         if (map != null)
@@ -256,6 +255,7 @@ public final class Game implements Runnable {
         map.createShaderPrograms();
         intro.start();
 
+        hud.init();
 
         final int desiredUPS = 60;
         final int desiredFPS = 60;
@@ -360,6 +360,8 @@ public final class Game implements Runnable {
         else
             map.render(map.getCamera());
         //-----------------\\
+        if (!intro.isPlayingIntro())
+            hud.render();
 
         updateScreenFade();
         GLFW.glfwSwapBuffers(window.getWindow());

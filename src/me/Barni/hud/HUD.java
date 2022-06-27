@@ -17,11 +17,15 @@ public class HUD {
         this.root = new HUDElement(g, "root", 0, 0, 0, 0);
     }
 
+    public void init() {
+        root.init();
+    }
+
     public void update() {
         root.update();
     }
 
-    public void render(BufferedImage img) {
-        root.render(img);
+    public void render() {
+        root.render();
     }
 }
