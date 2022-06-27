@@ -1,9 +1,7 @@
 package me.Barni.entity.childs;
 
 import me.Barni.Game;
-import me.Barni.graphics.GraphicsUtils;
-import me.Barni.graphics.ShaderProgram;
-import me.Barni.graphics.VertexArrayObject;
+import me.Barni.graphics.*;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.entity.Entity;
 import me.Barni.particle.ParticleData;
@@ -13,6 +11,8 @@ import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
 import org.lwjgl.opengl.GL30;
+
+import java.awt.*;
 
 public class Player extends Entity {
 
@@ -201,6 +201,8 @@ public class Player extends Entity {
         }
     }
 
+    private RenderableText velText = new RenderableText("",0,0);
+
     @Override
     public void render(VertexArrayObject vao, ShaderProgram shader) {
         if (!visible || !texture.isValid()) return;
@@ -215,5 +217,17 @@ public class Player extends Entity {
         texture.bind();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         texture.unBind();
+
+        velText.setSize(15);
+        velText.setColor(Color.RED);
+        velText.setText((xColl ? "# " : "   ") + velocity.x);
+        velText.setX(position.xi());
+        velText.setY(position.yi());
+        velText.render(game.getMap().getCamera());
+
+
+        velText.setText((yColl ? "# " : "   ") + velocity.x);
+        velText.setY(position.yi()+15);
+        velText.render(game.getMap().getCamera());
     }
 }

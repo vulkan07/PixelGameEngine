@@ -5,6 +5,7 @@ import me.Barni.Map;
 import me.Barni.tools.actions.EditorAction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class EditorActor {
     private Game g;
@@ -26,6 +27,7 @@ public class EditorActor {
     public void reload() {
 
     }
+
     public void undoLastAction() {
         if (actions.size() < 2)
             return;
@@ -46,14 +48,14 @@ public class EditorActor {
     public EditorAction getLastAction() {
         if (actions.size() <= 1)
             return null;
-        return actions.get(actions.size()-1);
+        return actions.get(actions.size() - 1);
     }
 
     public void executeLastAction(boolean force) {
         if (actions.size() == 0)
             return;
 
-        EditorAction a = actions.get(actions.size()-1);
+        EditorAction a = actions.get(actions.size() - 1);
         if (a == null)
             return;
 
@@ -62,10 +64,11 @@ public class EditorActor {
 
         a.execute();
     }
+
     public void addAction(EditorAction a) {
 
         //Remove all undone actions
-        int index = actions.size()-1;
+        int index = actions.size() - 1;
         while (index >= 0 && actions.get(index).isUndone()) {
             actions.remove(index);
             index--;
@@ -90,6 +93,19 @@ public class EditorActor {
         for (int i = 0; i < map.getDecorativeCount(); i++) {
             map.getDecorative(i).selected = false;
         }
+
+        if (selectedDecIndices == null) {
+            this.selectedDecIndices = new int[]{-1};
+            return;
+        }
+        if (selectedDecIndices.length < 1) {
+            this.selectedDecIndices = new int[]{-1};
+            return;
+        }
+        if (selectedDecIndices[0] == -1) {
+            return;
+        }
+
         //Set selected
         for (int i : selectedDecIndices) {
             map.getDecorative(i).selected = true;

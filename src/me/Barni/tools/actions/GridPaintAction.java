@@ -28,7 +28,7 @@ public class GridPaintAction extends EditorAction {
         success = true;
 
         index = getTileFromMousePos(game, mousePos);
-        if (index < 0 || index > map.getTilesLength())
+        if (index < 0 || index >= map.getTilesLength())
             return;
 
         //TODO validate if index is out of bounds

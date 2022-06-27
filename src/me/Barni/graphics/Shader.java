@@ -7,16 +7,17 @@ public class Shader {
 
     int id;
     private int type;
-    private String srcCode;
+    private String srcCode, name;
     public static final int TYPE_VERTEX = 0;
     public static final int TYPE_FRAGMENT = 1;
 
-    public Shader(int type, String srcCode) {
+    public Shader(int type, String srcCode, String name) {
         if (type < 0 || type > TYPE_FRAGMENT)
             throw new IllegalArgumentException("Illegal shader type ID: " + type);
         this.type = type;
         this.srcCode = srcCode;
         this.id = 0;
+        this.name = name;
     }
 
     public void compile() {
@@ -33,7 +34,8 @@ public class Shader {
 
         if (success == GL30.GL_FALSE)
         {
-            System.out.println("Shader compilation failed!");
+            System.out.println(srcCode);
+            System.out.printf("[SHADER] Failed Compiling: %s%n", name);
             System.out.println(GL30.glGetShaderInfoLog(id));
             throw new RuntimeException("Can't compile shaders!");
         }

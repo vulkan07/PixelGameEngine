@@ -73,7 +73,7 @@ public class Intro {
         vao.addAttributePointer(2); //Position (x,y)
         vao.addAttributePointer(2); //TX coords (u,v)
 
-        wheelVA = GraphicsUtils.generateVertexArray(0,0,128,128);
+        wheelVA = GraphicsUtils.generateVertexArray(0, 0, 128, 128);
 
         logoVA = new float[16];
         logoVA[0] = -1;    //TL x
@@ -153,15 +153,15 @@ public class Intro {
             GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
             logoTexture.unBind();
             logoShader.unBind();
-
-
-            int fadeTime = 80;
-            boolean shouldWheelFade = logoCount == 2 && timer < fadeTime;
-
-            //wheel
-            if (logoCount > 1)
-                renderWheel(shouldWheelFade ? game.getScreenFadeAlphaNormalized() : 0);
         }
+        //Wheel always rendered
+        int fadeTime = 80;
+        boolean shouldWheelFade = logoCount == 2 && timer < fadeTime;
+
+        //wheel
+        if (logoCount > 1)
+            renderWheel(shouldWheelFade ? game.getScreenFadeAlphaNormalized() : 0);
+
     }
 
     public void renderWheel(float alpha) {
@@ -174,7 +174,7 @@ public class Intro {
         wheelShader.uploadFloat("uTime", time);
         wheelShader.uploadMat4("uProjMat", game.getMap().getCamera().getDefaultProjMat());
         rot.identity();
-        rot.rotate((float)Math.toRadians(time*1.4f), 0, 0, 1);
+        rot.rotate((float) Math.toRadians(time * 1.4f), 0, 0, 1);
         wheelShader.uploadMat4("uRotMat", rot);
 
         vao.bind(false);

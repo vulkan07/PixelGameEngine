@@ -31,8 +31,10 @@ public class ShaderProgram {
 
     private String vertShader;
     private String fragShader;
+    private String shaderName;
 
     private void loadShadersFromFile(String sFileName) {
+        shaderName = sFileName;
         String lines = "";
         try {
             File file = new File( game.SHADER_DIR + sFileName + ".glsl");
@@ -52,8 +54,8 @@ public class ShaderProgram {
     public void create(String shaderName) {
         loadShadersFromFile(shaderName);
 
-        vertex = new Shader(Shader.TYPE_VERTEX, vertShader);
-        fragment = new Shader(Shader.TYPE_FRAGMENT, fragShader);
+        vertex = new Shader(Shader.TYPE_VERTEX, vertShader, shaderName+" {V}");
+        fragment = new Shader(Shader.TYPE_FRAGMENT, fragShader, shaderName+" {F}");
 
         vertex.compile();
         fragment.compile();

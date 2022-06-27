@@ -123,7 +123,7 @@ public final class Game implements Runnable {
 
         try {
             if (jsonObject.getString("base").equals("$"))
-                GAME_DIR = System.getProperty("user.dir");
+                GAME_DIR = System.getProperty("user.dir") + "/";
             else
                 GAME_DIR = jsonObject.getString("base") + "/";
             TEXTURE_DIR = jsonObject.getString("textures").replace("$", GAME_DIR) + "/";
@@ -283,7 +283,7 @@ public final class Game implements Runnable {
                 float delta = (System.nanoTime() - lastUPS) * 0.0000001f;
                 lastUPS = System.nanoTime();
 
-                tick(1.1f);
+                tick(1f);
 
                 window.update();
                 ups++;
@@ -355,17 +355,13 @@ public final class Game implements Runnable {
         //-----------------\\
         if (intro.isPlayingIntro() || getScreenFadeAlpha() != 0)
             window.clear(); //Only clear when playing intro, game overdraws every surface anyways
-
         if (intro.isPlayingIntro())
             intro.render();
-
         else
             map.render(map.getCamera());
         //-----------------\\
 
         updateScreenFade();
-
-
         GLFW.glfwSwapBuffers(window.getWindow());
     }
 

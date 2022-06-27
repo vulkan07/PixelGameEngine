@@ -4,6 +4,7 @@ import me.Barni.Game;
 import me.Barni.tools.EditorActor;
 
 import javax.swing.*;
+import java.util.Arrays;
 
 public class TableSelectAction extends EditorAction {
 
@@ -38,6 +39,17 @@ public class TableSelectAction extends EditorAction {
     @Override
     public void undo() {
         super.undo();
-        System.err.println("NO UNDO ON SELECT ACTION DEFINED (yet)");
+
+        int[] buffer = indices;
+        if (prevIndices[0] == -1)
+            actor.setSelectedDecs(new int[]{-1});
+        else
+            actor.setSelectedDecs(prevIndices);
+        indices = prevIndices;
+        prevIndices = buffer;
+
+
+        //Set actor's array
+        actor.getGUI().updateDecPropertyTable();
     }
 }

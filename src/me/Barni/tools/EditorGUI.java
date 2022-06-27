@@ -1,9 +1,7 @@
 package me.Barni.tools;
 
 import me.Barni.*;
-import me.Barni.tools.actions.FileAction;
-import me.Barni.tools.actions.GridPaintAction;
-import me.Barni.tools.actions.TableSelectAction;
+import me.Barni.tools.actions.*;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
 
@@ -260,8 +258,8 @@ public class EditorGUI {
         //Set data
         dtm.setValueAt(d.x + ", " + d.y, 0, 1);   //Pos
         dtm.setValueAt(d.w + ", " + d.h, 1, 1);   //Size
-        dtm.setValueAt(d.z, 2, 1);                     //Layer
-        dtm.setValueAt(d.parallax, 3, 1);              //Prx
+        dtm.setValueAt(String.valueOf(d.z), 2, 1);                     //Layer
+        dtm.setValueAt(String.valueOf(d.parallax), 3, 1);              //Prx
         dtm.setValueAt(d.texture.getPath(), 4, 1);     //Mat
     }
 
@@ -286,6 +284,25 @@ public class EditorGUI {
                         actor,
                         FileAction.TYPE_NEW,
                         pathField.getText())));
+        applyButton.addActionListener(e -> actor.addAction(
+                new UpdatePropertyAction(
+                        game,
+                        actor,
+                        propertiesTable,
+                        UpdatePropertyAction.TYPE_DEC)));
+        addButton.addActionListener(e -> actor.addAction(
+                new AddRemoveAction(
+                        game,
+                        actor,
+                        AddRemoveAction.TYPE_DEC,
+                        AddRemoveAction.MODE_ADD)));
+        deleteButton.addActionListener(e -> actor.addAction(
+                new AddRemoveAction(
+                        game,
+                        actor,
+                        AddRemoveAction.TYPE_DEC,
+                        AddRemoveAction.MODE_DEL)));
+        cancelButton.addActionListener(e -> updateDecPropertyTable());
 
         // Listen for changes in the pathField text
         pathField.getDocument().addDocumentListener(new DocumentListener() {
