@@ -70,7 +70,7 @@ public class UpdatePropertyAction extends EditorAction {
                 d.h = Integer.parseInt(size.split(",")[1].replace(" ", ""));
                 d.z = z;
                 d.parallax = p;
-                d.texture.loadTexture(game, mat, d.w, d.h, true);
+                d.texture.loadTexture(mat, d.w, d.h);
                 d.texture.uploadImageToGPU(0);
                 actor.getGUI().refresh();
             } catch (Exception e) {
@@ -106,7 +106,7 @@ public class UpdatePropertyAction extends EditorAction {
             d.h = ph;
             d.z = pz;
             d.parallax = pp;
-            d.texture.loadTexture(game, ppath, d.w, d.h, true);
+            d.texture.loadTexture(ppath, d.w, d.h);
             d.texture.uploadImageToGPU(0);
             actor.getGUI().refresh();
 

@@ -12,10 +12,12 @@ public class HUDNotification extends HUDElement {
     public String message;
     public Color msgColor;
     private float tx, indent;
+    private RenderableText velText;
 
     public HUDNotification(Game g, String name, String text, int indent, int y) {
         super(g, name, 0, 0, 1, 32);
         this.x = -1000;
+        this.y = y;
         this.indent = indent;
 
         if (indent < 0) {
@@ -23,22 +25,16 @@ public class HUDNotification extends HUDElement {
             this.indent = 16;
         }
 
-        this.y = y;
-
-
         setMessage(text);
-        if (text == null & text.isEmpty()) {
-            game.getLogger().warn("[HUDNotification] - \"" + name + "\" - Empty message!");
-        }
 
         this.msgColor = Color.WHITE;
     }
 
     public void setMessage(String text) {
+        if (text == null)
+            this.message = "<null>";
         this.message = text;
     }
-
-    private RenderableText velText;
 
     @Override
     public void render() {
@@ -89,13 +85,9 @@ public class HUDNotification extends HUDElement {
         tx = -w - 1;
     }
 
-    public void slideTo(int x) {
-        tx = x;
-    }
-
     @Override
     public void init() {
         velText = new RenderableText("",0,0);
-        hide();
+        show(1);
     }
 }

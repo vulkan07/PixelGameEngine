@@ -2,9 +2,12 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
+import me.Barni.exceptions.EngineException;
+import me.Barni.graphics.RenderableRect;
 import me.Barni.graphics.RenderableText;
 import me.Barni.graphics.TextRenderer;
 import me.Barni.texture.AnimSequenceLoader;
+import me.Barni.texture.Texture;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
 import me.Barni.window.Window;
@@ -35,6 +38,7 @@ public final class Game implements Runnable {
     private final Random r = new Random(); // Main random
 
     private int WIDTH, HEIGHT;
+    private long time;
 
     private HUD hud;
     private Logger logger;
@@ -144,14 +148,14 @@ public final class Game implements Runnable {
     //----------->  Start  <----------\\
     public synchronized void start(String title, int w, int h, boolean fullscreen, boolean resizeable, byte logLevel) {
 
-        //this function only can be called once
+        //This function only can be called once
         if (running) {
             getLogger().err("Tried to start game, while it's running!");
             return;
         }
 
 
-        //Logger
+        //Init Logger
         this.logger = new Logger(logLevel);
 
         if (!loadSearchPaths())
@@ -162,16 +166,20 @@ public final class Game implements Runnable {
         System.out.println("        v" + GAME_VERSION);
         System.out.println(">---------------------<");
         //Set Logger for static classes
-        AnimSequenceLoader.logger = logger;
-        Material.logger = logger;
+        Utils.init(this);
+        AnimSequenceLoader.init(this);
+        Material.init(this);
+        Texture.init(this);
 
+
+        //Create Window
         WIDTH = w;
         HEIGHT = h;
+        window = new Window(this, loadRandomTitleMsg() + title, WIDTH, HEIGHT, fullscreen);
 
-
-        window = new Window(this, loadRandomTitleMsg() + title, w, h, fullscreen);
-
-        if (!Material.loadMaterials(GAME_DIR+"materials.json")) return;
+        //Try to load material data
+        if (!Material.loadMaterials(GAME_DIR+"materials.json"))
+            throw new IllegalStateException("Can't load materials!");
 
         //Level editor
         levelEditor = new LevelEditor(this);
@@ -187,9 +195,9 @@ public final class Game implements Runnable {
         getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "<no msg>", 16, 30));
 
         //Add button & set colors
-        //getHud().getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
-        //((HUDButton) getHud().getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
-        //((HUDButton) getHud().getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
+        getHud().getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
+        ((HUDButton) getHud().getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
+        ((HUDButton) getHud().getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
 
         GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 
@@ -203,6 +211,7 @@ public final class Game implements Runnable {
 
         TextRenderer.init(this);
         RenderableText.init(this);
+        RenderableRect.init(this);
         nextLevel = "";
 
         if (map != null)
@@ -335,6 +344,7 @@ public final class Game implements Runnable {
     //---------------------------------\\
     //----------->   Tick   <----------\\
     private void tick(float delta) {
+        time++;
         if (!nextLevel.equals(""))
             loadNewMap(nextLevel);
 
@@ -416,10 +426,28 @@ public final class Game implements Runnable {
         blankAlpha = isFadedOut ? 255 : 0;
     }
 
+    public static void printStackTrace() {
+        java.util.Map<Thread, StackTraceElement[]> m = Thread.getAllStackTraces();
+        StackTraceElement[] ste = m.get(Thread.currentThread());
+
+        System.out.println("[----- STACK TRACE -----]");
+        System.out.printf(">> %s%n", ste[3].toString().replace("me.Barni.", ""));
+        //Remove last & first 2 stack calls
+        for (int i = 4; i < ste.length-2; i++) {
+            System.out.printf("    at %s%n", ste[i].toString().replace("me.Barni", ""));
+        }
+        System.out.println("[-----------------------]");
+    }
+
 
     //----------------------------------\\
     //------------ GETTERS -------------\\
     //----------------------------------\\
+
+
+    public long getGameTime() {
+        return time;
+    }
 
     public Logger getLogger() {
         return logger;

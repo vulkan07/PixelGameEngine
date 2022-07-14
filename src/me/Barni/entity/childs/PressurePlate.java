@@ -17,7 +17,6 @@ public class PressurePlate extends Entity {
 
     public PressurePlate(Game g, String name, Vec2D pos) {
         super(g, name, pos);
-        texture = new Texture();
         locked = true;
         solid = false;
 

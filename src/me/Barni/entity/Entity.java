@@ -19,7 +19,6 @@ public abstract class Entity {
     public float speed, resistance;
     public boolean visible, active, solid, locked, collidesWithMap, alive;
 
-
     protected Hitbox touchHitbox;
     protected Hitbox colliderHitbox;
     public Texture texture;
@@ -93,7 +92,7 @@ public abstract class Entity {
     }
 
     public void loadTexture(String path) {
-        texture.loadTexture(game, path, (int) size.x, (int) size.y, true);
+        texture.loadTexture(path, (int) size.x, (int) size.y);
         texture.uploadImageToGPU(0);
     }
 
@@ -160,11 +159,12 @@ public abstract class Entity {
 
         vao.setVertexData(vArray);
 
-
         shader.selectTextureSlot("uTexSampler", 0);
         shader.uploadBool("uSelected", false);
         texture.bind();
+        Utils.GLClearError();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+        Utils.GLCheckError();
         texture.unBind();
     }
 
@@ -194,5 +194,4 @@ public abstract class Entity {
     public void deserialize(JSONObject jobj) {
 
     }
-
 }

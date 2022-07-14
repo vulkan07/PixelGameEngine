@@ -8,9 +8,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 
-public class Material {
+public abstract class Material {
 
-    public static Logger logger;
+    private static Game game;
+    private static Logger logger;
+
+    public static void init(Game g) {
+        game = g;
+        logger = game.getLogger();
+    }
+
 
     public static boolean loadMaterials(String absPath) {
         String rawStr;
@@ -21,8 +28,8 @@ public class Material {
             fis.read(data);
             fis.close();
             rawStr = new String(data, StandardCharsets.UTF_8);
-        } catch (Exception ignored) {
-            logger.err("Can't read materials.json!   " + absPath);
+        } catch (Exception e) {
+            logger.err("Can't read materials.json!   " + absPath + "  " + e.getMessage());
             return false;
         }
 
@@ -75,12 +82,11 @@ public class Material {
             }
 
         } catch (JSONException e) {
-
             logger.err("[MAT] Invalid materials.json file! " + e.getMessage());
             return false;
         }
 
-        logger.info("[MAT] Loaded material info");
+        logger.info("[MAT] Loaded grid material info");
         return true;
     }
 

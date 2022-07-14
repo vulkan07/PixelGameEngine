@@ -50,8 +50,8 @@ public class RenderableText {
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
         vao.setElementData(QUAD_ELEMENT_ARRAY);
-        vao.addAttributePointer(2); //Position (x,y)
-        vao.addAttributePointer(2); //TX coords (u,v)
+        vao.addAttributePointer(2, "pos"); //Position (x,y)
+        vao.addAttributePointer(2, "tex"); //TX coords (u,v)
         t = new Texture();
         outdatedTexture = true;
     }

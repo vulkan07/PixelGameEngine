@@ -105,6 +105,8 @@ public class HUDElement {
     }
 
     public void init() {
+        if (childs == null)
+            childs = new ArrayList<>();
         for (int i = 0; i < childs.size(); i++) {
             childs.get(i).init();
         }

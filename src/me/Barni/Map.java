@@ -183,8 +183,8 @@ public class Map {
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
         vao.setElementData(ELEMENT_ARRAY);
-        vao.addAttributePointer(2); //Position (x,y)
-        vao.addAttributePointer(2); //TX coords (u,v)
+        vao.addAttributePointer(2, "pos"); //Position (x,y)
+        vao.addAttributePointer(2, "tex"); //TX coords (u,v)
     }
 
     public void dumpCurrentMapIntoFile(String absolutePath) {
@@ -292,7 +292,7 @@ public class Map {
         backgroundTexturePath = path;
         if (backgroundTexture == null)
             backgroundTexture = new Texture();
-        backgroundTexture.loadTexture(game, backgroundTexturePath, 1920, 1080, true);
+        backgroundTexture.loadTexture(backgroundTexturePath, 1920, 1080);
         backgroundTexture.uploadImageToGPU(0);
     }
 
@@ -306,7 +306,7 @@ public class Map {
                 if (Material.getPath(i,j) == null)
                     continue;
                 Texture t = new Texture();
-                t.loadTexture(game, Material.getPath(i,j), 32, 32, true);
+                t.loadTexture(Material.getPath(i,j), 32, 32);
                 t.uploadImageToGPU(0);
                 txts[j] = t;
             }
@@ -397,30 +397,19 @@ public class Map {
                     i / width * 32, 32, 32);
             vao.setVertexData(vArray);
 
+            Texture t;
             if (front) {
-                /*Nor
-                Texture t = normAtlas.getTexture(tiles[i] - 1);
-                if (t != null && t.isValid()) {
-                    currentShader.selectTextureSlot("uNorSampler", 1);
-                    t.bind();
-                }*/
-                //Dif
-                Texture t = atlas.getTexture(tiles[i].id-1, tiles[i].type);
-                if (t != null && t.isValid()) {
-                    currentShader.selectTextureSlot("uTexSampler", 1);
-                    t.bind();
-                }
+                t = atlas.getTexture(tiles[i].id - 1, tiles[i].type); //Foreground texture
             } else {
-                //Dif (background)
-                Texture t = atlas.getTexture(backTiles[i].id-1, backTiles[i].type);
-                if (t != null && t.isValid()) {
-                    currentShader.selectTextureSlot("uTexSampler", 1);
-                    t.bind();
-                }
-
-
+                t = atlas.getTexture(backTiles[i].id - 1, backTiles[i].type); //Background texture
             }
+            if (t != null && t.isValid()) {
+                currentShader.selectTextureSlot("uTexSampler", 1);
+                t.bind();
+            }
+            Utils.GLClearError();
             GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+            Utils.GLCheckError();
         }
         currentShader.unBind();
     }
@@ -554,6 +543,4 @@ public class Map {
         if (decoratives.length - 1 - i >= 0)
             System.arraycopy(decoratives, i + 1, decoratives, i, decoratives.length - 1 - i);
     }
-
-
 }

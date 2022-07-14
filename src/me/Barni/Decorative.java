@@ -30,7 +30,7 @@ public class Decorative {
         this.z = zPlane;
         this.parallax = Math.abs(parallax);
         texture = new Texture();
-        texture.loadTexture(game, path, w, h, true);
+        texture.loadTexture(path, w, h);
         texture.uploadImageToGPU(0);
     }
 
@@ -49,17 +49,9 @@ public class Decorative {
         shader.selectTextureSlot("uTexSampler", 0);
         shader.uploadBool("uSelected", selected);
         texture.bind();
+        Utils.GLClearError();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
+        Utils.GLCheckError();
         texture.unBind();
     }
-
-    public void renderDebug(Graphics g, Camera cam, boolean selected) {/*
-        g.setColor(Color.GREEN);
-        g.drawRect(x - cam.scroll.xi(), y - cam.scroll.yi(), w, h);
-        if (selected) {
-            g.setColor(Color.WHITE);
-            g.drawRect(x - cam.scroll.xi() - 2, y - cam.scroll.yi() - 2, w + 4, h + 4);
-        }
-        g.drawString((texture.getPath() + "(#" + id + ")"), x - cam.scroll.xi(), y - cam.scroll.yi() - 10);
-    */}
 }

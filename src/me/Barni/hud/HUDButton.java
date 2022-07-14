@@ -1,6 +1,7 @@
 package me.Barni.hud;
 
 import me.Barni.Game;
+import me.Barni.graphics.RenderableText;
 import me.Barni.window.MouseHandler;
 import me.Barni.hud.events.ButtonEventListener;
 
@@ -9,10 +10,12 @@ import java.awt.image.BufferedImage;
 
 public class HUDButton extends HUDElement {
 
-    private boolean hovered, pressed, pressed0;
+    private boolean hovered;
+    private boolean pressed;
     public boolean pressable;
     public Color hoveredColor, pressedColor;
     public String text;
+    private RenderableText velText;
 
 
     private ButtonEventListener myListener;
@@ -37,7 +40,7 @@ public class HUDButton extends HUDElement {
 
     @Override
     public void update() {
-        pressed0 = pressed;
+        boolean lastPressed = pressed;
         this.hovered = false;
         this.pressed = false;
         if (pressable)
@@ -53,12 +56,12 @@ public class HUDButton extends HUDElement {
                 if (MouseHandler.isPressed(MouseHandler.LMB)) {
                     this.pressed = true;
                     if (myListener != null)
-                        if (!pressed0)
+                        if (!lastPressed)
                             myListener.onPressed();
                 }
             }
         if (myListener != null)
-            if (!pressed && pressed0)
+            if (!pressed && lastPressed)
                 myListener.onReleased();
     }
 
@@ -68,5 +71,8 @@ public class HUDButton extends HUDElement {
 
     }
 
-
+    @Override
+    public void init() {
+        velText = new RenderableText("",0,0);
+    }
 }

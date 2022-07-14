@@ -1,5 +1,6 @@
 package me.Barni.texture;
 
+import me.Barni.Game;
 import me.Barni.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,11 +24,18 @@ public class AnimSequenceLoader {
 
     //Only read files that are >= VALID_VERSION
     public static final float VALID_VERSION = 1.0f;
-    public static Logger logger;
+    private static Logger logger;
+    private static Game game;
 
     private static void errMsg(String msg, String fullPath)
     {
         logger.err("[SeqLoader] " + msg + "  At:" + fullPath);
+    }
+
+    //Initialize (right now, only retrieves logger)
+    public static void init(Game g) {
+        game = g;
+        logger = game.getLogger();
     }
 
     //Returns the sequence(s); returns null on error

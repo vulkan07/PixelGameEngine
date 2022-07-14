@@ -91,6 +91,8 @@ public class Player extends Entity {
     }
 
     public void die(int respawnTimeTicks) {
+        if (!alive)
+            return;
 
         pem.position.x = position.x + size.x / 2;
         pem.position.y = position.y + size.y / 2;
@@ -214,6 +216,7 @@ public class Player extends Entity {
         shader.bind();
         shader.selectTextureSlot("uTexSampler", 0);
         shader.uploadBool("uSelected", false);
+        shader.uploadFloat("uTime", game.getGameTime());
         texture.bind();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         texture.unBind();

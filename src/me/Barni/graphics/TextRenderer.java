@@ -36,7 +36,7 @@ public class TextRenderer {
     public static void init(Game g) {
         game = g;
         textShader = new ShaderProgram(game);
-        textShader.create("text");
+        textShader.create("gui_text");
         textShader.link();
     }
 

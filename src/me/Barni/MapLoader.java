@@ -102,7 +102,7 @@ public class MapLoader {
         this.silent = silent;
 
         if (!silent) {
-            logger.info("[MAPLOAD] Loading map: " + relPath);
+            logger.info("[MAP-LOADER] Loading map: " + relPath);
             logger.increaseIndention("MAP LOADER");
         }
 
@@ -163,7 +163,7 @@ public class MapLoader {
             loadEntities(entList);
             logger.decreaseIndention("ENTITIES");
 
-            logger.info("[MAPLOAD] Loaded map: " + fullPath);
+            logger.info("[MAP-LOADER] Loaded map: " + fullPath);
             logger.decreaseIndention("MAP LOADER");
             return map;
 
@@ -186,7 +186,7 @@ public class MapLoader {
 
     private void errMsg(String msg) {
         if (silent) return;
-        logger.err("[MAPLOAD] " + msg + "    In: " + fullPath);
+        logger.err("[MAP-LOADER] " + msg + "    In: " + fullPath);
     }
 
 
@@ -208,13 +208,9 @@ public class MapLoader {
 
                 case "PressurePlate":
                     PressurePlate pp = new PressurePlate(game, null, new Vec2D());
-                    pp.loadFromEntityData(generalEntityLoader(entObj));
-                    pp.recharge = entObj.getInt("recharge");
-                    pp.force = entObj.getFloat("force");
-                    try {
-                        pp.strictTrigger = entObj.getBoolean("strictTrigger");
-                    } catch (JSONException e) {
-                    }
+                    pp.loadFromEntityData(generalEntityLoader(entObj)); //Common
+                    pp.deserialize(entObj); //Class-unique
+
                     map.addEntity(pp);
                     break;
 
@@ -261,7 +257,7 @@ public class MapLoader {
 
         e.texture = new Texture();
         //TODO: don't load textures here!
-        e.texture.loadTexture(game, texture, (int) w, (int) h, true);
+        e.texture.loadTexture(texture, (int) w, (int) h);
 
         if (entObj.has("visible"))
             e.visible = entObj.getBoolean("visible");

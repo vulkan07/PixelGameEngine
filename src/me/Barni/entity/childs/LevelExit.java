@@ -1,10 +1,19 @@
 package me.Barni.entity.childs;
 
 import me.Barni.Game;
+import me.Barni.Utils;
 import me.Barni.entity.Entity;
+import me.Barni.graphics.GraphicsUtils;
+import me.Barni.graphics.ShaderProgram;
+import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import org.json.JSONObject;
+import org.lwjgl.opengl.GL30;
+
+import java.util.Arrays;
+
+import static me.Barni.Intro.ELEMENT_ARRAY;
 
 public class LevelExit extends Entity {
 
@@ -23,6 +32,7 @@ public class LevelExit extends Entity {
     public LevelExit(Game g, String name, Vec2D pos, String nextMap) {
         super(g, name, pos);
         this.nextMap = nextMap;
+        visible = false;
         colliderHitbox = new Hitbox(
                 (int) position.x,
                 (int) position.y,
@@ -42,6 +52,11 @@ public class LevelExit extends Entity {
     public void tick() {
         if (triggered && game.getScreenFadeAlpha() == 255)
             game.loadNewMap(game.MAP_DIR + nextMap + ".map");
+    }
+
+    @Override
+    public void render(VertexArrayObject vao, ShaderProgram shader) {
+        super.render(vao, shader);
     }
 
     @Override

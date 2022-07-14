@@ -5,10 +5,11 @@ import org.lwjgl.opengl.GL30;
 import java.util.ArrayList;
 
 public class VertexArrayObject {
-    private int id;
-    private ArrayList<Integer> attribSizes;
-    private VertexBufferObject vbo;
-    private ElementBufferObject ebo;
+    private final int id;
+    private final ArrayList<Integer> attribSizes;
+    private final ArrayList<String> attribNames;
+    private final VertexBufferObject vbo;
+    private final ElementBufferObject ebo;
 
     public VertexArrayObject() {
         id = GL30.glGenVertexArrays();
@@ -17,11 +18,12 @@ public class VertexArrayObject {
         vbo = new VertexBufferObject();
         ebo = new ElementBufferObject();
         attribSizes = new ArrayList<>();
+        attribNames = new ArrayList<>();
     }
 
     public void setVertexData(float[] vArray) {
         vbo.setData(vArray);
-        attribSizes.clear();
+        //attribSizes.clear(); //Why?
         //System.out.println("VBO: Buffered Vertices");
     }
 
@@ -33,14 +35,24 @@ public class VertexArrayObject {
     /**
      * NOT IN BYTES
      **/
-    public void addAttributePointer(int attribLength) {
+    public void addAttributePointer(int attribLength, String attribName) {
         attribSizes.add(attribLength);
+        attribNames.add(attribName);
         processAttributePointers();
+    }
+
+    public String getAttributePointers() {
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < attribSizes.size(); i++) {
+            b.append("[\"").append(attribNames.get(i)).append("\" ").append(attribSizes.get(i)).append("] ");
+        }
+        return b.toString();
     }
 
     public int getVertexLen() {
         return vbo.getArraySize();
     }
+
     private void processAttributePointers() {
 
         final int FLOAT = Float.BYTES;

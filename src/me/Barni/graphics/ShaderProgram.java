@@ -1,6 +1,7 @@
 package me.Barni.graphics;
 
 import me.Barni.Game;
+import me.Barni.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;

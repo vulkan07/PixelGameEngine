@@ -55,7 +55,7 @@ public class Intro {
         timer = 0;
         game.fadeInScreen(255);
 
-        wheelTexture.loadTexture(game, "logos\\wheel", 128, 128, false);
+        wheelTexture.loadTexture("logos\\wheel", 128, 128);
         wheelTexture.uploadImageToGPU(0);
 
         logoShader = new ShaderProgram(game);
@@ -70,8 +70,8 @@ public class Intro {
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
         vao.setElementData(ELEMENT_ARRAY);
-        vao.addAttributePointer(2); //Position (x,y)
-        vao.addAttributePointer(2); //TX coords (u,v)
+        vao.addAttributePointer(2, "pos"); //Position (x,y)
+        vao.addAttributePointer(2, "tex"); //TX coords (u,v)
 
         wheelVA = GraphicsUtils.generateVertexArray(0, 0, 128, 128);
 
@@ -103,7 +103,7 @@ public class Intro {
 
 
     private void nextLogo() {
-        logoTexture.loadTexture(game, ("logos/logo" + logoCount), 1920, 1080, true);
+        logoTexture.loadTexture(("logos/logo" + logoCount), 1920, 1080);
         logoTexture.uploadImageToGPU(0);
         logoCount++;
     }

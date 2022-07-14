@@ -1,5 +1,7 @@
 package me.Barni;
 
+import me.Barni.exceptions.EngineException;
+
 public class Main {
     public static void main(String[] args) {
 
@@ -95,7 +97,11 @@ public class Main {
             System.err.println("Invalid arguments!");
             e.printStackTrace();
         }
-        game.start("PixelGameEngine", w, h, fc, false, Logger.LOG_INFO);
+        try {
+            game.start("PixelGameEngine", w, h, fc, false, Logger.LOG_INFO);
+        } catch (EngineException e) {
+            e.printStackTrace();
+        }
     }
 }
 

@@ -1,5 +1,6 @@
 package me.Barni.graphics;
 
+import me.Barni.Utils;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
 
@@ -21,13 +22,17 @@ public class VertexBufferObject {
         vBuffer.put(data).flip();
 
         //Upload data to GPU
+        Utils.GLClearError();
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, id);
         GL30.glBufferData(GL30.GL_ARRAY_BUFFER, vBuffer, GL30.GL_DYNAMIC_DRAW);
+        Utils.GLCheckError();
     }
 
     public VertexBufferObject() {
         //Generate & bind
+        Utils.GLClearError();
         id = GL30.glGenBuffers();
+        Utils.GLCheckError();
     }
 
     public int getArraySize() {

@@ -1,6 +1,8 @@
 package me.Barni.texture;
 
 import me.Barni.Game;
+import me.Barni.Utils;
+import me.Barni.exceptions.MaterialException;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
@@ -9,10 +11,11 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Map;
 
 public class Texture {
 
-    Game game;
+    private static Game game;
 
     private boolean animated, hasAnimation;
     public BufferedImage[] textures;
@@ -27,8 +30,12 @@ public class Texture {
     private int id;
     private String path;
 
+    public static void init(Game g) {
+        game = g;
+    }
+
     private void errMsg(String msg) {
-        game.getLogger().err("[TEXTURE] " + msg + "    At: " + generalPathName);
+        game.getLogger().err("[TEXTURE] " + msg + "    At: " + generalPathName + path + ".png");
     }
 
     public int getWidth() {
@@ -103,20 +110,45 @@ public class Texture {
         lastUploadedFrame = -1;
     }
 
-    public void loadTexture(Game g, String relativePath, int w, int h, boolean isAnimated) {
+    public void loadTexture(String relativePath, int w, int h) {
+        retries = 0;
+        setAnimated(true);
+        loadTextureImage(relativePath);
+
+        //Override dimensions (Might be dangerous!)
+        this.width = w;
+        this.height = h;
+    }
+    public void loadTexture(String relativePath) {
+        retries = 0;
+        setAnimated(true);
+        loadTextureImage(relativePath);
+    }
+
+    private void loadTextureImage(String relativePath) {
         amIValid = true;
-        game = g;
-        width = w;
-        height = h;
-        BufferedImage fullImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-        this.animated = isAnimated;
+        retries++;
 
         path = relativePath;
+        generalPathName = game.TEXTURE_DIR;
         String imgPath = path + ".png";
         String dataPath = path + ".anim";
-
+        BufferedImage fullImg = null;
         sequences = null;
-        generalPathName = game.TEXTURE_DIR;
+
+        //READ IMAGE
+        try {
+            fullImg = ImageIO.read(new File(game.TEXTURE_DIR + imgPath));
+            this.width = fullImg.getWidth();
+            this.height = fullImg.getHeight();
+        } catch (IOException e) {
+            if (e instanceof FileNotFoundException)
+                game.getLogger().err("[TEXTURE] File not Found: " + game.TEXTURE_DIR + imgPath);
+            else
+                game.getLogger().err("[TEXTURE] Can't read file: " + game.TEXTURE_DIR + imgPath);
+            amIValid = false;
+        }
+
 
         File dFile = new File(game.TEXTURE_DIR + dataPath);
         if (dFile.exists()) {
@@ -131,30 +163,19 @@ public class Texture {
         }
 
 
-        //READ IMAGE
-        try {
-            fullImg = ImageIO.read(new File(game.TEXTURE_DIR + imgPath));
-        } catch (IOException e) {
-            if (e instanceof FileNotFoundException)
-                game.getLogger().err("[TEXTURE] Can't find file: " + game.TEXTURE_DIR + imgPath);
-            else
-                game.getLogger().err("[TEXTURE] Can't read file: " + game.TEXTURE_DIR + imgPath);
-            amIValid = false;
-        }
-
-        //CHOP TEXTURES
+        //NO ANIMATION (1 FRAME ONLY)
         textures = new BufferedImage[1];
         textures[0] = fullImg;
 
+        //CHOP TEXTURES
         try {
             if (hasAnimation) {
                 textures = new BufferedImage[frameCount];
+                this.width /= frameCount;
                 for (int i = 0; i < frameCount; i++) {
-
-                    int[] px = fullImg.getRGB(width * i, 0, w, h, null, 0, w * h);
-                    BufferedImage img = new BufferedImage(fullImg.getWidth() / frameCount, h, BufferedImage.TYPE_INT_ARGB);
-                    img.setRGB(0, 0, w, h, px, 0, w * h);
-
+                    int[] px = fullImg.getRGB(width * i, 0, width, height, null, 0, width * height);
+                    BufferedImage img = new BufferedImage(fullImg.getWidth() / frameCount, height, BufferedImage.TYPE_INT_ARGB);
+                    img.setRGB(0, 0, width, height, px, 0, width * height);
                     textures[i] = img;
                 }
             }
@@ -167,7 +188,16 @@ public class Texture {
             amIValid = false;
         }
         lastUploadedFrame = -1;
+
+        if (!isValid()) {
+            if (retries > 2) { //  <-- Can't find missing.png
+                throw new MaterialException("Can't find \"missing.png\"!  :  " + path);
+            }
+            loadTextureImage("missing");
+        }
     }
+
+    private int retries = 0;
 
     public int getID() {
         return id;
@@ -267,7 +297,6 @@ public class Texture {
 
         BufferedImage img;
         img = textures[frameIndex];
-
         ByteBuffer buffer = BufferUtils.createByteBuffer(img.getWidth() * img.getHeight() * 4); //4 -> RGBA
         buffer.put(
                 intARGBtoByteRGBA(
@@ -276,6 +305,7 @@ public class Texture {
         ).flip();
 
         bind();
+        Utils.GLClearError();
         GL30.glTexImage2D(
                 GL30.GL_TEXTURE_2D,         //Type
                 0,                     //Level
@@ -286,6 +316,7 @@ public class Texture {
                 GL30.GL_RGBA,                //Color format
                 GL11.GL_UNSIGNED_BYTE,       //Buffer type
                 buffer);                    //Data
+        Utils.GLCheckError();
         unBind();
     }
 

@@ -2,7 +2,6 @@ package me.Barni.window;
 
 import me.Barni.Game;
 import me.Barni.tools.LevelEditor;
-import org.lwjgl.glfw.GLFW;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -31,6 +30,7 @@ public class KeyboardHandler {
 
 
     private static boolean pressed_CTRL_Z;
+
     public static boolean poll_CTRL_Z() {
         boolean val = pressed_CTRL_Z;
         pressed_CTRL_Z = false;
@@ -55,21 +55,21 @@ public class KeyboardHandler {
 
         //Catch modified keypress
         if (LevelEditor.isEditing())
-        if (mods == GLFW_MOD_CONTROL && key != 341 && action == GLFW_PRESS) {
-            switch (key) {
-                case C:
-                    System.out.println("CTRL+C");
-                    break;
-                case D:
-                    System.out.println("CTRL+D");
-                    break;
-                //These are bad, need to use localized: glfwSetCharCallback(window, character_callback);
-                case Z:
-                    pressed_CTRL_Z = true;
-                    break;
+            if (mods == GLFW_MOD_CONTROL && key != 341 && action == GLFW_PRESS) {
+                switch (key) {
+                    case C:
+                        System.out.println("CTRL+C");
+                        break;
+                    case D:
+                        System.out.println("CTRL+D");
+                        break;
+                    //These are bad, need to use localized: glfwSetCharCallback(window, character_callback);
+                    case Z:
+                        pressed_CTRL_Z = true;
+                        break;
+                }
+                return;
             }
-            return;
-        }
 
         if (action == GLFW_PRESS) {
             pressed[key] = true;
@@ -80,6 +80,7 @@ public class KeyboardHandler {
     }
 
     private static boolean prevF4;
+
     public static void update(Game game) {
 
         if (pressed[F1 + 3]) {
