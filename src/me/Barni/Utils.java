@@ -1,6 +1,5 @@
 package me.Barni;
 
-import com.sun.javafx.binding.StringFormatter;
 import org.lwjgl.opengl.*;
 
 public abstract class Utils {
@@ -48,7 +47,7 @@ public abstract class Utils {
             "Invalid Framebuffer Operation",
     };
 
-    public static void GLClearError() {
+    public static void GLClearErrors() {
         while (GL30.glGetError() != GL30.GL_NO_ERROR) ;
     }
 
@@ -64,7 +63,7 @@ public abstract class Utils {
                             //append(" - ").
                             .append(glErrorMessages[i])
                             .append("] at ")
-                            .append(getStackCaller().replace("me.Barni.", ""));
+                            .append(getStackCaller(1).replace("me.Barni.", ""));
                 }
             }
         }
@@ -79,9 +78,26 @@ public abstract class Utils {
         }
     }
 
-    public static String getStackCaller() {
+    public static String getStackCaller(int depth) {
         java.util.Map<Thread, StackTraceElement[]> m = Thread.getAllStackTraces();
         StackTraceElement[] ste = m.get(Thread.currentThread());
-        return ste[4].toString();
+
+        StringBuilder b = new StringBuilder();
+        String indent = game.getLogger().getIndentStr();
+        b.append(indent);
+        b.append("    >> ");
+        b.append(ste[3].toString().replace("me.Barni.", ""));
+        b.append('\n');
+
+        if (depth < 1)
+            depth = ste.length-2;
+
+        for (int i = 4; i < depth + 4; i++) {
+            b.append(indent);
+            b.append("        at ");
+            b.append(ste[i].toString().replace("me.Barni", ""));
+            b.append('\n');
+        }
+        return b.toString();
     }
 }

@@ -40,12 +40,10 @@ public class TextRenderer {
         textShader.link();
     }
 
-    public static Texture renderText(String text, Color color, float size) {
-        Texture t = new Texture();
+    public static void renderText(Texture t, String text, Color color, float size) {
         BufferedImage image = renderTextToBufferedImage(text, color, size);
-        t.setTexture(game, image);
+        t.setTexture(image);
         t.uploadImageToGPU(0);
-        return t;
     }
 
 }

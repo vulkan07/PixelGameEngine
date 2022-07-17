@@ -59,7 +59,7 @@ public class RenderableText {
     public void render(Camera cam) {
         if (outdatedTexture) {
             outdatedTexture = false;
-            t = TextRenderer.renderText(text, color, size * TextRenderer.RENDER_QUALITY_MULT);
+            TextRenderer.renderText(t, text, color, size * TextRenderer.RENDER_QUALITY_MULT);
         }
         vao.bind(false);
         if (inMap)

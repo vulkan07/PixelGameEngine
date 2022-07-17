@@ -6,9 +6,6 @@ import me.Barni.graphics.VertexArrayObject;
 import me.Barni.texture.Texture;
 import org.lwjgl.opengl.GL30;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
 public class Decorative {
     Game game;
     public Texture texture;
@@ -30,6 +27,7 @@ public class Decorative {
         this.z = zPlane;
         this.parallax = Math.abs(parallax);
         texture = new Texture();
+        texture.setNormalMap(true);
         texture.loadTexture(path, w, h);
         texture.uploadImageToGPU(0);
     }
@@ -46,10 +44,14 @@ public class Decorative {
 
         vao.setVertexData(vArray);
 
-        shader.selectTextureSlot("uTexSampler", 0);
         shader.uploadBool("uSelected", selected);
+        shader.selectTextureSlot("uTexSampler", 0);
         texture.bind();
-        Utils.GLClearError();
+        if (texture.isNormalValid()) {
+            shader.selectTextureSlot("uNorSampler", 1);
+            texture.bindNormal();
+        }
+        Utils.GLClearErrors();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         Utils.GLCheckError();
         texture.unBind();

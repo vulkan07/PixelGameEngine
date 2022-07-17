@@ -1,6 +1,7 @@
 package me.Barni.tools.actions;
 
 import me.Barni.Game;
+import me.Barni.hud.HUDNotification;
 import me.Barni.tools.EditorActor;
 
 import javax.swing.*;
@@ -24,8 +25,10 @@ public class FileAction extends EditorAction {
     public void execute() {
         executed = true;
         success = true;
-        if (type == TYPE_LOAD)
+        if (type == TYPE_LOAD){
             game.loadNewMap(path);
+            game.HUDNotify("Loaded: " + path.split("/")[path.split("/").length-1], 200);
+        }
         if (type == TYPE_SAVE) {
 
             if (path.contains("blank.map")){
@@ -39,12 +42,15 @@ public class FileAction extends EditorAction {
             if (fileExists)
                 n = JOptionPane.showConfirmDialog(null, "This file already exists. Overwrite?", "Save", JOptionPane.OK_CANCEL_OPTION);
 
-            if (n == 0)
+            if (n == 0){
                 game.getMap().dumpCurrentMapIntoFile(path);
+                game.HUDNotify("Saved as: " + path.split("/")[path.split("/").length-1], 200);
+            }
         }
 
         if (type == TYPE_NEW) {
             game.loadNewMap(game.MAP_DIR + "blank.map");
+            game.HUDNotify("New Map Created", 240);
         }
         game.getLevelEditor().refresh();
     }

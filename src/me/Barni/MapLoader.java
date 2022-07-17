@@ -103,7 +103,7 @@ public class MapLoader {
 
         if (!silent) {
             logger.info("[MAP-LOADER] Loading map: " + relPath);
-            logger.increaseIndention("MAP LOADER");
+            logger.increaseIndentation("MAP LOADER");
         }
 
         File file = new File(relPath);
@@ -139,10 +139,12 @@ public class MapLoader {
             map = new Map(game, h, w, 32, pathBroken[pathBroken.length - 1]);
 
             JSONArray grid = mapObj.getJSONArray("grid");
-            loadGrid(grid, false);
+            if (!loadGrid(grid, false))
+                return null;
 
             JSONArray grid2 = mapObj.getJSONArray("backGrid");
-            loadGrid(grid2, true);
+            if (!loadGrid(grid2, true))
+                return null;
 
             map.playerStartPos = strToVector(mapObj.getString("spawnPos"));
             map.playerStartVel = strToVector(mapObj.getString("spawnVel"));
@@ -152,19 +154,19 @@ public class MapLoader {
             else
                 logger.info("Couldn't find background image");
 
-            logger.increaseIndention("DECORATIVES");
+            logger.increaseIndentation("DECORATIVES");
             JSONObject objList = mapObj.getJSONObject("ObjectList");
             JSONArray decList = objList.getJSONArray("Decoratives");
             loadDecoratives(decList);
-            logger.decreaseIndention("DECORATIVES");
+            logger.decreaseIndentation("DECORATIVES");
 
-            logger.increaseIndention("ENTITIES");
+            logger.increaseIndentation("ENTITIES");
             JSONArray entList = objList.getJSONArray("Entities");
             loadEntities(entList);
-            logger.decreaseIndention("ENTITIES");
+            logger.decreaseIndentation("ENTITIES");
 
             logger.info("[MAP-LOADER] Loaded map: " + fullPath);
-            logger.decreaseIndention("MAP LOADER");
+            logger.decreaseIndentation("MAP LOADER");
             return map;
 
         } catch (IOException e) {
@@ -304,7 +306,7 @@ public class MapLoader {
     }
 
     //*Moves JSON grid text data into Map entity *//
-    private void loadGrid(JSONArray lines, boolean backGround) {
+    private boolean loadGrid(JSONArray lines, boolean backGround) {
         String[] tilesRaw;
         //For every row
         for (int y = 0; y < map.getHeight(); y++) {
@@ -312,11 +314,11 @@ public class MapLoader {
                 tilesRaw = ((String) lines.get(y)).split(",");
             } catch (NullPointerException e) {
                 errMsg("Invalid map grid format: too few lines!");
-                return;
+                return false;
             }
             if (tilesRaw.length > map.getWidth()) {
                 errMsg("Invalid map grid format: \"sizeX\" doesn't match row count! Too few rows!");
-                return;
+                return false;
             }
 
             //For every column
@@ -325,7 +327,7 @@ public class MapLoader {
                     tilesRaw[x] = tilesRaw[x].replace(" ", "");
                 } catch (ArrayIndexOutOfBoundsException e) {
                     errMsg("Invalid map grid format: \"sizeX\" doesn't match row count! Too few rows!");
-                    return;
+                    return false;
                 }
 
                 //TODO error handling
@@ -344,6 +346,7 @@ public class MapLoader {
                     map.setTile(y * map.getWidth() + x, new Tile(id, type));
             }
         }
+        return true;
     }
 
 }

@@ -87,7 +87,9 @@ public class Player extends Entity {
                 new Vec2D(64, 64),
                 pData,
                 new BloodParticleRenderer());
+        pem.setSaveable(false);
         game.getMap().addEntity(pem);
+        setSaveable(false);
     }
 
     public void die(int respawnTimeTicks) {
@@ -117,7 +119,7 @@ public class Player extends Entity {
             n.show(180);
         }
 
-        game.getMap().getCamera().shake(8, 100);
+        game.getMap().getCamera().shake(6, 100);
         game.getMap().getCamera().setZoom(game.getMap().getCamera().getZoom() + .05f, false);
 
         velocity.mult(0);

@@ -2,7 +2,6 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
-import me.Barni.exceptions.EngineException;
 import me.Barni.graphics.RenderableRect;
 import me.Barni.graphics.RenderableText;
 import me.Barni.graphics.TextRenderer;
@@ -19,6 +18,7 @@ import me.Barni.tools.LevelEditor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 
 import java.awt.*;
@@ -27,6 +27,8 @@ import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+
 public final class Game implements Runnable {
 
     private boolean running = false;    //Running
@@ -34,6 +36,7 @@ public final class Game implements Runnable {
 
     public Window window;               //Window
 
+    private final Shutdown shutdown = new Shutdown(this);
 
     private final Random r = new Random(); // Main random
 
@@ -205,6 +208,8 @@ public final class Game implements Runnable {
         running = true;
         thread = new Thread(this);
         thread.start();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(shutdown)); //Hook exterior shut down
     }
 
     public void loadNewMap(String path) {
@@ -226,6 +231,8 @@ public final class Game implements Runnable {
 
         //If map doesn't load, a hardcoded map loads
         if (map == null) {
+            logger.decreaseIndentation("MAP LOADER");
+            logger.increaseIndentation("DEFAULT MAP");
             map = new Map(this, 3, 5, 32, "error.map");
             //Tile[] defaultmap = new Tile[15];
             Tile t;
@@ -235,6 +242,7 @@ public final class Game implements Runnable {
                 map.setBackTile(i,t);
             }
             map.setTile(10, new Tile(3,0));
+            logger.decreaseIndentation("DEFAULT MAP");
         }
 
         map.createShaderPrograms();
@@ -276,7 +284,7 @@ public final class Game implements Runnable {
 
         int fps = 0, ups = 0;
 
-        while (!GLFW.glfwWindowShouldClose(window.getWindow())) {
+        while (!GLFW.glfwWindowShouldClose(window.getWindow()) && !Thread.interrupted()) {
             if ((System.nanoTime() - lastFPSUPSOutput) > 1000000000) {
 
                 //
@@ -320,7 +328,8 @@ public final class Game implements Runnable {
                     try {
                         Thread.sleep(finalWait);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        logger.info("Game thread interrupted");
+                        stop();
                     }
             }
         }
@@ -338,7 +347,7 @@ public final class Game implements Runnable {
         GLFW.glfwSetErrorCallback(null);
         GLFW.glfwTerminate();
 
-        System.exit(0);
+        Runtime.getRuntime().exit(0);
     }
 
     //---------------------------------\\
@@ -437,6 +446,12 @@ public final class Game implements Runnable {
             System.out.printf("    at %s%n", ste[i].toString().replace("me.Barni", ""));
         }
         System.out.println("[-----------------------]");
+    }
+
+    public void HUDNotify(String msg, int timeTicks) {
+        HUDNotification n = (HUDNotification) getHud().getRoot().getElement("PlayerNotification");
+        n.message = msg;
+        n.show(timeTicks);
     }
 
 

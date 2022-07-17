@@ -58,6 +58,7 @@ public class Map {
     public String getTitle() {
         return title;
     }
+
     public String getFileName() {
         return fileName;
     }
@@ -66,9 +67,11 @@ public class Map {
     public int getWidth() {
         return width;
     }
+
     public int getHeight() {
         return height;
     }
+
     public int getTileSize() {
         return tileSize;
     }
@@ -77,6 +80,7 @@ public class Map {
     public Tile getBackTile(int i) {
         return backTiles[i];
     }
+
     public Tile getTile(int i) {
         return tiles[i];
     }
@@ -85,6 +89,7 @@ public class Map {
     public void setTile(int i, Tile t) {
         tiles[i] = t;
     }
+
     public void setBackTile(int i, Tile t) {
         backTiles[i] = t;
     }
@@ -94,6 +99,7 @@ public class Map {
         tiles[i].id = id;
         tiles[i].type = type;
     }
+
     public void setBackTileData(int i, int id, int type) {
         backTiles[i].id = id;
         backTiles[i].type = type;
@@ -103,6 +109,7 @@ public class Map {
     public Player getPlayer() {
         return player;
     }
+
     public Camera getCamera() {
         return cam;
     }
@@ -116,6 +123,7 @@ public class Map {
     public void setTileArray(Tile[] newTiles) {
         tiles = newTiles;
     }
+
     public void setBackTiles(Tile[] newTiles) {
         backTiles = newTiles;
     }
@@ -123,6 +131,7 @@ public class Map {
     public int getDecorativeCount() {
         return decCount;
     }
+
     public int getEntityCount() {
         return entCount;
     }
@@ -211,8 +220,8 @@ public class Map {
         for (int y = 0; y < height; y++) {
             data = "";
             for (int x = 0; x < width; x++) {
-                int pos = y* width + x;
-                data += tiles[pos].id + String.valueOf(tiles[pos].type==0?"":tiles[pos].type) + ",";
+                int pos = y * width + x;
+                data += tiles[pos].id + String.valueOf(tiles[pos].type == 0 ? "" : tiles[pos].type) + ",";
             }
             grid.put(y, data);
         }
@@ -223,8 +232,8 @@ public class Map {
         for (int y = 0; y < height; y++) {
             data = "";
             for (int x = 0; x < width; x++) {
-                int pos = y* width + x;
-                data += backTiles[pos].id + String.valueOf(backTiles[pos].type==0?"":backTiles[pos].type) + ",";
+                int pos = y * width + x;
+                data += backTiles[pos].id + String.valueOf(backTiles[pos].type == 0 ? "" : backTiles[pos].type) + ",";
             }
             grid2.put(y, data);
         }
@@ -279,7 +288,10 @@ public class Map {
 
         int place = -1;
         for (Entity e : entities) {
-            if (e == null) continue;
+            if (e == null)
+                continue;
+            if (!e.isSaveable())
+                continue;
 
             place++;
             array.put(place, e.serialize());
@@ -303,10 +315,11 @@ public class Map {
         for (int i = 1; i < Material.getMatCount(); i++) {
             Texture[] txts = new Texture[Material.getMaxTypes()];
             for (int j = 0; j < Material.getMaxTypes() - 1; j++) {
-                if (Material.getPath(i,j) == null)
+                if (Material.getPath(i, j) == null)
                     continue;
                 Texture t = new Texture();
-                t.loadTexture(Material.getPath(i,j), 32, 32);
+                t.setNormalMap(true);
+                t.loadTexture(Material.getPath(i, j), 32, 32);
                 t.uploadImageToGPU(0);
                 txts[j] = t;
             }
@@ -324,6 +337,7 @@ public class Map {
         vao.unBind();
         GL30.glUseProgram(0); //Unbind shader
     }
+
     public final int ENT_RENDER_LAYER = 8;
     public final int TILE_RENDER_LAYER = 4;
     public final int RENDER_LAYERS = 12;
@@ -404,10 +418,14 @@ public class Map {
                 t = atlas.getTexture(backTiles[i].id - 1, backTiles[i].type); //Background texture
             }
             if (t != null && t.isValid()) {
-                currentShader.selectTextureSlot("uTexSampler", 1);
+                currentShader.selectTextureSlot("uTexSampler", 0);
                 t.bind();
+                if (t.isNormalValid()) {
+                    currentShader.selectTextureSlot("uNorSampler", 1);
+                    t.bindNormal();
+                }
             }
-            Utils.GLClearError();
+            Utils.GLClearErrors();
             GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
             Utils.GLCheckError();
         }
@@ -471,13 +489,16 @@ public class Map {
     //--------------------------------
 
     //ADDERS
-    /**Returns the ID of the new decorative.**/
+
+    /**
+     * Returns the ID of the new decorative.
+     **/
     public int addDecorative(Decorative dec) {
         if (decCount >= decoratives.length) {
             game.getLogger().err("Decoratives array is full! Resizing...");
 
             //Create new array with size+2, copy decoratives, and set it as the new array
-            Decorative[] newDecs = new Decorative[decoratives.length+2];
+            Decorative[] newDecs = new Decorative[decoratives.length + 2];
             System.arraycopy(decoratives, 0, newDecs, 0, decoratives.length);
             decoratives = newDecs;
         }
@@ -485,7 +506,10 @@ public class Map {
         decCount++;
         return decCount - 1;
     }
-    /**Returns the ID of the new entity.**/
+
+    /**
+     * Returns the ID of the new entity.
+     **/
     public int addEntity(Entity e) {
         if (e instanceof Player)
             initPlayer((Player) e);
@@ -494,7 +518,7 @@ public class Map {
             game.getLogger().err("Entity array is full! Resizing...");
 
             //Create new array with size+2, copy decoratives, and set it as the new array
-            Entity[] newEnts = new Entity[entities.length+2];
+            Entity[] newEnts = new Entity[entities.length + 2];
             System.arraycopy(entities, 0, newEnts, 0, entities.length);
             entities = newEnts;
         }
@@ -509,9 +533,11 @@ public class Map {
             if (e != null && e.name.equals(name)) return e;
         return null;
     }
+
     public Entity getEntity(int i) {
         return entities[i];
     }
+
     public Decorative getDecorative(int i) {
         return decoratives[i];
     }
@@ -535,6 +561,7 @@ public class Map {
         if (entities.length - 1 - index >= 0)
             System.arraycopy(entities, index + 1, entities, index, entities.length - 1 - index);
     }
+
     public void removeDecorative(int i) {
         decoratives[i] = null;
         decCount--;

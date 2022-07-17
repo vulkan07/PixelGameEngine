@@ -22,7 +22,7 @@ public class VertexBufferObject {
         vBuffer.put(data).flip();
 
         //Upload data to GPU
-        Utils.GLClearError();
+        Utils.GLClearErrors();
         GL30.glBindBuffer(GL30.GL_ARRAY_BUFFER, id);
         GL30.glBufferData(GL30.GL_ARRAY_BUFFER, vBuffer, GL30.GL_DYNAMIC_DRAW);
         Utils.GLCheckError();
@@ -30,7 +30,7 @@ public class VertexBufferObject {
 
     public VertexBufferObject() {
         //Generate & bind
-        Utils.GLClearError();
+        Utils.GLClearErrors();
         id = GL30.glGenBuffers();
         Utils.GLCheckError();
     }

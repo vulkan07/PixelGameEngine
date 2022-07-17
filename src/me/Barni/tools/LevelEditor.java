@@ -62,6 +62,7 @@ public class LevelEditor {
         pWin.setMinimumSize(new Dimension(650, 400));
         pWin.setTitle("Level editor: <Undefined map>");
         pWin.setContentPane(eGUI.rootPanel);
+        pWin.setLocation(10,100);
         pWin.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {

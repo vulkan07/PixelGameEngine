@@ -24,6 +24,15 @@ public abstract class Entity {
     public Texture texture;
     private int mapID = -1;
 
+    private boolean saveable = true;
+
+    public boolean isSaveable() {
+        return saveable;
+    }
+
+    public void setSaveable(boolean saveable) {
+        this.saveable = saveable;
+    }
 
     public Hitbox getTouchHitbox() {
         return touchHitbox;
@@ -162,7 +171,7 @@ public abstract class Entity {
         shader.selectTextureSlot("uTexSampler", 0);
         shader.uploadBool("uSelected", false);
         texture.bind();
-        Utils.GLClearError();
+        Utils.GLClearErrors();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         Utils.GLCheckError();
         texture.unBind();

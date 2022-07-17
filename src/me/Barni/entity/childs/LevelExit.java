@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL30;
 import java.util.Arrays;
 
 import static me.Barni.Intro.ELEMENT_ARRAY;
+import static me.Barni.graphics.GraphicsUtils.QUAD_ELEMENT_ARRAY;
 
 public class LevelExit extends Entity {
 
@@ -54,10 +55,6 @@ public class LevelExit extends Entity {
             game.loadNewMap(game.MAP_DIR + nextMap + ".map");
     }
 
-    @Override
-    public void render(VertexArrayObject vao, ShaderProgram shader) {
-        super.render(vao, shader);
-    }
 
     @Override
     public JSONObject serialize() {

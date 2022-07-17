@@ -9,6 +9,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GLCapabilities;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -151,8 +152,9 @@ public class Window {
             glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
             glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
         }
-        glfwWindowHint(GLFW_SAMPLES, 1);
+        glfwWindowHint(GLFW_SAMPLES, 2);
 
+        //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         changeMonitor(0);
     }
 
@@ -166,6 +168,12 @@ public class Window {
 
     public void setHideCursor(boolean hidden) {
         glfwSetInputMode(pWindow, GLFW_CURSOR, hidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+    }
+
+    private GLCapabilities glCapabilities;
+
+    public GLCapabilities getGlCapabilities() {
+        return glCapabilities;
     }
 
     private void initWindow() {
@@ -190,8 +198,7 @@ public class Window {
         glfwShowWindow(pWindow);
 
         //Critical stuff - Don't remove!!!
-        GL.createCapabilities();
-
+        glCapabilities = GL.createCapabilities();
         GL30.glClearColor(0f, 0f, 0f, 1f);
         GL30.glEnable(GL30.GL_BLEND);
         GL30.glEnable(GL30.GL_MULTISAMPLE);
@@ -201,7 +208,15 @@ public class Window {
         //Set icon
         try {
             setIcon(pWindow, ImageIO.read(new File(game.GAME_DIR + "game.png")));
-        } catch (IOException ignored) {}
+        } catch (IOException e) {
+            game.getLogger().err("Can't set icon image! " + e.getMessage());
+        }
+        //Set icon
+        try {
+            setCursorImage(pWindow, ImageIO.read(new File(game.TEXTURE_DIR + "/gui/cursorDef.png")));
+        } catch (IOException e) {
+            game.getLogger().err("Can't set cursor image! " + e.getMessage());
+        }
     }
 
     //Copied code - DO NOT TOUCH!
@@ -217,6 +232,20 @@ public class Window {
         images.free();
         image.free();
     }
+
+    private static void setCursorImage(long window, BufferedImage img) {
+        GLFWImage image = GLFWImage.malloc();
+        image.set(img.getWidth(), img.getHeight(), loadImageToByteBuffer(img));
+
+        //GLFWImage.Buffer images = GLFWImage.malloc(1);
+        //images.put(0, image);
+
+        long cursor = glfwCreateCursor(image, MouseHandler.getPosition().xi(), MouseHandler.getPosition().yi());
+        glfwSetCursor(window, cursor);
+        //images.free();
+        image.free();
+    }
+
     private static ByteBuffer loadImageToByteBuffer(final BufferedImage image) {
         final byte[] buffer = new byte[image.getWidth() * image.getHeight() * 4];
         int counter = 0;

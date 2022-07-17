@@ -31,6 +31,8 @@ public class UpdatePropertyAction extends EditorAction {
         if (type == TYPE_DEC) {
             if (actor.getSelectedDecoratives().length < 1)
                 return;
+            if (actor.getSelectedDecoratives()[0] == -1)
+                return;
             objID = actor.getSelectedDecoratives()[0];
             Decorative d = map.getDecorative(objID);
 

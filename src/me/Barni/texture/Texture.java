@@ -8,10 +8,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL30;
 
 import javax.imageio.ImageIO;
+import javax.rmi.CORBA.Util;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.Map;
 
 public class Texture {
 
@@ -19,23 +19,47 @@ public class Texture {
 
     private boolean animated, hasAnimation;
     public BufferedImage[] textures;
+    public BufferedImage[] normalTextures;
     private int width;
     private int height;
-    private boolean amIValid;
     private String generalPathName;
     private AnimSequence[] sequences;
     int currSequence, frameCount;
     private int lastUploadedFrame = -1;
+    private boolean hasNormalMap = false;
+    private boolean amIValid, isNormalValid;
     private boolean markedForReload; //If true, reuploads image to gpu on next update()
-    private int id;
+    private int id, normalID;
     private String path;
+    private String normalSuffix = "N";
 
     public static void init(Game g) {
         game = g;
     }
 
+    public String getNormalSuffix() {
+        return normalSuffix;
+    }
+
+    public void setNormalSuffix(String normalSuffix) {
+        this.normalSuffix = normalSuffix;
+    }
+
+    public boolean hasNormalMap() {
+        return hasNormalMap;
+    }
+
+    public void setNormalMap(boolean hasNormalMap) {
+        this.hasNormalMap = hasNormalMap;
+    }
+
+    public boolean hasValidNormal() {
+        return isNormalValid;
+    }
+
     private void errMsg(String msg) {
-        game.getLogger().err("[TEXTURE] " + msg + "    At: " + generalPathName + path + ".png");
+        game.getLogger().err("[TEXTURE] " + msg + "    At: " + generalPathName + path + ".png\n" +
+                Utils.getStackCaller(2));
     }
 
     public int getWidth() {
@@ -59,6 +83,10 @@ public class Texture {
     }
 
     public boolean setAnimationSequence(String seqName) {
+        if (sequences == null) {
+            errMsg("Texture has no sequences!");
+            return false;
+        }
 
         for (int i = 0; i < sequences.length; i++) {
             if (sequences[i].name.equals(seqName)) {
@@ -98,9 +126,8 @@ public class Texture {
             return textures[0];
     }
 
-    public void setTexture(Game g, BufferedImage img) {
+    public void setTexture(BufferedImage img) {
         amIValid = true;
-        game = g;
         width = img.getWidth();
         height = img.getHeight();
         this.animated = false;
@@ -119,6 +146,7 @@ public class Texture {
         this.width = w;
         this.height = h;
     }
+
     public void loadTexture(String relativePath) {
         retries = 0;
         setAnimated(true);
@@ -132,8 +160,10 @@ public class Texture {
         path = relativePath;
         generalPathName = game.TEXTURE_DIR;
         String imgPath = path + ".png";
+        String imgNPath = path + normalSuffix + ".png";
         String dataPath = path + ".anim";
         BufferedImage fullImg = null;
+        BufferedImage fullImgN = null; //normal
         sequences = null;
 
         //READ IMAGE
@@ -145,9 +175,29 @@ public class Texture {
             if (e instanceof FileNotFoundException)
                 game.getLogger().err("[TEXTURE] File not Found: " + game.TEXTURE_DIR + imgPath);
             else
-                game.getLogger().err("[TEXTURE] Can't read file: " + game.TEXTURE_DIR + imgPath);
+                game.getLogger().err("[TEXTURE] Can't read file: " + game.TEXTURE_DIR + imgPath
+                        + '\n' +  Utils.getStackCaller(3));
             amIValid = false;
         }
+        //READ NORMAL IMAGE
+        if (hasNormalMap)
+            try {
+                fullImgN = ImageIO.read(new File(game.TEXTURE_DIR + imgNPath));
+                isNormalValid = true;
+            } catch (IOException e) {
+                if (e instanceof FileNotFoundException)
+                    game.getLogger().err("[TEXTURE] Normal File Not Found: " + game.TEXTURE_DIR + imgPath);
+                else{
+                    game.getLogger().err("[TEXTURE] Can't read normal file: " + game.TEXTURE_DIR + imgPath);
+                }
+                isNormalValid = false;
+            }
+
+        if (isNormalValid)
+            if (fullImg.getWidth() != fullImgN.getWidth() || fullImg.getHeight() != fullImgN.getHeight()) {
+                game.getLogger().err("[TEXTURE] Mismatching normal and texture dimensions! " + game.TEXTURE_DIR + imgPath);
+                isNormalValid = false;
+            }
 
 
         File dFile = new File(game.TEXTURE_DIR + dataPath);
@@ -166,17 +216,31 @@ public class Texture {
         //NO ANIMATION (1 FRAME ONLY)
         textures = new BufferedImage[1];
         textures[0] = fullImg;
+        //Normal
+        normalTextures = new BufferedImage[1];
+        normalTextures[0] = fullImgN;
 
         //CHOP TEXTURES
         try {
             if (hasAnimation) {
                 textures = new BufferedImage[frameCount];
+                normalTextures = new BufferedImage[frameCount];
                 this.width /= frameCount;
+                //Diffuse chop
                 for (int i = 0; i < frameCount; i++) {
                     int[] px = fullImg.getRGB(width * i, 0, width, height, null, 0, width * height);
                     BufferedImage img = new BufferedImage(fullImg.getWidth() / frameCount, height, BufferedImage.TYPE_INT_ARGB);
                     img.setRGB(0, 0, width, height, px, 0, width * height);
                     textures[i] = img;
+                }
+                if (hasNormalMap && isNormalValid) {
+                    //Normal chop
+                    for (int i = 0; i < frameCount; i++) {
+                        int[] px = fullImgN.getRGB(width * i, 0, width, height, null, 0, width * height);
+                        BufferedImage img = new BufferedImage(fullImgN.getWidth() / frameCount, height, BufferedImage.TYPE_INT_ARGB);
+                        img.setRGB(0, 0, width, height, px, 0, width * height);
+                        normalTextures[i] = img;
+                    }
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -207,19 +271,48 @@ public class Texture {
         return amIValid;
     }
 
+    public boolean isNormalValid() {
+        return isNormalValid;
+    }
+
     private void generate() {
-        if (id != 0)
+        if (id != 0) {
+            errMsg("Attempted to generate existing texture! (ID:" + id + ") ");
             return;
+        }
 
 
+        Utils.GLClearErrors();
         id = GL30.glGenTextures();
+        Utils.GLCheckError();
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
+        Utils.GLCheckError();
 
         //Set texture default flags
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MIN_FILTER, GL30.GL_LINEAR); //Scale down
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MAG_FILTER, GL30.GL_LINEAR); //Scale up
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_S, GL30.GL_REPEAT);      //Wrap x
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_T, GL30.GL_REPEAT);      //Wrap y
+
+
+        //Normal (if texture has)
+        if (!hasNormalMap)
+            return;
+
+        if (normalID != 0)
+            errMsg("Attempted to generate existing normal texture! (ID:" + normalID + ") ");
+
+        Utils.GLClearErrors();
+        normalID = GL30.glGenTextures();
+        Utils.GLCheckError();
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, normalID);
+        Utils.GLCheckError();
+
+        //Set texture default flags
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MIN_FILTER, GL30.GL_LINEAR); //Scale down
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MAG_FILTER, GL30.GL_LINEAR); //Scale up
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_S, GL30.GL_REPEAT);      //Wrap x
+        GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_T, GL30.GL_REPEAT);      //Wrap y;
     }
 
     // S,T = U,V = X,Y
@@ -263,8 +356,13 @@ public class Texture {
     }
 
     public void bind() {
-        if (!amIValid) throw new IllegalStateException("Attempted to bind invalid texture! : " + getPath());
+        if (!amIValid) throw new MaterialException("Attempted to bind invalid texture! : " + getPath());
         GL30.glBindTexture(GL30.GL_TEXTURE_2D, id);
+    }
+
+    public void bindNormal() {
+        if (!isNormalValid) throw new MaterialException("Attempted to bind invalid texture normal! : " + getPath());
+        GL30.glBindTexture(GL30.GL_TEXTURE_2D, normalID);
     }
 
     public void markForReload() {
@@ -292,7 +390,9 @@ public class Texture {
     public void uploadImageToGPU(int frameIndex) {
         if (!amIValid) return;
         if (frameIndex == lastUploadedFrame) return;
-        if (id < 1) generate();
+        if (id == 0)
+            generate();
+
         lastUploadedFrame = frameIndex;
 
         BufferedImage img;
@@ -305,7 +405,33 @@ public class Texture {
         ).flip();
 
         bind();
-        Utils.GLClearError();
+        Utils.GLClearErrors();
+        GL30.glTexImage2D(
+                GL30.GL_TEXTURE_2D,         //Type
+                0,                     //Level
+                GL30.GL_RGBA8,               //Color Format (internal)
+                img.getWidth(),             //Width
+                img.getHeight(),            //Height
+                0,                    //Border
+                GL30.GL_RGBA,                //Color format
+                GL11.GL_UNSIGNED_BYTE,       //Buffer type
+                buffer);                    //Data
+        Utils.GLCheckError();
+        unBind();
+
+        if (!isNormalValid || !hasNormalMap)
+            return;
+
+        //Normal
+        img = normalTextures[frameIndex];
+        buffer.put(
+                intARGBtoByteRGBA(
+                        img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth())
+                )
+        ).flip();
+
+        bindNormal();
+        Utils.GLClearErrors();
         GL30.glTexImage2D(
                 GL30.GL_TEXTURE_2D,         //Type
                 0,                     //Level
@@ -321,8 +447,15 @@ public class Texture {
     }
 
     public void destroy() {
+
+        Utils.GLClearErrors();
+
         GL30.glDeleteTextures(id);
+        Utils.GLCheckError();
+        GL30.glDeleteTextures(normalID);
+        Utils.GLCheckError();
         amIValid = false;
+        isNormalValid = false;
     }
 
     public void update() {

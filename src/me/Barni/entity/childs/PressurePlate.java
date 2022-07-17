@@ -42,6 +42,7 @@ public class PressurePlate extends Entity {
                     return;
 
             other.acceleration.y = -force;
+            other.velocity.y = 0;
             if (strictTrigger) {
                 other.velocity.x = 0;
                 other.position.x = position.x;
@@ -62,10 +63,12 @@ public class PressurePlate extends Entity {
     }
 
     @Override
-    public void deserialize(JSONObject jobj)
-    {
+    public void deserialize(JSONObject jobj) {
         force = jobj.getFloat("force");
         recharge = jobj.getInt("recharge");
-        strictTrigger = jobj.getBoolean("strictTrigger");
+        if (jobj.has("strictTrigger"))
+            strictTrigger = jobj.getBoolean("strictTrigger");
+        else
+            strictTrigger = false;
     }
 }

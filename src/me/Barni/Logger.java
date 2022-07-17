@@ -53,14 +53,14 @@ public class Logger {
             currentIndent += INDENT;
     }
 
-    public void increaseIndention(String indentionName) {
+    public void increaseIndentation(String indentionName) {
         indentLevel++;
         if (indentionName != null)
             System.out.println(currentIndent + "    << " + indentionName + " >>");
         updateIndentionString();
     }
 
-    public void decreaseIndention(String indentionName) {
+    public void decreaseIndentation(String indentionName) {
         indentLevel--;
         if (indentLevel < 0)
             indentLevel = 0;

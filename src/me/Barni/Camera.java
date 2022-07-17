@@ -63,7 +63,7 @@ public class Camera {
 
     private int timer, setTimer, ticks;
     private float ampl, setAmpl;
-    private Vec2D noise = new Vec2D();
+    private Vec2D shake = new Vec2D();
     private Random r = new Random();
 
     public void shake(float ampl, int duration) {
@@ -78,12 +78,12 @@ public class Camera {
         if (timer > 0) {
             timer--;
             ampl = lerp(setAmpl, 0, 1 - Vec2D.remap(timer, 0, setTimer, 0, 1));
-            noise.y = (float) (Math.sin(ticks / ampl) * ampl * 0.1);
-            noise.x = (float) (Math.cos(ticks / ampl) * ampl * 0.1);
+            shake.y = (float) (Math.sin(ticks / ampl) * ampl * 0.1);
+            shake.x = (float) (Math.cos(ticks / ampl) * ampl * 0.1);
         }
         if (timer == 0) {
-            noise.x = 0;
-            noise.y = 0;
+            shake.x = 0;
+            shake.y = 0;
         }
 
         //Follow target entity
@@ -142,8 +142,7 @@ public class Camera {
 
     private void adjustMatricesToZoom() {
         projMat.identity();
-        projMat.ortho(0, 1920f * zoom, 1080f * zoom, 0f, 0f, 100f);
-        //projMat.scale(zoom);
+        projMat.ortho(-width/2*zoom, width/2*zoom, height/2*zoom, -height/2*zoom, -1, 10);
     }
 
     public void adjustProjection() {
@@ -156,9 +155,9 @@ public class Camera {
 
     public Matrix4f getViewMat() {
         viewMat.identity();
-        //Shifts center pos according to zoom
-        float wm = pos.x - (width / 2f * zoom) + (noise.x * ampl * zoom);
-        float hm = pos.y - (height / 2f * zoom) + (noise.y * ampl * zoom);
+        //Adds the shake downscaled by zoom
+        float wm = pos.x + (shake.x * ampl / zoom);
+        float hm = pos.y + (shake.y * ampl / zoom);
         //Generates viewmatrix
         viewMat.lookAt(
                 new Vector3f(wm, hm, 10f),  // Position
