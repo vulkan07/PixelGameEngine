@@ -1,39 +1,45 @@
 package me.Barni.graphics;
 
-import me.Barni.Camera;
 import me.Barni.Game;
-import me.Barni.texture.Texture;
-import org.lwjgl.opengl.GL30;
+import org.joml.Vector4f;
 
 import java.awt.*;
-
-import static me.Barni.graphics.GraphicsUtils.QUAD_ELEMENT_ARRAY;
+import java.nio.charset.StandardCharsets;
 
 
 public class RenderableText {
     private String text;
-    private float x, y;
-    private int size;
+    private float xPos;
+    private float yPos;
+
+
+
+    private float width;
+    private float height;
+    private float size;
     private Color color;
-    private Texture t;
-    private boolean outdatedTexture, inMap;
+    private QuadBatch batch;
+    private boolean  inMap;
+    private ShaderProgram textShader;
 
     private static Game game;
-    private VertexArrayObject vao;
+
+    private int numCols = 512 / 32, numRows = 512 / 32, cellWidth = 32, cellHeight = 32, startCharID = 32; //TODO
+
 
     public RenderableText(String text, int x, int y) {
         this.text = text;
-        this.x = x;
-        this.y = y;
-        this.size = 10;
+        this.xPos = x;
+        this.yPos = y;
+        this.size = 1.3f;
         this.color = Color.WHITE;
         initGraphics();
     }
 
     public RenderableText(String text, int x, int y, int size, Color color) {
         this.text = text;
-        this.x = x;
-        this.y = y;
+        this.xPos = x;
+        this.yPos = y;
         this.size = size;
         this.color = color;
         initGraphics();
@@ -46,6 +52,7 @@ public class RenderableText {
     //Constructors call this
     private void initGraphics() {
 
+        /*
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
@@ -53,46 +60,67 @@ public class RenderableText {
         vao.addAttributePointer(2, "pos"); //Position (x,y)
         vao.addAttributePointer(2, "tex"); //TX coords (u,v)
         t = new Texture();
-        outdatedTexture = true;
+        outdatedTexture = true;*/
+        batch = new QuadBatch(new float[]{}, new float[]{});
+        batch.loadTexture("fonts/consolas");
+        textShader = new ShaderProgram(game);
+        textShader.create("gui_text");
+        textShader.link();
+        updateText();
     }
 
-    public void render(Camera cam) {
-        if (outdatedTexture) {
-            outdatedTexture = false;
-            TextRenderer.renderText(t, text, color, size * TextRenderer.RENDER_QUALITY_MULT);
+    public void updateText() {
+        byte[] chars = text.getBytes(StandardCharsets.UTF_8);
+        int numChars = chars.length;
+        float[] positions = new float[numChars * 4];
+        float[] texCoords = new float[numChars * 8];
+
+        width = 9 * size * chars.length;
+        height = cellHeight * size;
+
+        for (int i = 0; i < numChars; i++) {
+            int offset = i * 4;
+            byte currChar = (byte) (chars[i] - startCharID);
+
+            float col = currChar % numCols;
+            float row = currChar / numCols;
+
+            //X
+            positions[offset] = xPos + i * 9*size;   //x
+            texCoords[offset * 2] = col / numCols;  //u
+            texCoords[offset * 2 + 1] = row / numRows;  //v
+
+            //Y
+            positions[offset + 1] = yPos;             //y
+            texCoords[offset * 2 + 2] = (col + 1) / numCols;  //u
+            texCoords[offset * 2 + 3] = (row + 1) / numRows;  //v
+
+            //Width
+            positions[offset + 2] = cellWidth*size;     //w
+            texCoords[offset * 2 + 4] = (col + 1) / numCols;  //u
+            texCoords[offset * 2 + 5] = row / numRows;  //v
+
+            //Height
+            positions[offset + 3] = cellHeight*size;    //h
+            texCoords[offset * 2 + 6] = col / numCols;  //u
+            texCoords[offset * 2 + 7] = (row + 1) / numRows;  //v
+
         }
-        vao.bind(false);
-        if (inMap)
-            vao.setVertexData(GraphicsUtils.generateVertexArray(
-                    x,
-                    y,
-                    t.getWidth() / TextRenderer.RENDER_QUALITY_MULT,
-                    t.getHeight() / TextRenderer.RENDER_QUALITY_MULT));
-        else
-            vao.setVertexData(GraphicsUtils.generateVertexArray(
-                    x,
-                    y,
-                    t.getWidth() / TextRenderer.RENDER_QUALITY_MULT,
-                    t.getHeight() / TextRenderer.RENDER_QUALITY_MULT));
+        batch.updateData(positions, texCoords);
 
-        TextRenderer.textShader.bind();
-        if (inMap) {
-            TextRenderer.textShader.uploadMat4("uProjMat", cam.getProjMat());
-            TextRenderer.textShader.uploadMat4("uViewMat", cam.getViewMat());
-        } else
-            TextRenderer.textShader.uploadMat4("uProjMat", cam.getDefaultProjMat());
-        TextRenderer.textShader.uploadBool("uInMap", inMap);
-        TextRenderer.textShader.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
-        //TextRenderer.textShader.selectTextureSlot("uTexSampler", 1);
-        t.bind();
-        GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
-        vao.unBind();
-        TextRenderer.textShader.unBind();
     }
 
-    public Texture getT() {
-        return t;
+    public void render() {
+        textShader.uploadVec4(
+                "tint",
+                new Vector4f(
+                        color.getRed(),
+                        color.getGreen(),
+                        color.getBlue(),
+                        color.getAlpha()));
+        batch.render(textShader);
     }
+
 
     public String getText() {
         return text;
@@ -100,32 +128,32 @@ public class RenderableText {
 
     public void setText(String text) {
         this.text = text;
-        outdatedTexture = true;
+        updateText();
     }
 
-    public float getX() {
-        return x;
+    public float getxPos() {
+        return xPos;
     }
 
-    public void setX(float x) {
-        this.x = x;
+    public void setxPos(float xPos) {
+        this.xPos = xPos;
     }
 
-    public float getY() {
-        return y;
+    public float getyPos() {
+        return yPos;
     }
 
-    public void setY(float y) {
-        this.y = y;
+    public void setyPos(float yPos) {
+        this.yPos = yPos;
     }
 
-    public int getSize() {
+    public float getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(float size) {
         this.size = size;
-        outdatedTexture = true;
+        updateText();
     }
 
     public Color getColor() {
@@ -134,7 +162,7 @@ public class RenderableText {
 
     public void setColor(Color color) {
         this.color = color;
-        outdatedTexture = true;
+        updateText();
     }
 
     public boolean isInMap() {
@@ -143,5 +171,12 @@ public class RenderableText {
 
     public void setInMap(boolean inMap) {
         this.inMap = inMap;
+    }
+    public float getWidth() {
+        return width;
+    }
+
+    public float getHeight() {
+        return height;
     }
 }

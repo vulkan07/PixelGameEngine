@@ -1,20 +1,11 @@
 package me.Barni.entity.childs;
 
 import me.Barni.Game;
-import me.Barni.Utils;
 import me.Barni.entity.Entity;
-import me.Barni.graphics.GraphicsUtils;
-import me.Barni.graphics.ShaderProgram;
-import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Hitbox;
 import me.Barni.physics.Vec2D;
 import org.json.JSONObject;
-import org.lwjgl.opengl.GL30;
 
-import java.util.Arrays;
-
-import static me.Barni.Intro.ELEMENT_ARRAY;
-import static me.Barni.graphics.GraphicsUtils.QUAD_ELEMENT_ARRAY;
 
 public class LevelExit extends Entity {
 

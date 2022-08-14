@@ -2,9 +2,7 @@ package me.Barni;
 
 
 import me.Barni.entity.childs.Player;
-import me.Barni.graphics.RenderableRect;
-import me.Barni.graphics.RenderableText;
-import me.Barni.graphics.TextRenderer;
+import me.Barni.graphics.*;
 import me.Barni.texture.AnimSequenceLoader;
 import me.Barni.texture.Texture;
 import me.Barni.window.KeyboardHandler;
@@ -166,6 +164,9 @@ public final class Game implements Runnable {
         System.out.println("        v" + GAME_VERSION);
         System.out.println(">---------------------<");
         //Set Logger for static classes
+
+        //Initialize classes
+        //WANRING: Don't init GPU objects here! no context is current here!
         ResourceManager.init(this);
         Utils.init(this);
         AnimSequenceLoader.init(this);
@@ -212,9 +213,14 @@ public final class Game implements Runnable {
 
     public void loadNewMap(String path) {
 
-        TextRenderer.init(this);
         RenderableText.init(this);
-        RenderableRect.init(this);
+        Quad.init(this);
+        QuadBatch.init(this);
+        FontManager.init(this);
+        text = new RenderableText("abcdefg ---\n ---Árvíztűrő tükörfúrógép!", 200,200);
+        text.setColor(Color.RED);
+        text.setSize(1.6f);
+
         nextLevel = "";
 
         if (map != null)
@@ -380,9 +386,15 @@ public final class Game implements Runnable {
         if (!intro.isPlayingIntro())
             hud.render();
 
+        //RTEST
+        FontManager.renderTEST();
+        text.render();
         updateScreenFade();
         GLFW.glfwSwapBuffers(window.getWindow());
     }
+
+    //TEST
+    RenderableText text;
 
     private void updateScreenFade() {
         if (!intro.isPlayingIntro() && (isScreenFadingIn || isScreenFadingOut))

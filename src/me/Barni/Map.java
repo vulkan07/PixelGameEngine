@@ -2,6 +2,7 @@ package me.Barni;
 
 import me.Barni.entity.Entity;
 import me.Barni.entity.childs.Player;
+import me.Barni.graphics.GraphicsUtils;
 import me.Barni.graphics.ShaderProgram;
 import me.Barni.graphics.VertexArrayObject;
 import me.Barni.physics.Physics;
@@ -16,7 +17,6 @@ import org.lwjgl.opengl.GL30;
 
 import java.io.*;
 
-import static me.Barni.Intro.ELEMENT_ARRAY;
 import static me.Barni.graphics.GraphicsUtils.SCREEN_VERTEX_ARRAY;
 import static me.Barni.graphics.GraphicsUtils.generateVertexArray;
 
@@ -191,7 +191,7 @@ public class Map {
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
-        vao.setElementData(ELEMENT_ARRAY);
+        vao.setElementData(GraphicsUtils.QUAD_ELEMENT_ARRAY);
         vao.addAttributePointer(2, "pos"); //Position (x,y)
         vao.addAttributePointer(2, "tex"); //TX coords (u,v)
     }

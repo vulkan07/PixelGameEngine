@@ -38,15 +38,14 @@ public class HUDNotification extends HUDElement {
 
     @Override
     public void render() {
-        velText.setSize(25);
+        velText.setSize(1.4f);
         velText.setColor(Color.BLACK);
-        velText.setInMap(false);
         velText.setText(message);
-        velText.setX(x+20);
-        velText.setY(h);
-        velText.render(game.getMap().getCamera());
-        w = velText.getT().getWidth();
-        h = velText.getT().getHeight();
+        velText.setxPos(x+20);
+        velText.setyPos(h+50);
+        velText.render();
+        w = velText.getWidth();
+        h = velText.getHeight();
     }
 
     @Override
@@ -82,7 +81,7 @@ public class HUDNotification extends HUDElement {
 
     public void hide() {
         hidden = true;
-        tx = -w - 1;
+        tx = -w - 30;
     }
 
     @Override

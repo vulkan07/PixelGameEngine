@@ -25,7 +25,7 @@ public class Intro {
 
     ShaderProgram logoShader, wheelShader;
     VertexArrayObject vao;
-    public static final int[] ELEMENT_ARRAY = {2, 1, 0, 0, 1, 3};
+
 
     float[] logoVA, wheelVA;
     int time;
@@ -69,7 +69,7 @@ public class Intro {
         vao = new VertexArrayObject();
         float[] vArray = new float[8];
         vao.setVertexData(vArray);
-        vao.setElementData(ELEMENT_ARRAY);
+        vao.setElementData(GraphicsUtils.QUAD_ELEMENT_ARRAY);
         vao.addAttributePointer(2, "pos"); //Position (x,y)
         vao.addAttributePointer(2, "tex"); //TX coords (u,v)
 
