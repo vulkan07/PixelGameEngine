@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL30;
 public class Shader {
 
 
-    int id;
+    private int id;
     private int type;
     private String srcCode, name;
     public static final int TYPE_VERTEX = 0;

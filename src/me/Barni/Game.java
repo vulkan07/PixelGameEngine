@@ -18,7 +18,6 @@ import me.Barni.tools.LevelEditor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 
 import java.awt.*;
@@ -26,8 +25,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
-
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 
 public final class Game implements Runnable {
 
@@ -169,6 +166,7 @@ public final class Game implements Runnable {
         System.out.println("        v" + GAME_VERSION);
         System.out.println(">---------------------<");
         //Set Logger for static classes
+        ResourceManager.init(this);
         Utils.init(this);
         AnimSequenceLoader.init(this);
         Material.init(this);
@@ -341,9 +339,9 @@ public final class Game implements Runnable {
     public synchronized void stop() {
         getLogger().info("Game loop stopped");
 
-        map.destroy();
-
+        ResourceManager.cleanUp();
         window.destroy();
+
         GLFW.glfwSetErrorCallback(null);
         GLFW.glfwTerminate();
 

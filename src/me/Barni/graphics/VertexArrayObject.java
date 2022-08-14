@@ -1,11 +1,14 @@
 package me.Barni.graphics;
 
+import me.Barni.ResourceManager;
+import me.Barni.Utils;
+import me.Barni.exceptions.EngineException;
 import org.lwjgl.opengl.GL30;
 
 import java.util.ArrayList;
 
 public class VertexArrayObject {
-    private final int id;
+    private int id;
     private final ArrayList<Integer> attribSizes;
     private final ArrayList<String> attribNames;
     private final VertexBufferObject vbo;
@@ -19,15 +22,30 @@ public class VertexArrayObject {
         ebo = new ElementBufferObject();
         attribSizes = new ArrayList<>();
         attribNames = new ArrayList<>();
+        ResourceManager.registerVertexArrayObject(this);
+    }
+
+    public void destroy() {
+        ebo.destroy();
+        vbo.destroy();
+        GL30.glDeleteBuffers(id);
+        id = 0;
+        ResourceManager.removeVertexArrayObject(this);
     }
 
     public void setVertexData(float[] vArray) {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted VertexArrayObject!");
+
         vbo.setData(vArray);
         //attribSizes.clear(); //Why?
         //System.out.println("VBO: Buffered Vertices");
     }
 
     public void setElementData(int[] eArray) {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted VertexArrayObject!");
+
         ebo.setData(eArray);
         //System.out.println("VBO: Buffered Elements");
     }
@@ -36,12 +54,18 @@ public class VertexArrayObject {
      * NOT IN BYTES
      **/
     public void addAttributePointer(int attribLength, String attribName) {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted VertexArrayObject!");
+
         attribSizes.add(attribLength);
         attribNames.add(attribName);
         processAttributePointers();
     }
 
     public String getAttributePointers() {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted VertexArrayObject!");
+
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < attribSizes.size(); i++) {
             b.append("[\"").append(attribNames.get(i)).append("\" ").append(attribSizes.get(i)).append("] ");
@@ -50,6 +74,9 @@ public class VertexArrayObject {
     }
 
     public int getVertexLen() {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted VertexArrayObject!");
+
         return vbo.getArraySize();
     }
 
@@ -76,6 +103,9 @@ public class VertexArrayObject {
     }
 
     public void bind(boolean rebindAll) {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted VertexArrayObject!");
+
         //Bind vertex array (this)
         GL30.glBindVertexArray(id);
 
@@ -92,6 +122,9 @@ public class VertexArrayObject {
     }
 
     public void unBind() {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted VertexArrayObject!");
+
         //UnBind vertex array
         GL30.glBindVertexArray(0);
 

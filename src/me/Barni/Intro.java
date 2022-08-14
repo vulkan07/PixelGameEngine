@@ -175,7 +175,7 @@ public class Intro {
         wheelShader.uploadFloat("uTime", time);
         wheelShader.uploadMat4("uProjMat", game.getMap().getCamera().getDefaultProjMat());
         rot.identity();
-        rot.rotate((float) Math.toRadians(time * 1.4f), 0, 0, 1);
+        rot.rotate((float) Math.toRadians(time * 6.8f), 0, 0, 1); //1.4f
         wheelShader.uploadMat4("uRotMat", rot);
 
         vao.bind(false);

@@ -1,5 +1,7 @@
 package me.Barni.graphics;
 
+import me.Barni.Utils;
+import me.Barni.exceptions.EngineException;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
 
@@ -11,6 +13,8 @@ public class ElementBufferObject {
 
     public void setData(int[] data)
     {
+        if (id == 0)
+            throw new EngineException("Tried to reference deleted ElementBufferObject!");
         //this.data = data;
         this.eSize = data.length;
 
@@ -24,6 +28,13 @@ public class ElementBufferObject {
 
     public ElementBufferObject() {
         id = GL30.glGenBuffers();
+    }
+
+    public void destroy() {
+        Utils.GLClearErrors();
+        GL30.glDeleteBuffers(id);
+        id = 0;
+        Utils.GLCheckError();
     }
 
     public int getArraySize() {

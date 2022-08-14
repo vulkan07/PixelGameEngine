@@ -1,6 +1,7 @@
 package me.Barni.graphics;
 
 import me.Barni.Game;
+import me.Barni.ResourceManager;
 import me.Barni.Utils;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -65,6 +66,16 @@ public class ShaderProgram {
         GL30.glAttachShader(id, vertex.getId());
         GL30.glAttachShader(id, fragment.getId());
         game.getLogger().subInfo("[SHADER] ShaderProgram created: \"" + shaderName + "\"" );
+        ResourceManager.registerShader(this);
+    }
+
+    public void destroy() {
+        bind();
+        GL30.glDeleteShader(vertex.getId());
+        GL30.glDeleteShader(fragment.getId());
+        GL30.glDeleteProgram(id);
+        unBind();
+        ResourceManager.removeShader(this);
     }
 
     public void link() {

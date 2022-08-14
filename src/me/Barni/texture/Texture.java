@@ -1,6 +1,7 @@
 package me.Barni.texture;
 
 import me.Barni.Game;
+import me.Barni.ResourceManager;
 import me.Barni.Utils;
 import me.Barni.exceptions.MaterialException;
 import org.lwjgl.BufferUtils;
@@ -188,7 +189,7 @@ public class Texture {
                 if (e instanceof FileNotFoundException)
                     game.getLogger().err("[TEXTURE] Normal File Not Found: " + game.TEXTURE_DIR + imgPath);
                 else{
-                    game.getLogger().err("[TEXTURE] Can't read normal file: " + game.TEXTURE_DIR + imgPath);
+                    //game.getLogger().err("[TEXTURE] Can't read normal file: " + game.TEXTURE_DIR + imgPath);
                 }
                 isNormalValid = false;
             }
@@ -313,6 +314,8 @@ public class Texture {
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_MAG_FILTER, GL30.GL_LINEAR); //Scale up
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_S, GL30.GL_REPEAT);      //Wrap x
         GL30.glTexParameteri(GL30.GL_TEXTURE_2D, GL30.GL_TEXTURE_WRAP_T, GL30.GL_REPEAT);      //Wrap y;
+
+        ResourceManager.registerTexture(this);
     }
 
     // S,T = U,V = X,Y
@@ -456,6 +459,8 @@ public class Texture {
         Utils.GLCheckError();
         amIValid = false;
         isNormalValid = false;
+
+        ResourceManager.removeTexture(this);
     }
 
     public void update() {

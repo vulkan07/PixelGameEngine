@@ -327,15 +327,26 @@ public class Map {
         }
     }
 
-    private void destroyTextures() {
-        atlas.destroy();
-        game.getLogger().info("[MAP] Deleted textures from GPU");
-    }
-
     public void destroy() {
-        destroyTextures();
+
+        //Unbind
         vao.unBind();
         GL30.glUseProgram(0); //Unbind shader
+
+        //Textures
+        atlas.destroy();
+
+        //VAO
+        vao.destroy();
+
+        //Shaders
+        frontShader.destroy();
+        backShader.destroy();
+        decShader.destroy();
+        entShader.destroy();
+        backImageShader.destroy();
+
+        game.getLogger().info("[MAP] Deleted GPU Resources");
     }
 
     public final int ENT_RENDER_LAYER = 8;
