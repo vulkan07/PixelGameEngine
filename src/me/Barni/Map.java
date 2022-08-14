@@ -25,6 +25,8 @@ public class Map {
     private final Game game;
     private Physics physics;
 
+    private String nextMap = "";
+    private int nextMapDelay = 0;
     private int width, height, tileSize;
 
     private Tile[] tiles;
@@ -155,6 +157,12 @@ public class Map {
 
         cam = new Camera(g.getWIDTH(), g.getHEIGHT());
         //cam.setZoom(1.3f, false);
+    }
+
+    public void changeMap(String path) {
+        game.fadeOutScreen(0);
+        game.window.setHideCursor(true);
+        nextMap = path;
     }
 
     public void initPlayer(Player p) {
@@ -487,6 +495,11 @@ public class Map {
 
         deathGray = Vec2D.lerp(deathGray, player.alive ? 0 : 0.6f, player.alive ? .06f : .04f);
 
+        if (!nextMap.isEmpty()) {
+            nextMapDelay++;
+            if (nextMapDelay >= 150)
+                game.loadNewMap(nextMap);
+        }
 
         for (Decorative d : decoratives) {
             if (d != null)

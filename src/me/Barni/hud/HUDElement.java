@@ -99,6 +99,8 @@ public class HUDElement {
 
 
     public void render() {
+        if (!visible)
+            return;
         for (int i = 0; i < childs.size(); i++) {
             childs.get(i).render();
         }

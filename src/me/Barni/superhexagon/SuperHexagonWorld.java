@@ -259,7 +259,7 @@ public class SuperHexagonWorld {
             hexagonVertexBuffer[1][i] = point.yi();
         }
         g.drawPolygon(hexagonVertexBuffer[0], hexagonVertexBuffer[1], polySideCount);
-        g.setFont(game.getDefaultFont());
+        //g.setFont(game.getDefaultFont());
         //========================
 
         g.drawString(Integer.toString(secondsTimer), origin.xi() - 8, origin.yi());

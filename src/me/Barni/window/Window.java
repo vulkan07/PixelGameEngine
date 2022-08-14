@@ -48,6 +48,7 @@ public class Window {
     private String title;
     private static Game game;
     private boolean fullScreen;
+    private boolean cursorHidden;
     private int width, height;
     private long pWindow;
     private static boolean lastFocused, focused, minimized;
@@ -166,8 +167,14 @@ public class Window {
             init();
     }
 
+
     public void setHideCursor(boolean hidden) {
-        glfwSetInputMode(pWindow, GLFW_CURSOR, hidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+        cursorHidden = hidden;
+        glfwSetInputMode(pWindow, GLFW_CURSOR, cursorHidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+    }
+
+    public boolean isCursorHidden() {
+        return cursorHidden;
     }
 
     private GLCapabilities glCapabilities;

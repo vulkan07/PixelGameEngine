@@ -110,16 +110,14 @@ public class Player extends Entity {
         alive = false;
         visible = false;
         HUDNotification n = (HUDNotification) game.getHud().getRoot().getElement("PlayerNotification");
-        if (deaths == 20 && level == 1) {
-            n.message = "Calm down! Reducing respawn time";
-            reducedRespawnTime = 2;
-            n.show(220);
-        } else {
-            n.message = "Deaths: " + deaths;
-            n.show(180);
-        }
+
+        n.message = "Deaths: " + deaths;
+        n.show(180);
+
 
         game.getMap().getCamera().shake(6, 100);
+        game.getMap().getCamera().followEntity = null;
+        game.getMap().getCamera().target = this.position.toV2f();
         game.getMap().getCamera().setZoom(game.getMap().getCamera().getZoom() + .05f, false);
 
         velocity.mult(0);
@@ -129,7 +127,6 @@ public class Player extends Entity {
     }
 
     public void respawn() {
-        game.getMap().getCamera().lerp = game.getMap().getCamera().DEFAULT_LERP;
         visible = true;
         alive = true;
         game.getMap().getCamera().setZoom(game.getMap().getCamera().getZoom() - .05f, false);
@@ -159,6 +156,9 @@ public class Player extends Entity {
 
         if (!alive) {
             respawnTimer--;
+            if (respawnTimer <= 35){
+                game.getMap().getCamera().lerp = game.getMap().getCamera().DEFAULT_LERP;
+                game.getMap().getCamera().followEntity = this;}
             if (respawnTimer <= 0)
                 respawn();
             return;
@@ -223,20 +223,6 @@ public class Player extends Entity {
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         texture.unBind();
 
-        /*
-        velText.setSize(20);
-        velText.setColor(Color.RED);
-        velText.setText(String.valueOf(velocity.x));
-//        velText.setX(position.xi());
-//        velText.setY(position.yi());
-        velText.setX(40);
-        velText.setY(40);
-        velText.render(game.getMap().getCamera());
 
-
-        velText.setText(String.valueOf(velocity.y));
-        velText.setY(position.y+15);
-        velText.render(game.getMap().getCamera());
-        */
     }
 }

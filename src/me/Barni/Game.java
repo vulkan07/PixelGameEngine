@@ -1,8 +1,11 @@
 package me.Barni;
 
 
+import me.Barni.entity.childs.LevelExit;
 import me.Barni.entity.childs.Player;
 import me.Barni.graphics.*;
+import me.Barni.hud.HUDElement;
+import me.Barni.hud.events.ButtonEventListener;
 import me.Barni.texture.AnimSequenceLoader;
 import me.Barni.texture.Texture;
 import me.Barni.window.KeyboardHandler;
@@ -61,7 +64,6 @@ public final class Game implements Runnable {
 
     public String defaultWindowTitle;
 
-    Font defaultFont = new Font("Verdana", Font.PLAIN, 20); // Default font
 
 
     //Constructor
@@ -194,12 +196,57 @@ public final class Game implements Runnable {
 
 
         //Add PlayerNotification
-        getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "<no msg>", 16, 30));
+        getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "{null}", 16, 30));
 
-        //Add button & set colors
-        getHud().getRoot().add(new HUDButton(this, "button", 200, 200, 30, "alma"));
-        ((HUDButton) getHud().getRoot().getElement("button")).hoveredColor = new Color(80, 100, 120, 100);
-        ((HUDButton) getHud().getRoot().getElement("button")).pressedColor = new Color(0, 150, 190, 100);
+        //Create main menu
+        HUDElement mainMenu = new HUDElement(this, "MainMenu", 0,0,1920,1080);
+        getHud().getRoot().add(mainMenu);
+
+        //NEW GAME Button
+        HUDButton newButton = new HUDButton(this, "button", 200, 200, 140, 20, "NEW GAME");
+        mainMenu.add(newButton);
+        newButton.setListener(new ButtonEventListener() {
+            @Override
+            public void onPressed() {
+                map.changeMap("01.map");
+            }
+
+            @Override
+            public void onReleased() {
+
+            }
+        });
+
+        //EXIT Button
+        HUDButton quitButton = new HUDButton(this, "button", 200, 240, 140, 20, "QUIT");
+        mainMenu.add(quitButton);
+        quitButton.setListener(new ButtonEventListener() {
+            @Override
+            public void onPressed() {
+                stop();
+            }
+
+            @Override
+            public void onReleased() {
+
+            }
+        });
+
+        //TEST Button
+        HUDButton testButton = new HUDButton(this, "button", 200, 280, 140, 20, "TEST");
+        mainMenu.add(testButton);
+        testButton.setListener(new ButtonEventListener() {
+            @Override
+            public void onPressed() {
+                //mainMenu.setVisible(false);
+                testButton.enabled = false;
+            }
+
+            @Override
+            public void onReleased() {
+
+            }
+        });
 
         GLFW.glfwMakeContextCurrent(MemoryUtil.NULL);
 
@@ -217,9 +264,6 @@ public final class Game implements Runnable {
         Quad.init(this);
         QuadBatch.init(this);
         FontManager.init(this);
-        text = new RenderableText("abcdefg ---\n ---Árvíztűrő tükörfúrógép!", 200,200);
-        text.setColor(Color.RED);
-        text.setSize(1.6f);
 
         nextLevel = "";
 
@@ -272,7 +316,7 @@ public final class Game implements Runnable {
 
         window.init();
 
-        loadNewMap("01.map");
+        loadNewMap("mainMenu.map");
         map.createShaderPrograms();
         intro.start();
 
@@ -386,18 +430,13 @@ public final class Game implements Runnable {
         if (!intro.isPlayingIntro())
             hud.render();
 
-        //RTEST
-        FontManager.renderTEST();
-        text.render();
         updateScreenFade();
         GLFW.glfwSwapBuffers(window.getWindow());
     }
 
-    //TEST
-    RenderableText text;
 
     private void updateScreenFade() {
-        if (!intro.isPlayingIntro() && (isScreenFadingIn || isScreenFadingOut))
+        if (!intro.isPlayingIntro())
             intro.renderWheel(1 - getScreenFadeAlphaNormalized());
         //None -> back
         if (isScreenFadingOut) {
@@ -494,9 +533,6 @@ public final class Game implements Runnable {
         return hud;
     }
 
-    public Font getDefaultFont() {
-        return defaultFont;
-    }
 
     public float getScreenFadeAlpha() {
         return blankAlpha;

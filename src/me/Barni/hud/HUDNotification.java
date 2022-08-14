@@ -38,11 +38,11 @@ public class HUDNotification extends HUDElement {
 
     @Override
     public void render() {
-        velText.setSize(1.4f);
+        velText.setSize(1.5f);
         velText.setColor(Color.BLACK);
         velText.setText(message);
-        velText.setxPos(x+20);
-        velText.setyPos(h+50);
+        velText.setxPos(x+10);
+        velText.setyPos(h+10);
         velText.render();
         w = velText.getWidth();
         h = velText.getHeight();
@@ -74,7 +74,7 @@ public class HUDNotification extends HUDElement {
             showTimer = time;
             timed = true;
         }
-        x = -w - 1;
+        //x = -w - 1;
         tx = indent;
         visible = true;
     }

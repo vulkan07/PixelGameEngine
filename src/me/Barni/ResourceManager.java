@@ -63,14 +63,14 @@ public abstract class ResourceManager {
         while (!shaders.isEmpty())
             shaders.get(0).destroy();
         if (s > 0)
-            out += s + " ShadersPrograms, ";
+            out += s + " ShaderPrograms, ";
 
         //Delete remaining VertexArrays
         s = vertexArrays.size();
         while (!vertexArrays.isEmpty())
             vertexArrays.get(0).destroy();
         if (s > 0)
-            out += s + " VertexArraysObjects";
+            out += s + " VertexArrayObjects";
         info(out);
     }
 

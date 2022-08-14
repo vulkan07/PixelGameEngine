@@ -119,6 +119,7 @@ public class Intro {
         logoTexture.unBind(); //Any texture unbind is good
 
         playingIntro = false;
+        game.window.setHideCursor(false);
     }
 
     public void render() {
