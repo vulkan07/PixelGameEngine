@@ -80,6 +80,7 @@ public class KeyboardHandler {
     }
 
     private static boolean prevF4;
+    private static boolean prevF11;
 
     public static void update(Game game) {
 
@@ -93,7 +94,12 @@ public class KeyboardHandler {
         if (pressed[SPACE])
             if (game.getIntro().isPlayingIntro())
                 game.getIntro().end();
-
+        if (pressed[F1+10]) {
+            if(!prevF11)
+                game.setFullscreen(!game.window.isFullScreen());
+            prevF11 = true;
+        } else
+            prevF11 = false;
     }
 
 }

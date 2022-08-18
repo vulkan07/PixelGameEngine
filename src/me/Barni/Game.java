@@ -1,7 +1,6 @@
 package me.Barni;
 
 
-import me.Barni.entity.childs.LevelExit;
 import me.Barni.entity.childs.Player;
 import me.Barni.graphics.*;
 import me.Barni.hud.HUDElement;
@@ -19,9 +18,9 @@ import me.Barni.tools.LevelEditor;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
 
-import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
@@ -61,9 +60,6 @@ public final class Game implements Runnable {
 
     private Intro intro;
     private LevelEditor levelEditor;
-
-    public String defaultWindowTitle;
-
 
 
     //Constructor
@@ -167,13 +163,14 @@ public final class Game implements Runnable {
         System.out.println(">---------------------<");
         //Set Logger for static classes
 
-        //Initialize classes
+        //INITS
         //WANRING: Don't init GPU objects here! no context is current here!
         ResourceManager.init(this);
         Utils.init(this);
         AnimSequenceLoader.init(this);
         Material.init(this);
         Texture.init(this);
+        MouseHandler.init(this);
 
 
         //Create Window
@@ -182,7 +179,7 @@ public final class Game implements Runnable {
         window = new Window(this, loadRandomTitleMsg() + title, WIDTH, HEIGHT, fullscreen);
 
         //Try to load material data
-        if (!Material.loadMaterials(GAME_DIR+"materials.json"))
+        if (!Material.loadMaterials(GAME_DIR + "materials.json"))
             throw new IllegalStateException("Can't load materials!");
 
         //Level editor
@@ -199,27 +196,27 @@ public final class Game implements Runnable {
         getHud().getRoot().add(new HUDNotification(this, "PlayerNotification", "{null}", 16, 30));
 
         //Create main menu
-        HUDElement mainMenu = new HUDElement(this, "MainMenu", 0,0,1920,1080);
+        HUDElement mainMenu = new HUDElement(this, "MainMenu", 0, 0, 1920, 1080);
         getHud().getRoot().add(mainMenu);
 
         //NEW GAME Button
-        HUDButton newButton = new HUDButton(this, "button", 200, 200, 140, 20, "NEW GAME");
+        HUDButton newButton = new HUDButton(this, "NewButton", 200, 200, 200, 40, "NEW GAME");
         mainMenu.add(newButton);
         newButton.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
+                mainMenu.hide();
                 map.changeMap("01.map");
             }
 
             @Override
             public void onReleased() {
-
             }
         });
 
         //EXIT Button
-        HUDButton quitButton = new HUDButton(this, "button", 200, 240, 140, 20, "QUIT");
-        mainMenu.add(quitButton);
+        HUDButton quitButton = new HUDButton(this, "QuitButton", 200, 250, 180, 40, "QUIT");
+        mainMenu.add(quitButton);;
         quitButton.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
@@ -228,23 +225,25 @@ public final class Game implements Runnable {
 
             @Override
             public void onReleased() {
-
             }
         });
 
         //TEST Button
-        HUDButton testButton = new HUDButton(this, "button", 200, 280, 140, 20, "TEST");
+        HUDButton testButton = new HUDButton(this, "testButton", 200, 300, 300, 80, "OwO");
         mainMenu.add(testButton);
         testButton.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
                 //mainMenu.setVisible(false);
-                testButton.enabled = false;
+                testButton.setImage("gui/buttonDef");
+                quitButton.setImage("gui/buttonDef");
+                newButton.setImage("gui/buttonDef");
+
+                //testButton.enabled = false;
             }
 
             @Override
             public void onReleased() {
-
             }
         });
 
@@ -270,7 +269,7 @@ public final class Game implements Runnable {
         if (map != null)
             map.destroy(); //Old map
 
-        if (!Material.loadMaterials(GAME_DIR+"materials.json")) stop();
+        if (!Material.loadMaterials(GAME_DIR + "materials.json")) stop();
 
         MapLoader ml = new MapLoader(this);
 
@@ -284,12 +283,12 @@ public final class Game implements Runnable {
             map = new Map(this, 3, 5, 32, "error.map");
             //Tile[] defaultmap = new Tile[15];
             Tile t;
-            for (int i = 0;i < 15; i++) {
-                t = new Tile(0,0);
-                map.setTile(i,t);
-                map.setBackTile(i,t);
+            for (int i = 0; i < 15; i++) {
+                t = new Tile(0, 0);
+                map.setTile(i, t);
+                map.setBackTile(i, t);
             }
-            map.setTile(10, new Tile(3,0));
+            map.setTile(10, new Tile(3, 0));
             logger.decreaseIndentation("DEFAULT MAP");
         }
 
@@ -308,6 +307,8 @@ public final class Game implements Runnable {
         resetScreenFade(true);
         fadeInScreen(255);//Add screen fading effect
     }
+
+    Quad quad;
 
     //--------------------------------\\
     //----------->   Run   <----------\\
@@ -491,7 +492,7 @@ public final class Game implements Runnable {
         System.out.println("[----- STACK TRACE -----]");
         System.out.printf(">> %s%n", ste[3].toString().replace("me.Barni.", ""));
         //Remove last & first 2 stack calls
-        for (int i = 4; i < ste.length-2; i++) {
+        for (int i = 4; i < ste.length - 2; i++) {
             System.out.printf("    at %s%n", ste[i].toString().replace("me.Barni", ""));
         }
         System.out.println("[-----------------------]");
@@ -503,6 +504,23 @@ public final class Game implements Runnable {
         n.show(timeTicks);
     }
 
+    public void setFullscreen(boolean fullscreen) {
+        window.setFullScreen(fullscreen);
+        WIDTH = window.getWidth();
+        HEIGHT = window.getHeight();
+        GL30.glViewport(0, 0, WIDTH, HEIGHT);
+        if (map != null)
+            map.getCamera().setSize(WIDTH, HEIGHT);
+    }
+
+    public void resizeWindow(int width, int height, boolean fullscreen) {
+        WIDTH = width;
+        HEIGHT = height;
+        window.setSize(width, height, fullscreen);
+        GL30.glViewport(0, 0, width, height);
+        if (map != null)
+            map.getCamera().setSize(width, height);
+    }
 
     //----------------------------------\\
     //------------ GETTERS -------------\\

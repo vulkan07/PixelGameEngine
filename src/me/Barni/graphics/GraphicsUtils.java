@@ -1,5 +1,7 @@
 package me.Barni.graphics;
 
+import org.joml.Vector4f;
+
 import java.util.Arrays;
 
 public class GraphicsUtils {
@@ -56,10 +58,10 @@ public class GraphicsUtils {
     public static float[] generateBatchVertexArray(float[] positions, float[] texCoords) {
         //positions = [xywh ; ...]
         //texCoords = [uv, uv, uv, uv ; ...]
-        float[] va = new float[16 * positions.length/4];
+        float[] va = new float[16 * positions.length / 4];
         for (int i = 0; i < positions.length / 4; i++) {
-            int quadOffset = i*16;
-            int vertexOffset = i*4;
+            int quadOffset = i * 16;
+            int vertexOffset = i * 4;
 
             float x = positions[vertexOffset];
             float y = positions[vertexOffset + 1];
@@ -70,28 +72,41 @@ public class GraphicsUtils {
             va[quadOffset + 0] = x;    //TL x
             va[quadOffset + 1] = y;    //TL y
 
-            va[quadOffset + 2] = texCoords[vertexOffset*2+ 0];   //U
-            va[quadOffset + 3] = texCoords[vertexOffset*2+ 1];   //V
+            va[quadOffset + 2] = texCoords[vertexOffset * 2 + 0];   //U
+            va[quadOffset + 3] = texCoords[vertexOffset * 2 + 1];   //V
 
-            va[quadOffset + 4] = x + w;  //BR x
-            va[quadOffset + 5] = y + h;  //BR y
+            va[quadOffset + 4] = w;  //BR x
+            va[quadOffset + 5] = h;  //BR y
 
-            va[quadOffset + 6] = texCoords[vertexOffset*2+ 2];   //U
-            va[quadOffset + 7] = texCoords[vertexOffset*2+ 3];   //V
+            va[quadOffset + 6] = texCoords[vertexOffset * 2 + 2];   //U
+            va[quadOffset + 7] = texCoords[vertexOffset * 2 + 3];   //V
 
-            va[quadOffset + 8] = x + w;  //TR x
+            va[quadOffset + 8] = w;  //TR x
             va[quadOffset + 9] = y;    //TR y
 
-            va[quadOffset + 10] = texCoords[vertexOffset*2 + 4];   //U
-            va[quadOffset + 11] = texCoords[vertexOffset*2 + 5];   //V
+            va[quadOffset + 10] = texCoords[vertexOffset * 2 + 4];   //U
+            va[quadOffset + 11] = texCoords[vertexOffset * 2 + 5];   //V
 
             va[quadOffset + 12] = x;    //BL x
-            va[quadOffset + 13] = y + h;  //BL y
+            va[quadOffset + 13] = h;  //BL y
 
-            va[quadOffset + 14] = texCoords[vertexOffset*2 + 6];   //U
-            va[quadOffset + 15] = texCoords[vertexOffset*2 + 7];   //V
+            va[quadOffset + 14] = texCoords[vertexOffset * 2 + 6];   //U
+            va[quadOffset + 15] = texCoords[vertexOffset * 2 + 7];   //V
 
         }
         return va;
+    }
+
+    public static Vector4f remapVec4f(Vector4f v, float low1, float high1, float low2, float high2) {
+        Vector4f v2 = new Vector4f();
+        v2.x = remap(v.x, low1, high1, low2, high2);
+        v2.y = remap(v.y, low1, high1, low2, high2);
+        v2.z = remap(v.z, low1, high1, low2, high2);
+        v2.w = remap(v.w, low1, high1, low2, high2);
+        return v2;
+    }
+
+    public static float remap(float value, float low1, float high1, float low2, float high2) {
+        return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
     }
 }

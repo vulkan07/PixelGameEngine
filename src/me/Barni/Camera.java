@@ -46,7 +46,7 @@ public class Camera {
         adjustProjection();
 
         defProjMat.identity();
-        defProjMat.ortho(0, 1920, 1080f, 0f, 0f, 100f);
+        defProjMat.ortho(0, width, height, 0f, 0f, 100f);
 
         defViewMat.identity();
         defViewMat.lookAt(
@@ -148,6 +148,14 @@ public class Camera {
     public void adjustProjection() {
         projMat.identity();
         projMat.ortho(0f, 1920f, 1080f, 0f, 0f, 100f);
+    }
+
+    public void setSize(int w, int h) {
+        width = w;
+        height = h;
+        adjustMatricesToZoom();
+        defProjMat.identity();
+        defProjMat.ortho(0, width, height, 0f, 0f, 100f);
     }
 
     Vector3f camFront = new Vector3f(0f, 0f, -1f);

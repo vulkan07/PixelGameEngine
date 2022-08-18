@@ -1,6 +1,7 @@
 package me.Barni.graphics;
 
 import me.Barni.Game;
+import me.Barni.physics.Vec2D;
 import org.joml.Vector4f;
 
 import java.awt.*;
@@ -52,16 +53,6 @@ public class RenderableText {
 
     //Constructors call this
     private void initGraphics() {
-
-        /*
-        vao = new VertexArrayObject();
-        float[] vArray = new float[8];
-        vao.setVertexData(vArray);
-        vao.setElementData(QUAD_ELEMENT_ARRAY);
-        vao.addAttributePointer(2, "pos"); //Position (x,y)
-        vao.addAttributePointer(2, "tex"); //TX coords (u,v)
-        t = new Texture();
-        outdatedTexture = true;*/
         batch = new QuadBatch(new float[]{}, new float[]{});
         batch.loadTexture(DEFAULT_FONT);
         textShader = new ShaderProgram(game);
@@ -76,8 +67,7 @@ public class RenderableText {
         float[] positions = new float[numChars * 4];
         float[] texCoords = new float[numChars * 8];
 
-        width = 30 * size * chars.length;
-        height = cellHeight * size;
+        updateMetrics();
 
         int line = 1;
         float lineXPos = 0;
@@ -89,30 +79,33 @@ public class RenderableText {
             float col = currChar % numCols;
             float row = currChar / numCols;
 
-            lineXPos++;
 
             if (chars[i] == '\n') {
                 line++;
                 lineXPos = 0;
             }
+            float x = xPos + lineXPos * 30 * size;
+            float y = yPos + line * cellHeight/1.8f;
+
+            lineXPos++;
 
             //X
-            positions[offset] = xPos + lineXPos * 30 * size;   //x
+            positions[offset] = x;   //x
             texCoords[offset * 2] = col / numCols;  //u
             texCoords[offset * 2 + 1] = row / numRows;  //v
 
             //Y
-            positions[offset + 1] = yPos + line * cellHeight/1.8f;             //y
+            positions[offset + 1] = y;             //y
             texCoords[offset * 2 + 2] = (col + 1) / numCols;  //u
             texCoords[offset * 2 + 3] = (row + 1) / numRows;  //v
 
             //Width
-            positions[offset + 2] = cellWidth * size;     //w
+            positions[offset + 2] = x + cellWidth * size;     //w
             texCoords[offset * 2 + 4] = (col + 1) / numCols;  //u
             texCoords[offset * 2 + 5] = row / numRows;  //v
 
             //Height
-            positions[offset + 3] = cellHeight * size;    //h
+            positions[offset + 3] = y + cellHeight * size;    //h
             texCoords[offset * 2 + 6] = col / numCols;  //u
             texCoords[offset * 2 + 7] = (row + 1) / numRows;  //v
 
@@ -129,6 +122,10 @@ public class RenderableText {
         batch.render(textShader);
     }
 
+    public void updateMetrics() {
+        width = 30 * size * text.length();
+        height = cellHeight * size;
+    }
 
     public String getText() {
         return text;
@@ -137,22 +134,18 @@ public class RenderableText {
     public void setText(String text) {
         this.text = text;
         updateText();
+        updateMetrics();
     }
 
-    public float getxPos() {
-        return xPos;
+    public Vec2D getPosition()
+    {
+        return new Vec2D(xPos, yPos);
     }
-
-    public void setxPos(float xPos) {
-        this.xPos = xPos;
-    }
-
-    public float getyPos() {
-        return yPos;
-    }
-
-    public void setyPos(float yPos) {
-        this.yPos = yPos;
+    public void setPosition(float x, float y)
+    {
+        xPos = x;
+        yPos = y;
+        updateMetrics();
     }
 
     public float getSize() {
@@ -162,6 +155,7 @@ public class RenderableText {
     public void setSize(float size) {
         this.size = size/3f;
         updateText();
+        updateMetrics();
     }
 
     public Color getColor() {
@@ -173,14 +167,14 @@ public class RenderableText {
         this.color.y = remap(color.getGreen(), 0, 255, 0, 1);
         this.color.z = remap(color.getBlue(), 0, 255, 0, 1);
         this.color.w = remap(color.getAlpha(), 0, 255, 0, 1);
-        updateText();
-    }    public void setColor(Vector4f color) {
+    }
+    public void setColor(Vector4f color) {
         this.color.x = remap(color.x(), 0, 255, 0, 1);
         this.color.y = remap(color.y(), 0, 255, 0, 1);
         this.color.z = remap(color.z(), 0, 255, 0, 1);
         this.color.w = remap(color.w(), 0, 255, 0, 1);
-        updateText();
     }
+
     private float remap(float value, float low1, float high1, float low2, float high2) {
         return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
     }

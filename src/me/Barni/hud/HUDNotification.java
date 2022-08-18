@@ -41,8 +41,7 @@ public class HUDNotification extends HUDElement {
         velText.setSize(1.5f);
         velText.setColor(Color.BLACK);
         velText.setText(message);
-        velText.setxPos(x+10);
-        velText.setyPos(h+10);
+        velText.setPosition(x+10, y+10);
         velText.render();
         w = velText.getWidth();
         h = velText.getHeight();

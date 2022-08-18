@@ -1,7 +1,6 @@
 package me.Barni.window;
 
 import me.Barni.Game;
-import me.Barni.texture.Texture;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.Version;
@@ -15,7 +14,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -49,9 +47,10 @@ public class Window {
     private static Game game;
     private boolean fullScreen;
     private boolean cursorHidden;
-    private int width, height;
+    private int width, height, oldW, oldH;
     private long pWindow;
     private static boolean lastFocused, focused, minimized;
+    private GLCapabilities glCapabilities;
 
     public static boolean isFocused() {
         return focused;
@@ -76,7 +75,9 @@ public class Window {
         g.getLogger().info("[WINDOW] Created [" + width + "x" + height + "]");
         g.getLogger().info("[LWJGL] " + Version.getVersion());
         this.title = title;
-        setSize(width, height, fullScreen, false);
+        this.fullScreen = fullScreen;
+        this.width = width;
+        this.height = height;
     }
 
 
@@ -92,15 +93,39 @@ public class Window {
         lastFocused = focused;
     }
 
+    public void requestAttention(){
+        glfwRequestWindowAttention(pWindow); //Windows taskbar yellow thingie
+    }
+
     public void focus() {
-        //if (fullScreen) {
-        //    glfwRequestWindowAttention(pWindow); //Windows taskbar yellow thingie
-        //}
-        glfwMaximizeWindow(pWindow);
+        //glfwMaximizeWindow(pWindow);
         glfwFocusWindow(pWindow);
         focused = true;
         minimized = false;
     }
+
+    public void setFullScreen(boolean fullScreen) {
+
+        this.fullScreen = fullScreen;
+        if (fullScreen){
+            oldW = width;
+            oldH = height;
+            glfwMaximizeWindow(pWindow);
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+            glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+            setSize(1920,1080, true);
+        } else {
+            setSize(oldW,oldH, false);
+            oldW = width;
+            oldH = height;
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
+            glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+        }
+        System.out.printf("%dx%d%n", width, height);
+    }
+
 
     public void minimize() {
         if (fullScreen)
@@ -110,7 +135,7 @@ public class Window {
 
     public void destroy() {
         glfwDestroyWindow(pWindow);
-        pWindow = -1;
+        pWindow = NULL;
     }
 
     public void changeMonitor(int monitorIndex) {
@@ -130,7 +155,6 @@ public class Window {
         }
         initWindow();
     }
-
 
     public void init() {
         //Error callback
@@ -157,14 +181,23 @@ public class Window {
 
         //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         changeMonitor(0);
+        glfwMaximizeWindow(pWindow);
     }
 
-    private void setSize(int w, int h, boolean fullScreen, boolean refresh) {
+    public void setSize(int w, int h, boolean fullScreen) {
         width = w;
         height = h;
         this.fullScreen = fullScreen;
-        if (refresh)
-            init();
+        if (fullScreen) {
+            glfwMaximizeWindow(pWindow);
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+            glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+        } else {
+            glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+            glfwWindowHint(GLFW_MAXIMIZED, GLFW_FALSE);
+            glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
+        }
     }
 
 
@@ -177,8 +210,6 @@ public class Window {
         return cursorHidden;
     }
 
-    private GLCapabilities glCapabilities;
-
     public GLCapabilities getGlCapabilities() {
         return glCapabilities;
     }
@@ -190,6 +221,7 @@ public class Window {
         glfwSetScrollCallback(pWindow, MouseHandler::mouseScrollCallback);
         glfwSetWindowFocusCallback(pWindow, Window::windowFocusCallback);
         glfwSetDropCallback(pWindow, Window::fileDropCallback);
+        glfwSetWindowSizeCallback(pWindow, Window::windowRefreshCallback);
 
         glfwSetInputMode(pWindow, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         //Set Keyboard callbacks
@@ -218,7 +250,7 @@ public class Window {
         } catch (IOException e) {
             game.getLogger().err("Can't set icon image! " + e.getMessage());
         }
-        //Set icon
+        //Set Cursor
         try {
             setCursorImage(pWindow, ImageIO.read(new File(game.TEXTURE_DIR + "/gui/cursorDef.png")));
         } catch (IOException e) {
@@ -273,5 +305,9 @@ public class Window {
 
     public void clear() {
         GL30.glClear(GL30.GL_COLOR_BUFFER_BIT);
+    }
+
+    private static void windowRefreshCallback(long l, int w, int h) {
+        game.resizeWindow(w,h, false);
     }
 }

@@ -2,6 +2,8 @@ package me.Barni.hud;
 
 import me.Barni.Game;
 import me.Barni.graphics.RenderableText;
+import me.Barni.physics.Vec2D;
+import me.Barni.window.MouseHandler;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -12,6 +14,7 @@ public class HUDElement {
     protected ArrayList<HUDElement> childs = new ArrayList<>();
 
     protected String name;
+    protected float parentOpacity, opacity, targOpacity;
     public Game game;
     public Color color;
     protected float x, y, w, h;
@@ -27,6 +30,8 @@ public class HUDElement {
         this.h = h;
         this.color = new Color(0, 0, 0, 100);
         this.visible = true;
+        this.opacity = 255;
+        this.targOpacity = 255;
 
     }
 
@@ -92,11 +97,27 @@ public class HUDElement {
     }
 
     public void update() {
+        this.opacity = Vec2D.lerp(this.opacity, targOpacity, .12f);
+        if (targOpacity == 0 && opacity < .05f)
+            visible = false;
+
         for (int i = 0; i < childs.size(); i++) {
             childs.get(i).update();
+            childs.get(i).parentOpacity = this.opacity;
         }
     }
 
+    public void focus() {
+        show();
+        game.window.setHideCursor(false);
+    }
+    public void show() {
+        targOpacity = 255;
+        visible = true;
+    }
+    public void hide() {
+        targOpacity = 0;
+    }
 
     public void render() {
         if (!visible)

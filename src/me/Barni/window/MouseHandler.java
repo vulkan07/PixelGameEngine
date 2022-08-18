@@ -7,6 +7,8 @@ import org.lwjgl.glfw.GLFW;
 
 public class MouseHandler {
 
+    private static Game game;
+
     public static final int LMB = 0;
     public static final int RMB = 1;
     public static final int WHEEL = 2;
@@ -58,6 +60,8 @@ public class MouseHandler {
         prevY = y;
         x = (float) xpos;
         y = (float) ypos;
+        //if (game.window.isFullScreen())
+            y -= 55;
     }
 
     public static void update(Game game) {
@@ -83,5 +87,9 @@ public class MouseHandler {
     public static void mouseScrollCallback(long window, double xoffset, double yoffset) {
         scrollX = (float) xoffset;
         scrollY = (float) yoffset;
+    }
+
+    public static void init(Game g) {
+        game = g;
     }
 }

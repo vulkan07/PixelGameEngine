@@ -11,7 +11,6 @@ public class QuadBatch {
     private static ShaderProgram rectShader;
     private VertexArrayObject vao;
     private Texture t;
-    private float[] positions, texCoords;
 
     public QuadBatch(float[] positions, float[] texCoords) {
         initGraphics();
@@ -19,16 +18,17 @@ public class QuadBatch {
     }
 
     public void updateData(float[] positions, float[] texCoords){
-        this.positions = positions;
-        this.texCoords = texCoords;
         vao.setVertexData(GraphicsUtils.generateBatchVertexArray(positions, texCoords));
         vao.setElementData(GraphicsUtils.getQuadElementArray(positions.length/4));
+    }
+    public void setRawData(float[] vertexArray, int numElements){
+        vao.setVertexData(vertexArray);
+        vao.setElementData(GraphicsUtils.getQuadElementArray(numElements));
     }
 
     public static void init(Game g) {
         game = g;
-        rectShader = new ShaderProgram(game);
-        rectShader.create("gui_rect");
+        rectShader = Quad.getRectShader();
     }
 
     private void initGraphics() {
@@ -39,6 +39,10 @@ public class QuadBatch {
         vao.setElementData(new int[1]);
         vao.addAttributePointer(2, "pos"); //Position (x,y)
         vao.addAttributePointer(2, "tex"); //TX coords (u,v)
+    }
+
+    public VertexArrayObject getVertexArrayObject() {
+        return vao;
     }
 
     public void loadTexture(String name) {
