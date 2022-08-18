@@ -15,11 +15,10 @@ public class HUDButton extends HUDElement {
 
     private boolean hovered;
     private boolean pressed;
-    public boolean enabled;
     public Color hoveredColor, pressedColor, defaultColor, disabledColor;
     private Vector4f currentColor, targColor;
     private Vec2D imgSize, imgPos, textPos;
-    public String text;
+    private String text;
     private float defTextSize, targTextSize, textSize; //Text variables for text size bounce on click
     private RenderableText textRenderTarget;
     private QuadBatch image;
@@ -35,7 +34,7 @@ public class HUDButton extends HUDElement {
         GraphicsUtils.nonaSlice(image, x,y,w,h);
     }
 
-    public HUDButton(Game g, String name, int x, int y, int width, int height, String text) {
+    public HUDButton(Game g, String name, float x, float y, int width, int height, String text) {
         super(g, name, x, y, width, height);
         hoveredColor = new Color(255, 255, 255);
         pressedColor = new Color(162, 189, 218);
@@ -75,7 +74,16 @@ public class HUDButton extends HUDElement {
     }
 
     @Override
+    public void hide() {
+        super.hide();
+    }
+
+    @Override
     public void update() {
+
+        this.opacity = Vec2D.lerp(this.opacity, targOpacity, .12f);
+        if (targOpacity == 0 && opacity < .05f)
+            visible = false;
 
         currentColor.lerp(targColor, .135f);
         textSize = Vec2D.lerp(textSize, targTextSize, .16f);
@@ -125,9 +133,19 @@ public class HUDButton extends HUDElement {
         }
     }
 
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+        textRenderTarget.setText(text);
+        setPosition(x,y); //Update text pos
+    }
+
     @Override
     public void render() {
-        if (!visible) return;
+        if (!visible && opacity < .1f) return;
 
         renderImage();
 

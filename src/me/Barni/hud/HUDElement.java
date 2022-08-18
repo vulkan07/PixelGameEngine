@@ -13,15 +13,16 @@ public class HUDElement {
 
     protected ArrayList<HUDElement> childs = new ArrayList<>();
 
+    protected HUDElement parent = null;
     protected String name;
     protected float parentOpacity, opacity, targOpacity;
     public Game game;
     public Color color;
     protected float x, y, w, h;
-    protected boolean visible;
+    protected boolean visible, enabled;
 
 
-    public HUDElement(Game g, String name, int x, int y, int w, int h) {
+    public HUDElement(Game g, String name, float x, float y, int w, int h) {
         this.game = g;
         this.name = name;
         this.x = x;
@@ -30,9 +31,17 @@ public class HUDElement {
         this.h = h;
         this.color = new Color(0, 0, 0, 100);
         this.visible = true;
+        this.enabled = true;
         this.opacity = 255;
         this.targOpacity = 255;
+    }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public String getName() {
@@ -48,7 +57,16 @@ public class HUDElement {
     }
 
     public void add(HUDElement elem) {
+        elem.setParent(this);
         childs.add(elem);
+    }
+
+    public HUDElement getParent() {
+        return parent;
+    }
+
+    public void setParent(HUDElement parent) {
+        this.parent = parent;
     }
 
     public void removeElement(String name) {
@@ -71,6 +89,12 @@ public class HUDElement {
 
 
     public void setPosition(float x, float y) {
+
+        if (parent != null) {
+            x += parent.x;
+            y += parent.y;
+        }
+
         this.x = x;
         this.y = y;
     }
@@ -111,10 +135,12 @@ public class HUDElement {
         show();
         game.window.setHideCursor(false);
     }
+
     public void show() {
         targOpacity = 255;
         visible = true;
     }
+
     public void hide() {
         targOpacity = 0;
     }
@@ -128,8 +154,10 @@ public class HUDElement {
     }
 
     public void init() {
-        if (childs == null)
+        setPosition(x, y);
+        if (childs == null) {
             childs = new ArrayList<>();
+        }
         for (int i = 0; i < childs.size(); i++) {
             childs.get(i).init();
         }

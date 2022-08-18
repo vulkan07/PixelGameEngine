@@ -3,16 +3,13 @@ package me.Barni;
 
 import me.Barni.entity.childs.Player;
 import me.Barni.graphics.*;
-import me.Barni.hud.HUDElement;
+import me.Barni.hud.*;
 import me.Barni.hud.events.ButtonEventListener;
 import me.Barni.texture.AnimSequenceLoader;
 import me.Barni.texture.Texture;
 import me.Barni.window.KeyboardHandler;
 import me.Barni.window.MouseHandler;
 import me.Barni.window.Window;
-import me.Barni.hud.HUD;
-import me.Barni.hud.HUDButton;
-import me.Barni.hud.HUDNotification;
 import me.Barni.physics.Vec2D;
 import me.Barni.tools.LevelEditor;
 import org.json.JSONException;
@@ -52,7 +49,7 @@ public final class Game implements Runnable {
     public String MAP_DIR;
     public String GAME_VERSION;
 
-    public String nextLevel; //if not empty, game will change to this map
+    public String nextLevel = ""; //if not empty, game will change to this map
 
     //Screen fading variables
     private boolean isScreenFadingIn, isScreenFadingOut;
@@ -199,9 +196,12 @@ public final class Game implements Runnable {
         HUDElement mainMenu = new HUDElement(this, "MainMenu", 0, 0, 1920, 1080);
         getHud().getRoot().add(mainMenu);
 
+        HUDFrame frame = new HUDFrame(this, "Frame", 400, 250, 300, 600);
+        mainMenu.add(frame);
+
         //NEW GAME Button
         HUDButton newButton = new HUDButton(this, "NewButton", 200, 200, 190, 40, "NEW GAME");
-        mainMenu.add(newButton);
+        frame.add(newButton);
         newButton.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
@@ -216,7 +216,8 @@ public final class Game implements Runnable {
 
         //EXIT Button
         HUDButton quitButton = new HUDButton(this, "QuitButton", 200, 250, 190, 40, "QUIT");
-        mainMenu.add(quitButton);;
+        mainMenu.add(quitButton);
+
         quitButton.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
@@ -236,7 +237,8 @@ public final class Game implements Runnable {
             public void onPressed() {
                 //mainMenu.setVisible(false);
 
-                testButton.enabled = false;
+                System.out.println(newButton.getParent().getName());
+                newButton.setPosition(newButton.getX(), newButton.getY());
                 testButton.setImage("gui/buttonDef");
                 quitButton.setImage("gui/buttonDef");
                 newButton.setImage("gui/buttonDef");
@@ -250,12 +252,21 @@ public final class Game implements Runnable {
         });
 
         //TEST Button2
-        HUDButton testButton2 = new HUDButton(this, "testButton", 200, 350, 190, 40, "Enable");
+        HUDButton testButton2 = new HUDButton(this, "testButton2", 200, 350, 190, 40, "Enable");
         mainMenu.add(testButton2);
         testButton2.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
-                testButton.enabled = true;
+                if (testButton.isEnabled()) {
+                    testButton.setEnabled(false);
+                    testButton.hide();
+                    testButton2.setText("ENABLE");
+                    frame.open();
+                } else {
+                    testButton.setEnabled(true);
+                    testButton2.setText("DISABLE");
+                    frame.close();
+                }
             }
 
             @Override
@@ -272,6 +283,7 @@ public final class Game implements Runnable {
 
         Runtime.getRuntime().addShutdownHook(new Thread(shutdown)); //Hook exterior shut down
     }
+
 
     public void loadNewMap(String path) {
 
@@ -324,7 +336,6 @@ public final class Game implements Runnable {
         fadeInScreen(255);//Add screen fading effect
     }
 
-    Quad quad;
 
     //--------------------------------\\
     //----------->   Run   <----------\\
@@ -427,7 +438,8 @@ public final class Game implements Runnable {
         MouseHandler.update(this);
         KeyboardHandler.update(this);
 
-        map.tick(delta);
+        if (map != null)
+            map.tick(delta);
 
         levelEditor.update();
     }
@@ -441,7 +453,7 @@ public final class Game implements Runnable {
             window.clear(); //Only clear when playing intro, game overdraws every surface anyways
         if (intro.isPlayingIntro())
             intro.render();
-        else
+        else if (map != null)
             map.render(map.getCamera());
         //-----------------\\
         if (!intro.isPlayingIntro())

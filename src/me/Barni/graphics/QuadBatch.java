@@ -18,6 +18,10 @@ public class QuadBatch {
         initGraphics();
         updateData(positions, texCoords);
     }
+    public QuadBatch() {
+        initGraphics();
+        updateData(new float[]{},new float[]{});
+    }
 
     public void updateData(float[] positions, float[] texCoords){
         vao.setVertexData(GraphicsUtils.generateBatchVertexArray(positions, texCoords));
@@ -56,20 +60,20 @@ public class QuadBatch {
         t.uploadImageToGPU(0);
     }
 
-    public void render(ShaderProgram sh) {
-        if (sh == null)
-            sh = rectShader;
+    public void render(ShaderProgram shOverride) {
+        if (shOverride == null)
+            shOverride = rectShader;
 
         vao.bind(false);
-        sh.bind();
-        sh.uploadMat4("uProjMat", game.getMap().getCamera().getDefaultProjMat());
-        sh.uploadMat4("uViewMat", game.getMap().getCamera().getDefaultViewMat());
-        sh.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
-        sh.uploadVec4("tint", tint);
+        shOverride.bind();
+        shOverride.uploadMat4("uProjMat", game.getMap().getCamera().getDefaultProjMat());
+        shOverride.uploadMat4("uViewMat", game.getMap().getCamera().getDefaultViewMat());
+        shOverride.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
+        shOverride.uploadVec4("tint", tint);
         t.bind();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         vao.unBind();
-        sh.unBind();
+        shOverride.unBind();
     }
 
     public void setTint(Vector4f tint) {

@@ -62,6 +62,8 @@ public class RenderableText {
     }
 
     public void updateText() {
+        if (text == null)
+            return;
         byte[] chars = text.getBytes(StandardCharsets.UTF_8);
         int numChars = chars.length;
         float[] positions = new float[numChars * 4];

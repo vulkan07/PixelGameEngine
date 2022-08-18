@@ -1,5 +1,6 @@
 package me.Barni.graphics;
 
+import me.Barni.physics.Vec2D;
 import org.joml.Vector4f;
 
 public class GraphicsUtils {
@@ -171,5 +172,9 @@ public class GraphicsUtils {
 
     public static float remap(float value, float low1, float high1, float low2, float high2) {
         return low2 + (value - low1) * (high2 - low2) / (high1 - low1);
+    }
+
+    public static float lerp(float v0, float v1, float t) {
+        return (1 - t) * v0 + t * v1;
     }
 }
