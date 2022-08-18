@@ -22,7 +22,7 @@ public class RenderableText {
     private Vector4f color;
     private QuadBatch batch;
     private boolean inMap;
-    private ShaderProgram textShader;
+    private static ShaderProgram textShader;
 
     private static Game game;
 
@@ -49,15 +49,15 @@ public class RenderableText {
 
     public static void init(Game g) {
         game = g;
+        textShader = new ShaderProgram(game);
+        textShader.create("gui_text");
+        textShader.link();
     }
 
     //Constructors call this
     private void initGraphics() {
         batch = new QuadBatch(new float[]{}, new float[]{});
         batch.loadTexture(DEFAULT_FONT);
-        textShader = new ShaderProgram(game);
-        textShader.create("gui_text");
-        textShader.link();
         updateText();
     }
 
@@ -117,7 +117,7 @@ public class RenderableText {
     public void render() {
         if (text.isEmpty())
             return;
-        textShader.uploadVec4("tint", color);
+        textShader.uploadVec4("tint_", color);
         textShader.uploadBool("uInMap", isInMap());
         batch.render(textShader);
     }

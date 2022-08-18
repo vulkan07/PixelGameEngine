@@ -3,6 +3,7 @@ package me.Barni.graphics;
 import me.Barni.Game;
 import me.Barni.physics.Vec2D;
 import me.Barni.texture.Texture;
+import org.joml.Vector4f;
 import org.lwjgl.opengl.GL30;
 
 
@@ -11,6 +12,7 @@ public class QuadBatch {
     private static ShaderProgram rectShader;
     private VertexArrayObject vao;
     private Texture t;
+    private Vector4f tint = new Vector4f(1,1,1,1);
 
     public QuadBatch(float[] positions, float[] texCoords) {
         initGraphics();
@@ -63,9 +65,18 @@ public class QuadBatch {
         sh.uploadMat4("uProjMat", game.getMap().getCamera().getDefaultProjMat());
         sh.uploadMat4("uViewMat", game.getMap().getCamera().getDefaultViewMat());
         sh.uploadFloat("uAlpha", game.getScreenFadeAlphaNormalized());
+        sh.uploadVec4("tint", tint);
         t.bind();
         GL30.glDrawElements(GL30.GL_TRIANGLES, vao.getVertexLen(), GL30.GL_UNSIGNED_INT, 0);
         vao.unBind();
         sh.unBind();
+    }
+
+    public void setTint(Vector4f tint) {
+        this.tint = tint;
+    }
+
+    public Texture getTexture() {
+        return t;
     }
 }

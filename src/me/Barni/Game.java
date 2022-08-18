@@ -200,12 +200,12 @@ public final class Game implements Runnable {
         getHud().getRoot().add(mainMenu);
 
         //NEW GAME Button
-        HUDButton newButton = new HUDButton(this, "NewButton", 200, 200, 200, 40, "NEW GAME");
+        HUDButton newButton = new HUDButton(this, "NewButton", 200, 200, 190, 40, "NEW GAME");
         mainMenu.add(newButton);
         newButton.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
-                mainMenu.hide();
+                //mainMenu.hide();
                 map.changeMap("01.map");
             }
 
@@ -215,7 +215,7 @@ public final class Game implements Runnable {
         });
 
         //EXIT Button
-        HUDButton quitButton = new HUDButton(this, "QuitButton", 200, 250, 180, 40, "QUIT");
+        HUDButton quitButton = new HUDButton(this, "QuitButton", 200, 250, 190, 40, "QUIT");
         mainMenu.add(quitButton);;
         quitButton.setListener(new ButtonEventListener() {
             @Override
@@ -229,17 +229,33 @@ public final class Game implements Runnable {
         });
 
         //TEST Button
-        HUDButton testButton = new HUDButton(this, "testButton", 200, 300, 300, 80, "OwO");
+        HUDButton testButton = new HUDButton(this, "testButton", 200, 300, 190, 40, "OwO");
         mainMenu.add(testButton);
         testButton.setListener(new ButtonEventListener() {
             @Override
             public void onPressed() {
                 //mainMenu.setVisible(false);
+
+                testButton.enabled = false;
                 testButton.setImage("gui/buttonDef");
                 quitButton.setImage("gui/buttonDef");
                 newButton.setImage("gui/buttonDef");
 
                 //testButton.enabled = false;
+            }
+
+            @Override
+            public void onReleased() {
+            }
+        });
+
+        //TEST Button2
+        HUDButton testButton2 = new HUDButton(this, "testButton", 200, 350, 190, 40, "Enable");
+        mainMenu.add(testButton2);
+        testButton2.setListener(new ButtonEventListener() {
+            @Override
+            public void onPressed() {
+                testButton.enabled = true;
             }
 
             @Override

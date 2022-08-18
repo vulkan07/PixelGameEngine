@@ -2,8 +2,6 @@ package me.Barni.graphics;
 
 import org.joml.Vector4f;
 
-import java.util.Arrays;
-
 public class GraphicsUtils {
 
 
@@ -95,6 +93,71 @@ public class GraphicsUtils {
 
         }
         return va;
+    }
+
+    private static float[] positions = new float[9*4];
+    private static float[] texCoords = new float[9*8];
+
+
+    /**
+     * Slices the batch's texture into 9 segments to avoid corner stretch (used for UI)
+     */
+    public static void nonaSlice(QuadBatch b, float x, float y, float w, float h) {
+
+        int numCols = 3;
+        int numRows = 3;
+        int cellWidth = b.getTexture().getWidth()/numRows;
+        int cellHeight = b.getTexture().getHeight()/numCols;
+
+        float centerLenW = w - cellWidth*2;
+        float centerLenH = h - cellHeight*2;
+
+        for (int i = 0; i < 9; i++) {
+            int offset = i * 4;
+            float col = i / numCols;
+            float row = i % numCols;
+
+
+            //If on corners -> cellwidth
+            //If on corners ==> row !=1
+            //If center -> width-cellwidth*2
+
+            float x_ = x;
+            float y_ = y+32;
+
+
+            switch ((int) row){
+                case 0: x_ += 0; break;
+                case 1: x_ += cellWidth; break;
+                case 2: x_ += cellWidth + centerLenW; break;
+            }
+            switch ((int) col){
+                case 0: y_ += 0; break;
+                case 1: y_ += cellHeight; break;
+                case 2: y_ += cellHeight + centerLenH; break;
+            }
+
+            //X
+            positions[offset] = x_;   //x
+            positions[offset + 1] = y_;             //y
+            positions[offset + 2] = x_ + (row==1?centerLenW:cellWidth);     //w
+            positions[offset + 3] = y_ + (col==1?centerLenH:cellHeight);      //h
+
+
+            texCoords[offset * 2]     = row / numCols;                //u
+            texCoords[offset * 2 + 1] = col / numRows;            //v
+
+            texCoords[offset * 2 + 2] = (row + 1) / numCols;      //u
+            texCoords[offset * 2 + 3] = (col + 1) / numRows;      //v
+
+            texCoords[offset * 2 + 4] = (row + 1) / numCols;      //u
+            texCoords[offset * 2 + 5] = col / numRows;            //v
+
+            texCoords[offset * 2 + 6] = row / numCols;            //u
+            texCoords[offset * 2 + 7] = (col + 1) / numRows;      //v
+        }
+
+        b.updateData(positions, texCoords);
     }
 
     public static Vector4f remapVec4f(Vector4f v, float low1, float high1, float low2, float high2) {
